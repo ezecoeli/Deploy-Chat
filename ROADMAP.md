@@ -9,7 +9,7 @@ Crear una aplicación de chat en tiempo real para developers con característica
 - [ ] Crear proyecto React con Vite o Create React App
 - [ ] Instalar TailwindCSS y configurar dark/light mode
 - [ ] Configurar Supabase (auth + base de datos + realtime)
-- [ ] Estructura de carpetas (components, sections, assets, utils)
+- [ ] Estructura de carpetas (components, sections, assets, utils, context, hooks)
 
 ### Fase 2: Autenticación
 - [ ] Registro/login con correo

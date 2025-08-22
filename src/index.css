@@ -15,10 +15,10 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 170%;
-  height: 170%;
+  width: 190%;
+  height: 190%;
   background: conic-gradient(from 180deg at 50% 50%, #4ade80 0deg, #60a5fa 90deg, #38bdf8 180deg, #a78bfa 270deg, transparent 360deg);
-  animation: spin-slow 8s linear infinite;
+  animation: spin-slow 20s linear infinite;
   z-index: -1;
   border-radius: 9999px; 
 }
