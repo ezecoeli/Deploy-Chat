@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import { useTranslation } from '../hooks/useTranslation';
-import LanguageDropdown from './LanguageDropdown';
-import logo from '../assets/DC-logo.png';
+import LanguageToggle from './LanguageToggle';
+import banner from '../assets/banner-black.png';
 
 export default function Login() {
   const { t } = useTranslation(); // hook para traducciones
@@ -34,56 +34,67 @@ export default function Login() {
   };
 
   return (
-    <div className="w-80 sm:w-96 mx-auto p-6 bg-transparent relative overflow-hidden z-0 login-border">
-      
-      <div className="relative z-10 bg-gray-100 dark:bg-gray-900 p-6 rounded-lg">
-        
-        {/* Dropdown */}
-        <div className="flex justify-between items-center mb-4">
-          <LanguageDropdown />
-          <img src={logo} alt="logo" className="w-15 h-15 drop-shadow-lg" />
-        </div>
-        
-        <h2 className="text-2xl font-bold mb-8 text-center text-gray-900 dark:text-gray-100">
-          {t('login')} / {t('register')}
-        </h2>
-        <form className="flex flex-col gap-4">
-          <input
-            type="email"
-            placeholder={t('email')} 
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-800 dark:text-gray-100"
-          />
-          <input
-            type="password"
-            placeholder={t('password')} 
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-800 dark:text-gray-100"
-          />
-          <div className="flex justify-between gap-3">
-            <button 
-              type="button" 
-              onClick={handleLogin} 
-              className="flex-1 px-4 py-2 bg-green-600 hover:bg-gray-700 text-white font-medium rounded-md transition-colors duration-200"
-            >
-              {t('confirmLogin')}
-            </button>
-            <button 
-              type="button" 
-              onClick={handleSignUp} 
-              className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-md transition-colors duration-200"
-            >
-              {t('confirmRegister')}
-            </button>
+    <div className="flex flex-col lg:flex-row items-center justify-center w-full gap-8 px-4">
+      {/* Banner Image */}
+      <div className="w-full lg:w-auto p-4">
+        <img 
+          src={banner} 
+          alt="Login Banner" 
+          className="max-h-[400px] lg:max-h-[600px] object-contain mx-auto"
+        />
+      </div>
+
+      {/* Login Form Container */}
+      <div className="w-[320px] sm:w-96 p-4 relative overflow-hidden z-0 login-border rounded-lg">
+        <div className="relative z-10 bg-black p-6 rounded-lg">
+          {/* Dropdown */}
+          <div className="flex justify-end mb-4">
+            <LanguageToggle />
           </div>
-        </form>
-        {message && (
-          <p className="mt-4 text-center text-sm text-gray-700 dark:text-gray-300">
-            {message}
-          </p>
-        )}
+
+          <h2 className="text-2xl font-bold mb-8 text-center text-gray-200">
+            {t('login')} / {t('register')}
+          </h2>
+
+          <form className="flex flex-col gap-4 text-gray-100">
+            <input
+              type="email"
+              placeholder={t('email')}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+            <input
+              type="password"
+              placeholder={t('password')}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+            <div className="flex justify-between gap-3">
+              <button
+                type="button"
+                onClick={handleLogin}
+                className="flex-1 px-4 py-2 bg-green-600 hover:bg-gray-500 text-white font-medium rounded-md transition-colors duration-200"
+              >
+                {t('confirmLogin')}
+              </button>
+              <button
+                type="button"
+                onClick={handleSignUp}
+                className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white font-medium rounded-md transition-colors duration-200"
+              >
+                {t('confirmRegister')}
+              </button>
+            </div>
+          </form>
+
+          {message && (
+            <p className="mt-4 text-center text-sm text-gray-700">
+              {message}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

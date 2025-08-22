@@ -4,7 +4,7 @@ import Login from './components/Login.jsx';
 function App() {
   return (
     <LanguageProvider>
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-800">
+      <div className="min-h-screen flex items-center justify-center bg-black relative">
         <Login />
       </div>
     </LanguageProvider>
