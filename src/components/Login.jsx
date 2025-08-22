@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import { useTranslation } from '../hooks/useTranslation';
 import LanguageDropdown from './LanguageDropdown';
+import logo from '../assets/DC-logo.png';
 
 export default function Login() {
   const { t } = useTranslation(); // hook para traducciones
@@ -35,12 +36,14 @@ export default function Login() {
   return (
     <div className="w-80 sm:w-96 mx-auto p-6 bg-transparent relative overflow-hidden z-0 login-border">
       
-      <div className="relative z-10 bg-gray-100 dark:bg-gray-600 p-6 rounded-lg">
+      <div className="relative z-10 bg-gray-100 dark:bg-gray-900 p-6 rounded-lg">
+        
         {/* Dropdown */}
-        <div className="flex justify-end mb-4">
+        <div className="flex justify-between items-center mb-4">
           <LanguageDropdown />
+          <img src={logo} alt="logo" className="w-15 h-15 drop-shadow-lg" />
         </div>
-
+        
         <h2 className="text-2xl font-bold mb-8 text-center text-gray-900 dark:text-gray-100">
           {t('login')} / {t('register')}
         </h2>
