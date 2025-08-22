@@ -31,6 +31,7 @@ Crear una aplicación de chat en tiempo real para developers con característica
 - [ ] Chats 1 a 1 (privados)
 
 ### Fase 5: Experiencia visual y UX
+- [ ] Selector de idioma (ES/EN) 
 - [ ] Dark/light mode toggle
 - [ ] Animaciones de entrada con Framer Motion
 - [ ] Modo retro terminal

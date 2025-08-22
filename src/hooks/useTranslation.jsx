@@ -1,0 +1,158 @@
+import { createContext, useContext, useState } from 'react';
+
+// traducciones
+const translations = {
+  es: {
+    // Auth
+    login: "Login",
+    register: "Registro",
+    email: "Correo electrónico",
+    password: "Contraseña",
+    confirmLogin: "Iniciar sesión",
+    confirmRegister: "Registrarse",
+    welcome: "Bienvenido",
+    logout: "Cerrar sesión",
+    loginWithGithub: "Iniciar con GitHub",
+    loginWithGoogle: "Iniciar con Google",
+    checkEmail: "Revisa tu correo para confirmar la cuenta",
+    
+    // Chat
+    sendMessage: "Enviar mensaje",
+    typing: "escribiendo...",
+    online: "conectado",
+    offline: "desconectado",
+    messageInput: "Escribe un mensaje...",
+    noMessages: "No hay mensajes aún",
+    
+    // Channels
+    general: "General",
+    random: "Random",
+    tech: "Tecnología",
+    createChannel: "Crear canal",
+    joinChannel: "Unirse al canal",
+    leaveChannel: "Salir del canal",
+    
+    // UI
+    darkMode: "Modo oscuro",
+    lightMode: "Modo claro",
+    language: "Idioma",
+    settings: "Configuración",
+    profile: "Perfil",
+    
+    // Navigation
+    home: "Inicio",
+    channels: "Canales",
+    directMessages: "Mensajes directos",
+    
+    // Messages
+    pinnedMessages: "Mensajes fijados",
+    pinMessage: "Fijar mensaje",
+    unpinMessage: "Desfijar mensaje",
+    deleteMessage: "Eliminar mensaje",
+    editMessage: "Editar mensaje",
+    
+    // Errors
+    errorLogin: "Error al iniciar sesión",
+    errorRegister: "Error al registrarse",
+    errorSendMessage: "Error al enviar mensaje",
+    
+    // Time
+    now: "ahora",
+    minutesAgo: "hace {count} minutos",
+    hoursAgo: "hace {count} horas",
+    daysAgo: "hace {count} días",
+  },
+  en: {
+    // Auth
+    login: "Sign In",
+    register: "Sign Up",
+    email: "Email",
+    password: "Password",
+    confirmLogin: "Login",
+    confirmRegister: "Register",
+    welcome: "Welcome",
+    logout: "Sign Out",
+    loginWithGithub: "Sign in with GitHub",
+    loginWithGoogle: "Sign in with Google",
+    checkEmail: "Check your email to confirm your account",
+    
+    // Chat
+    sendMessage: "Send message",
+    typing: "typing...",
+    online: "online",
+    offline: "offline",
+    messageInput: "Type a message...",
+    noMessages: "No messages yet",
+    
+    // Channels
+    general: "General",
+    random: "Random",
+    tech: "Tech",
+    createChannel: "Create channel",
+    joinChannel: "Join channel",
+    leaveChannel: "Leave channel",
+    
+    // UI
+    darkMode: "Dark mode",
+    lightMode: "Light mode",
+    language: "Language",
+    settings: "Settings",
+    profile: "Profile",
+    
+    // Navigation
+    home: "Home",
+    channels: "Channels",
+    directMessages: "Direct Messages",
+    
+    // Messages
+    pinnedMessages: "Pinned messages",
+    pinMessage: "Pin message",
+    unpinMessage: "Unpin message",
+    deleteMessage: "Delete message",
+    editMessage: "Edit message",
+    
+    // Errors
+    errorLogin: "Login error",
+    errorRegister: "Registration error",
+    errorSendMessage: "Error sending message",
+    
+    // Time
+    now: "now",
+    minutesAgo: "{count} minutes ago",
+    hoursAgo: "{count} hours ago",
+    daysAgo: "{count} days ago",
+  }
+};
+
+// Contexto para el idioma
+const LanguageContext = createContext();
+
+// Provider del idioma
+export function LanguageProvider({ children }) {
+  const [language, setLanguage] = useState(
+    localStorage.getItem('language') || 'es'
+  );
+
+  const changeLanguage = (newLang) => {
+    setLanguage(newLang);
+    localStorage.setItem('language', newLang);
+  };
+
+  // Función para obtener traducciones
+  const t = (key) => translations[language][key] || key;
+
+  return (
+    <LanguageContext.Provider value={{ language, changeLanguage, t }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+}
+
+// Hook para usar las traducciones
+export function useTranslation() {
+  const context = useContext(LanguageContext);
+  if (!context) {
+    throw new Error('useTranslation must be used within LanguageProvider');
+  }
+  return context;
+}
