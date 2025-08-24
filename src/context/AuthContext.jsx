@@ -1,34 +1,65 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { supabase } from '../utils/supabaseClient';
+import { handleUserSession } from '../utils/auth';
 
 const AuthContext = createContext({});
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const isInitialized = useRef(false);
 
   useEffect(() => {
-    // Verificar sesión inicial
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    if (isInitialized.current) return;
+    isInitialized.current = true;
+
+    const initializeSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
       setLoading(false);
-    });
 
-    // Escuchar cambios en auth
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
+      if (session) {
+        await handleUserSession(session);
+      }
 
-    return () => subscription.unsubscribe();
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        setUser(session?.user ?? null);
+        setLoading(false);
+
+        if (event === 'SIGNED_IN') {
+          await handleUserSession(session);
+        }
+      });
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    };
+
+    initializeSession();
   }, []);
 
+  const logout = async () => {
+    await supabase.auth.signOut();
+  };
+
+  const value = {
+    user,
+    logout,
+    loading
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading }}>
-      {!loading && children}
+    <AuthContext.Provider value={value}>
+      {children}
     </AuthContext.Provider>
   );
 };
 
 export const useAuth = () => {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth debe usarse dentro de un AuthProvider');
+  }
+  return context;
 };

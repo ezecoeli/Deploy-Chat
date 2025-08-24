@@ -13,16 +13,6 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
 
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN') {
-        handleUserSession(session);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
   const handleLogin = async (e) => {
     e.preventDefault();
     const { data, error } = await supabase.auth.signInWithPassword({
