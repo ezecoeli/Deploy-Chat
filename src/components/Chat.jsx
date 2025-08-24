@@ -2,6 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from '../hooks/useTranslation';
+import LanguageToggle from './LanguageToggle';
+
+const DEFAULT_AVATAR = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";
 
 export default function Chat() {
   const { user } = useAuth();
@@ -109,12 +112,17 @@ export default function Chat() {
   };
 
   return (
-    <div className="w-full max-w-4xl h-screen p-4 flex flex-col">
+    <div className="w-full max-w-4xl h-screen p-4 flex flex-col relative">
+      {/* Language Toggle */}
+      <div className="absolute top-4 right-4 z-10">
+        <LanguageToggle />
+      </div>
+
       {/* Header */}
-      <header className="flex justify-between items-center mb-4">
+      <header className="flex justify-between items-center mb-4 pr-20">
         <div className="flex items-center gap-2">
           <img 
-            src={user?.user_metadata?.avatar_url || 'https://via.placeholder.com/40'} 
+            src={user?.user_metadata?.avatar_url || DEFAULT_AVATAR} 
             alt="avatar" 
             className="w-10 h-10 rounded-full"
           />
@@ -148,14 +156,16 @@ export default function Chat() {
               }`}
             >
               <img
-                src={msg.users?.avatar_url || 'https://via.placeholder.com/40'}
+                src={msg.users?.avatar_url || DEFAULT_AVATAR}
                 alt="avatar"
                 className="w-8 h-8 rounded-full"
               />
               <div className={`max-w-[70%] ${
                 msg.user_id === user.id ? 'bg-green-700' : 'bg-gray-700'
               } rounded-lg p-2`}>
-                <p className="text-sm text-gray-300">{msg.users?.email}</p>
+                <p className="text-sm text-gray-300">
+                  {msg.users?.username || msg.users?.email}
+                </p>
                 <p className="text-white">{msg.content}</p>
               </div>
             </div>
