@@ -51,10 +51,16 @@ const translations = {
     deleteMessage: "Eliminar mensaje",
     editMessage: "Editar mensaje",
     
-    // Errors
+    // Errors y validaciones
     errorLogin: "Error al iniciar sesión",
     errorRegister: "Error al registrarse",
     errorSendMessage: "Error al enviar mensaje",
+    invalidCredentials: "Credenciales inválidas",
+    missingEmail: "Por favor ingresa tu email",
+    missingPassword: "Por favor ingresa tu contraseña",
+    invalidEmail: "Por favor ingresa un email válido",
+    passwordTooShort: "La contraseña debe tener al menos 6 caracteres",
+    unexpectedError: "Error inesperado",
     
     // Time
     now: "ahora",
@@ -111,10 +117,16 @@ const translations = {
     deleteMessage: "Delete message",
     editMessage: "Edit message",
     
-    // Errors
+    // Errors y validaciones
     errorLogin: "Login error",
     errorRegister: "Registration error",
     errorSendMessage: "Error sending message",
+    invalidCredentials: "Invalid login credentials",
+    missingEmail: "Please enter your email",
+    missingPassword: "Please enter your password",
+    invalidEmail: "Please enter a valid email",
+    passwordTooShort: "Password must be at least 6 characters",
+    unexpectedError: "Unexpected error",
     
     // Time
     now: "now",

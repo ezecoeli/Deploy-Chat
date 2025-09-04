@@ -11,7 +11,7 @@ Crear una aplicación de chat en tiempo real para developers con característica
 - [✅] Configurar Supabase (auth + base de datos + realtime)
 - [✅] Estructura de carpetas (components, sections, assets, utils, context, hooks)
 
-### Fase 2: Autenticación ✅
+### Fase 2: Autenticación
 - [✅] Registro/login con correo
 - [✅] Login con GitHub
 - [✅] Login con Google
@@ -19,8 +19,8 @@ Crear una aplicación de chat en tiempo real para developers con característica
 - [✅] Guardar usuarios en Supabase
 
 ### Fase 3: Chat básico
-- [ ] Crear sala #general
-- [ ] Enviar y recibir mensajes en tiempo real
+- [✅] Crear sala #general
+- [✅] Enviar y recibir mensajes en tiempo real
 - [ ] Mostrar avatar y nombre del usuario
 - [ ] Scroll automático al último mensaje
 

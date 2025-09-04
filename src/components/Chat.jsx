@@ -30,6 +30,7 @@ export default function Chat() {
         .order('created_at', { ascending: true })
         .limit(100);
       if (error) throw error;
+      
       setMessages(data || []);
     } catch (err) {
       setError('Error cargando mensajes: ' + err.message);
@@ -53,14 +54,14 @@ export default function Chat() {
   }, [user, loading, loadMessages, currentChannel]);
 
   useEffect(() => {
-    if (!currentChannel?.id) return;
+    if (!currentChannel?.id || !user) return;
 
     if (realtimeChannel.current) {
       supabase.removeChannel(realtimeChannel.current);
     }
 
     realtimeChannel.current = supabase
-      .channel('public:messages')
+      .channel(`messages-channel-${currentChannel.id}`)
       .on(
         'postgres_changes',
         {
@@ -69,29 +70,37 @@ export default function Chat() {
           table: 'messages',
           filter: `channel_id=eq.${currentChannel.id}`,
         },
-        async (payload) => {
-          const { data: newMessage, error } = await supabase
-            .from('messages')
-            .select('*, users:user_id(*)')
-            .eq('id', payload.new.id)
-            .single();
+        (payload) => {
+          console.log('Mensaje recibido via real-time:', payload.new);
+          
+          const newMessage = {
+            ...payload.new,
+            users: payload.new.user_id === user.id ? {
+              id: user.id,
+              email: user.email,
+              username: user.user_metadata?.name || user.user_metadata?.full_name || user.email.split('@')[0],
+              avatar_url: user.user_metadata?.avatar_url
+            } : {
+              id: payload.new.user_id,
+              email: 'Usuario',
+              username: 'Usuario',
+              avatar_url: null
+            }
+          };
 
-          if (error) {
-            console.error('Error fetching new message on real-time update:', error);
-            return;
-          }
-
-          if (newMessage) {
-            setMessages((currentMessages) => {
-              if (currentMessages.some((msg) => msg.id === newMessage.id)) {
-                return currentMessages;
-              }
-              return [...currentMessages, newMessage].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-            });
-          }
+          setMessages((currentMessages) => {
+            const messageExists = currentMessages.some((msg) => msg.id === newMessage.id);
+            if (messageExists) {
+              return currentMessages;
+            }
+            const updatedMessages = [...currentMessages, newMessage];
+            return updatedMessages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+          });
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Estado de suscripción real-time:', status);
+      });
 
     return () => {
       if (realtimeChannel.current) {
@@ -99,7 +108,7 @@ export default function Chat() {
         realtimeChannel.current = null;
       }
     };
-  }, [currentChannel?.id]);
+  }, [currentChannel?.id, user]);
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -118,6 +127,7 @@ export default function Chat() {
     setSending(true);
     const messageContent = message.trim();
     setMessage('');
+    
     try {
       const { error } = await supabase
         .from('messages')
@@ -126,8 +136,11 @@ export default function Chat() {
           user_id: user.id,
           channel_id: currentChannel.id
         }]);
+      
       if (error) throw error;
+      setError(null);
     } catch (err) {
+      console.error('Error enviando mensaje:', err);
       setError('Error enviando mensaje: ' + err.message);
       setMessage(messageContent);
     } finally {
