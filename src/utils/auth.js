@@ -1,35 +1,87 @@
 import { supabase } from './supabaseClient';
 
-export const handleUserSession = async (session) => {
-  if (session?.user) {
-    const { id, email, user_metadata } = session.user;
-    
-    console.log('Guardando usuario:', { id, email, user_metadata });
-    
-    try {
-      const { data, error } = await supabase
-        .from('users')
-        .upsert({
-          id,
-          email,
-          username: user_metadata?.name || user_metadata?.full_name || email.split('@')[0],
-          avatar_url: user_metadata?.avatar_url || `https://www.gravatar.com/avatar/${id}?d=identicon`,
-          status: 'online'
-        }, {
-          onConflict: 'id'
-        });
+// Cache para evitar requests simultáneos
+const pendingRequests = new Map();
 
-      if (error) {
-        console.error('Error updating user:', error);
-        return false;
-      } else {
-        console.log('Usuario guardado exitosamente:', data);
-        return true;
-      }
-    } catch (err) {
-      console.error('Error en handleUserSession:', err);
+export const handleUserSession = async (session) => {
+  if (!session?.user) {
+    console.log('No hay sesión válida para procesar');
+    return false;
+  }
+
+  const user = session.user;
+  const userId = user.id;
+  
+  console.log('Guardando usuario:', { id: userId, email: user.email });
+
+  // Verificar si ya hay un request pendiente para este usuario
+  if (pendingRequests.has(userId)) {
+    console.log('Request ya en progreso para usuario:', user.email);
+    try {
+      return await pendingRequests.get(userId);
+    } catch (error) {
+      console.error('Error en request pendiente:', error);
+      pendingRequests.delete(userId);
       return false;
     }
   }
-  return false;
+
+  // Crear la promesa con timeout
+  const userPromise = Promise.race([
+    // Request principal
+    (async () => {
+      try {
+        console.log('📤 Ejecutando upsert para usuario:', user.email);
+        
+        const { data, error } = await supabase
+          .from('users')
+          .upsert({
+            id: userId,
+            email: user.email,
+            username: user.user_metadata?.name || 
+                     user.user_metadata?.full_name || 
+                     user.email.split('@')[0],
+            avatar_url: user.user_metadata?.avatar_url || 
+                       `https://www.gravatar.com/avatar/${userId}?d=identicon`,
+            status: 'online'
+            
+          }, {
+            onConflict: 'id',
+            ignoreDuplicates: false
+          });
+
+        if (error) {
+          console.error('❌ Error en upsert:', error);
+          throw error;
+        }
+
+        console.log('Usuario actualizado exitosamente:', data);
+        return true;
+
+      } catch (error) {
+        console.error('Error en handleUserSession:', error.message);
+        throw error;
+      }
+    })(),
+    
+    // Timeout de 10 segundos
+    new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Timeout: handleUserSession tardó más de 10 segundos')), 10000)
+    )
+  ]);
+
+  // Guardar en cache
+  pendingRequests.set(userId, userPromise);
+
+  try {
+    const result = await userPromise;
+    console.log('handleUserSession completado exitosamente');
+    return result;
+  } catch (error) {
+    console.error('handleUserSession falló:', error.message);
+    return false;
+  } finally {
+    // Limpiar cache
+    pendingRequests.delete(userId);
+  }
 };
