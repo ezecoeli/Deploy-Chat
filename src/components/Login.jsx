@@ -3,7 +3,6 @@ import { FaGoogle, FaGithub } from 'react-icons/fa';
 import { PiWarningCircleFill } from "react-icons/pi";
 import { supabase } from '../utils/supabaseClient';
 import { useTranslation } from '../hooks/useTranslation';
-import { handleUserSession } from '../utils/auth';
 import LanguageToggle from './LanguageToggle';
 import PasswordReset from './PasswordReset';
 import banner from '../assets/banner-transp.png';
@@ -12,7 +11,7 @@ import loginBackground from '../assets/login-bg.png';
 export default function Login() {
   const { t } = useTranslation();
   
-  // los hooks
+  // hooks
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -152,7 +151,7 @@ export default function Login() {
       {/* Fondo base oscuro */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800" />
       
-      {/* Imagen de fondo con mayor opacidad y filtro */}
+      {/* Imagen de fondo  */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ 
@@ -162,7 +161,7 @@ export default function Login() {
         }}
       />
       
-      {/* Overlay con gradiente radial centrado */}
+      {/* Overlay con gradiente */}
       <div 
         className="absolute inset-0"
         style={{

@@ -31,7 +31,7 @@ export const handleUserSession = async (session) => {
     // Request principal
     (async () => {
       try {
-        console.log('📤 Ejecutando upsert para usuario:', user.email);
+        console.log('Ejecutando upsert para usuario:', user.email);
         
         const { data, error } = await supabase
           .from('users')
@@ -51,7 +51,7 @@ export const handleUserSession = async (session) => {
           });
 
         if (error) {
-          console.error('❌ Error en upsert:', error);
+          console.error('Error en upsert:', error);
           throw error;
         }
 
@@ -64,9 +64,9 @@ export const handleUserSession = async (session) => {
       }
     })(),
     
-    // Timeout de 10 segundos
+    // Timeout 
     new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Timeout: handleUserSession tardó más de 10 segundos')), 10000)
+      setTimeout(() => reject(new Error('Timeout: handleUserSession tardó más de 20 segundos')), 20000)
     )
   ]);
 

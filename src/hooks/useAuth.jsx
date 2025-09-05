@@ -10,104 +10,133 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     let mounted = true;
-    console.log('useAuth useEffect iniciado');
+    console.log('useAuth: useEffect iniciado');
 
     const initializeAuth = async () => {
       try {
-        console.log('Inicializando autenticación...');
+        const authFlow = sessionStorage.getItem('auth_flow_active');
         
-        const { data: { session }, error } = await supabase.auth.getSession();
+        console.log('useAuth: Verificando flujo de auth:', authFlow);
         
-        if (error) {
-          console.error('Error getting session:', error);
-        } else if (session?.user && mounted) {
-          console.log('Sesión existente encontrada:', session.user.email);
-          setUser(session.user);
+        // Si es recovery, NO inicializar sesión automática
+        if (authFlow === 'recovery') {
+          console.log('useAuth: Recovery flow activo, manteniendo user = null');
+          setUser(null);
+          if (mounted) {
+            setLoading(false);
+          }
+          return;
+        }
+        
+        // Si hay tokens de login pendientes, establecer sesión
+        if (authFlow === 'login') {
+          const accessToken = sessionStorage.getItem('auth_login_access_token');
+          const refreshToken = sessionStorage.getItem('auth_login_refresh_token');
           
-          try {
-            await handleUserSession(session);
-            console.log('handleUserSession completado en initializeAuth');
-          } catch (handleSessionError) {
-            console.error('Error en handleUserSession (initializeAuth):', handleSessionError);
-            // Continúa aunque handleUserSession falle
+          if (accessToken) {
+            console.log('useAuth: Estableciendo sesión con tokens de login');
+            
+            const { data, error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken || ''
+            });
+            
+            if (error) {
+              console.error('useAuth: Error estableciendo sesión de login:', error);
+            } else if (data.user && mounted) {
+              console.log('useAuth: Sesión de login establecida:', data.user.email);
+              setUser(data.user);
+              
+              try {
+                await handleUserSession(data);
+              } catch (handleSessionError) {
+                console.error('useAuth: Error en handleUserSession:', handleSessionError);
+              }
+            }
+            
+            // Limpiar tokens de login
+            sessionStorage.removeItem('auth_login_access_token');
+            sessionStorage.removeItem('auth_login_refresh_token');
+            sessionStorage.removeItem('auth_flow_active');
           }
         } else {
-          console.log('No hay sesión existente');
-          setUser(null);
+          // Flujo normal: verificar sesión existente
+          console.log('useAuth: Verificando sesión existente...');
+          
+          const { data: { session }, error } = await supabase.auth.getSession();
+          
+          if (error) {
+            console.error('useAuth: Error getting session:', error);
+          } else if (session?.user && mounted) {
+            console.log('useAuth: Sesión existente encontrada:', session.user.email);
+            setUser(session.user);
+            
+            try {
+              await handleUserSession(session);
+            } catch (handleSessionError) {
+              console.error('useAuth: Error en handleUserSession:', handleSessionError);
+            }
+          } else {
+            console.log('useAuth: No hay sesión existente');
+            setUser(null);
+          }
         }
       } catch (error) {
-        console.error('Error in initializeAuth:', error);
+        console.error('useAuth: Error in initializeAuth:', error);
       } finally {
         if (mounted) {
-          console.log('initializeAuth finally - setting loading = false');
+          console.log('useAuth: Inicialización completa, loading = false');
           setLoading(false);
-        } else {
-          console.log('Component unmounted, not setting loading = false');
         }
       }
     };
 
-    // Listener de cambios de auth
+    // Listener de cambios de auth (solo para eventos manuales)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('onAuthStateChange triggered:', event, 'mounted:', mounted);
+        console.log('useAuth: onAuthStateChange:', event);
         
-        if (!mounted) {
-          console.log('Component unmounted, skipping auth change');
+        if (!mounted) return;
+
+        // Ignorar eventos automáticos durante recovery
+        const authFlow = sessionStorage.getItem('auth_flow_active');
+        if (authFlow === 'recovery') {
+          console.log('useAuth: Ignorando evento durante recovery:', event);
           return;
         }
 
-        console.log('Auth state changed:', event);
-        
         try {
           if (session?.user) {
-            console.log('Usuario autenticado:', session.user.email);
+            console.log('useAuth: Usuario autenticado via onChange:', session.user.email);
             setUser(session.user);
             
-            if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-              console.log('Ejecutando handleUserSession...');
-              
+            if (event === 'SIGNED_IN') {
+              console.log('useAuth: Ejecutando handleUserSession...');
               try {
-                // timeout 
-                const sessionPromise = handleUserSession(session);
-                const timeoutPromise = new Promise((_, reject) => 
-                  setTimeout(() => reject(new Error('handleUserSession timeout en useAuth')), 8000)
-                );
-                
-                await Promise.race([sessionPromise, timeoutPromise]);
-                console.log('handleUserSession completado en onChange');
+                await handleUserSession(session);
               } catch (handleSessionError) {
-                console.error('Error en handleUserSession (onChange):', handleSessionError.message);
-                // Continúa aunque handleUserSession falle
+                console.error('useAuth: Error en handleUserSession:', handleSessionError);
               }
             }
           } else {
-            console.log('Usuario desautenticado');
+            console.log('useAuth: Usuario desautenticado');
             setUser(null);
           }
         } catch (error) {
-          console.error('Error handling auth change:', error);
+          console.error('useAuth: Error handling auth change:', error);
         }
         
-        // SIEMPRE setear loading a false, sin importar errores
-        console.log('Antes de setear loading = false, mounted:', mounted);
         if (mounted) {
-          console.log('Auth change procesado, loading = false');
           setLoading(false);
-        } else {
-          console.log('Component unmounted, not setting loading = false in onChange');
         }
       }
     );
 
-    console.log('Subscription creada, iniciando auth...');
-    
-    // Inicializar
-    initializeAuth();
+    // Delay para asegurar que main.jsx terminó de procesar
+    const timer = setTimeout(initializeAuth, 100);
 
-    // Cleanup
     return () => {
-      console.log('🧹 useAuth cleanup - unmounting');
+      clearTimeout(timer);
       mounted = false;
       subscription.unsubscribe();
     };
@@ -115,7 +144,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      console.log('🚪 Iniciando logout...');
+      console.log('useAuth: Iniciando logout...');
       
       if (user) {
         await supabase
@@ -124,26 +153,30 @@ export const AuthProvider = ({ children }) => {
           .eq('id', user.id);
       }
 
+      // Limpiar los tokens de auth
+      sessionStorage.removeItem('auth_flow_active');
+      sessionStorage.removeItem('auth_recovery_access_token');
+      sessionStorage.removeItem('auth_recovery_refresh_token');
+      sessionStorage.removeItem('auth_recovery_code');
+      sessionStorage.removeItem('auth_recovery_type');
+      sessionStorage.removeItem('auth_login_access_token');
+      sessionStorage.removeItem('auth_login_refresh_token');
+
       const { error } = await supabase.auth.signOut();
       if (error) {
-        console.error('Error during logout:', error);
+        console.error('useAuth: Error during logout:', error);
       } else {
         setUser(null);
-        console.log('Logout exitoso');
+        console.log('useAuth: Logout exitoso');
       }
     } catch (error) {
-      console.error('Error in logout:', error);
+      console.error('useAuth: Error in logout:', error);
     }
   };
 
-  // Debug del estado actual
-  console.log('useAuth render - user:', user?.email || 'null', 'loading:', loading);
+  console.log('useAuth: render - user:', user?.email || 'null', 'loading:', loading);
 
-  const value = {
-    user,
-    loading,
-    logout
-  };
+  const value = { user, loading, logout };
 
   return (
     <AuthContext.Provider value={value}>

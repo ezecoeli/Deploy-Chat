@@ -36,6 +36,7 @@ export default function Chat() {
       } else if (navigator.onLine) {
         setConnectionStatus('online');
         console.log('Usuario de vuelta (pestaña activa)');
+        
       }
     };
 
@@ -125,7 +126,7 @@ export default function Chat() {
 
       loadInitialMessages();
     }
-  }, [user, loading]); // REMOVIDO currentChannel de dependencies
+  }, [user, loading]);
 
   // Auto-scroll a nuevos mensajes
   useEffect(() => {
@@ -140,42 +141,61 @@ export default function Chat() {
     }
 
     console.log('Iniciando suscripción a canal:', currentChannel.id);
+    
+    let retryCount = 0;
+    const maxRetries = 3;
 
-    const subscription = supabase
-      .channel(`messages:${currentChannel.id}`)
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'messages',
-        filter: `channel_id=eq.${currentChannel.id}`
-      }, (payload) => {
-        console.log('Nuevo mensaje recibido:', payload.new);
-        
-        // Verificar que el mensaje no sea del usuario actual (evitar duplicados)
-        setMessages(current => {
-          const messageExists = current.some(msg => msg.id === payload.new.id);
-          if (messageExists) {
-            console.log('Mensaje ya existe, ignorando');
-            return current;
-          }
+    const createSubscription = () => {
+      const subscription = supabase
+        .channel(`messages:${currentChannel.id}`)
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `channel_id=eq.${currentChannel.id}`
+        }, (payload) => {
+          console.log('Nuevo mensaje recibido:', payload.new);
           
-          return [...current, {
-            ...payload.new,
-            users: payload.new.user_id === user.id ? user : null
-          }];
+          setMessages(current => {
+            const messageExists = current.some(msg => msg.id === payload.new.id);
+            if (messageExists) {
+              console.log('Mensaje ya existe, ignorando');
+              return current;
+            }
+            
+            return [...current, {
+              ...payload.new,
+              users: payload.new.user_id === user.id ? user : null
+            }];
+          });
+        })
+        .subscribe((status) => {
+          console.log('Estado de suscripción:', status);
+          
+          // Reintentar en caso de error
+          if (status === 'CHANNEL_ERROR' && retryCount < maxRetries) {
+            retryCount++;
+            console.log(`Reintentando suscripción (${retryCount}/${maxRetries})...`);
+            setTimeout(() => {
+              subscription.unsubscribe();
+              createSubscription();
+            }, 2000 * retryCount); 
+          }
         });
-      })
-      .subscribe((status) => {
-        console.log('Estado de suscripción:', status);
-      });
+        
+      return subscription;
+    };
 
+    const subscription = createSubscription();
     console.log('Suscrito a mensajes del canal:', currentChannel.id);
 
     return () => {
       console.log('Limpiando suscripción del canal:', currentChannel.id);
-      subscription.unsubscribe();
+      if (subscription) {
+        subscription.unsubscribe();
+      }
     };
-  }, [currentChannel?.id, user?.id]); // Dependencies específicas
+  }, [currentChannel?.id, user?.id]);
 
   // Función para obtener el estado visual de conexión
   const getStatusInfo = () => {

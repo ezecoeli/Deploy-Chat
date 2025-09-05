@@ -49,14 +49,26 @@ export default function PasswordReset({ onBackToLogin }) {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
+      {/* Fondo base oscuro */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800" />
+      
       {/* Imagen de fondo */}
       <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
-        style={{ backgroundImage: `url(${loginBackground})` }}
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ 
+          backgroundImage: `url(${loginBackground})`,
+          opacity: 0.15,
+          filter: 'brightness(0.4) contrast(1.2) hue-rotate(200deg)'
+        }}
       />
       
-      {/* Overlay oscuro */}
-      <div className="absolute inset-0 bg-black/40" />
+      {/* Overlay con gradiente */}
+      <div 
+        className="absolute inset-0"
+        style={{
+          background: 'radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 70%)'
+        }}
+      />
       
       {/* Contenido principal */}
       <div className="relative z-10 flex flex-col lg:flex-row items-center justify-center min-h-screen w-full gap-8 px-4">
