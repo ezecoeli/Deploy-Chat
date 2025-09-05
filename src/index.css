@@ -23,5 +23,5 @@
   animation: spin-slow 20s linear infinite;
   z-index: -1;
   border-radius: 9999px; 
+  opacity: 0.5;
 }
-

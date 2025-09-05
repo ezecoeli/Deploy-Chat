@@ -67,6 +67,18 @@ const translations = {
     minutesAgo: "hace {count} minutos",
     hoursAgo: "hace {count} horas",
     daysAgo: "hace {count} días",
+
+    // Recuperar contraseña
+    forgotPassword: "¿Olvidaste tu contraseña?",
+    resetPassword: "Restablecer contraseña",
+    newPassword: "Nueva contraseña",
+    confirmNewPassword: "Confirmar nueva contraseña",
+    sendResetEmail: "Enviar enlace",
+    resetEmailSent: "Revisa tu correo para restablecer la contraseña",
+    passwordsDoNotMatch: "Las contraseñas no coinciden",
+    passwordUpdated: "Contraseña actualizada exitosamente",
+    backToLogin: "Volver al inicio",
+    enterEmailToReset: "Ingresa el email asociado a tu cuenta para recibir el enlace de restablecimiento.",
   },
   en: {
     // Auth
@@ -133,6 +145,18 @@ const translations = {
     minutesAgo: "{count} minutes ago",
     hoursAgo: "{count} hours ago",
     daysAgo: "{count} days ago",
+  
+  // Forgot Password
+    forgotPassword: "Forgot your password?",
+    resetPassword: "Reset password",
+    newPassword: "New password",
+    confirmNewPassword: "Confirm new password",
+    sendResetEmail: "Send link",
+    resetEmailSent: "Check your email to reset your password",
+    passwordsDoNotMatch: "Passwords do not match",
+    passwordUpdated: "Password updated successfully",
+    backToLogin: "Back to home",
+    enterEmailToReset: "Enter the email associated with your account to receive the reset link.",
   }
 };
 

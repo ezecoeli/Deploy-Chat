@@ -1,0 +1,162 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '../utils/supabaseClient';
+import { useTranslation } from '../hooks/useTranslation';
+import { PiWarningCircleFill } from "react-icons/pi";
+import LanguageToggle from './LanguageToggle';
+import banner from '../assets/banner-transp.png';
+import loginBackground from '../assets/login-bg.png';
+
+export default function UpdatePassword({ onPasswordUpdated }) {
+  const { t } = useTranslation();
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [message, setMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  const handleUpdatePassword = async (e) => {
+    e.preventDefault();
+    
+    if (!password.trim()) {
+      setMessage(t('missingPassword'));
+      return;
+    }
+
+    if (password.length < 6) {
+      setMessage(t('passwordTooShort'));
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setMessage(t('passwordsDoNotMatch'));
+      return;
+    }
+
+    setIsLoading(true);
+    setMessage('');
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: password
+      });
+
+      if (error) {
+        setMessage(error.message);
+      } else {
+        setMessage(t('passwordUpdated'));
+        setIsSuccess(true);
+        
+        // Llamar al callback después de actualizar
+        setTimeout(() => {
+          if (onPasswordUpdated) {
+            onPasswordUpdated();
+          } else {
+            window.location.href = '/';
+          }
+        }, 2000);
+      }
+    } catch (err) {
+      setMessage(t('unexpectedError'));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="relative min-h-screen w-full overflow-hidden">
+      {/* Imagen de fondo */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
+        style={{ backgroundImage: `url(${loginBackground})` }}
+      />
+      
+      {/* Overlay oscuro */}
+      <div className="absolute inset-0 bg-black/40" />
+      
+      {/* Contenido principal */}
+      <div className="relative z-10 flex flex-col lg:flex-row items-center justify-center min-h-screen w-full gap-8 px-4">
+        
+        {/* Banner Image */}
+        <div className="w-full lg:w-auto p-4">
+          <img
+            src={banner}
+            alt="Update Password Banner"
+            className="max-h-[400px] lg:max-h-[600px] object-contain mx-auto"
+          />
+        </div>
+
+        {/* Update Form Container */}
+        <div className="w-[320px] sm:w-96 p-4 relative overflow-hidden z-0 login-border rounded-lg">
+          <div className="relative z-10 bg-black/90 backdrop-blur-sm p-6 rounded-lg">
+            {/* Language toggle */}
+            <div className="flex justify-end mb-4">
+              <LanguageToggle />
+            </div>
+
+            <h2 className="text-3xl font-bold mb-8 text-center text-gray-200">
+              {t('resetPassword')}
+            </h2>
+
+            {!isSuccess ? (
+              <form onSubmit={handleUpdatePassword} className="flex flex-col gap-4">
+                <input
+                  id="new-password"
+                  name="new-password"
+                  type="password"
+                  placeholder={t('newPassword')}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="new-password"
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 text-base text-gray-800"
+                  disabled={isLoading}
+                />
+                
+                <input
+                  id="confirm-password"
+                  name="confirm-password"
+                  type="password"
+                  placeholder={t('confirmNewPassword')}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  autoComplete="new-password"
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 text-base text-gray-800"
+                  disabled={isLoading}
+                />
+                
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="px-4 py-2 bg-green-700 hover:bg-green-600 text-white font-medium rounded-md transition-colors duration-200 text-base disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isLoading && (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  )}
+                  {isLoading ? 'Actualizando...' : t('resetPassword')}
+                </button>
+              </form>
+            ) : (
+              <div className="text-center">
+                <div className="mb-6 text-green-400">
+                  <svg className="w-16 h-16 mx-auto mb-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <p className="text-lg font-medium text-green-400">{t('passwordUpdated')}</p>
+                  <p className="text-sm text-gray-300 mt-2">Redirigiendo al login...</p>
+                </div>
+              </div>
+            )}
+
+            {message && !isSuccess && (
+              <div className="mt-4 flex items-center justify-center gap-2 text-red-400">
+                <PiWarningCircleFill className="w-5 h-5" />
+                <p className="text-center text-base">
+                  {message}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

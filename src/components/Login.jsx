@@ -5,12 +5,15 @@ import { supabase } from '../utils/supabaseClient';
 import { useTranslation } from '../hooks/useTranslation';
 import { handleUserSession } from '../utils/auth';
 import LanguageToggle from './LanguageToggle';
+import PasswordReset from './PasswordReset';
 import banner from '../assets/banner-transp.png';
 import loginBackground from '../assets/login-bg.png';
 
 export default function Login() {
   const { t } = useTranslation();
-
+  
+  // los hooks
+  const [showResetPassword, setShowResetPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
@@ -19,7 +22,7 @@ export default function Login() {
     password: false
   });
 
-  // Función para limpiar errores de un campo específico
+  // funciones
   const clearFieldError = (fieldName) => {
     setFieldErrors(prev => ({
       ...prev,
@@ -28,7 +31,6 @@ export default function Login() {
     if (message) setMessage('');
   };
 
-  // Función para establecer error en un campo específico
   const setFieldError = (fieldName, errorMessage) => {
     setFieldErrors(prev => ({
       ...prev,
@@ -37,7 +39,6 @@ export default function Login() {
     setMessage(errorMessage);
   };
 
-  // Función para limpiar todos los errores
   const clearAllErrors = () => {
     setFieldErrors({ email: false, password: false });
     setMessage('');
@@ -46,10 +47,8 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    // Limpiar errores previos
     clearAllErrors();
 
-    // Validaciones del lado del cliente
     if (!email.trim()) {
       setFieldError('email', t('missingEmail'));
       return;
@@ -72,7 +71,6 @@ export default function Login() {
       });
 
       if (error) {
-        // Mapear errores comunes de Supabase a traducciones
         if (error.message === 'Invalid login credentials') {
           setFieldErrors({ email: true, password: true });
           setMessage(t('invalidCredentials'));
@@ -90,10 +88,8 @@ export default function Login() {
   const handleSignUp = async (e) => {
     e.preventDefault();
 
-    // Limpiar errores previos
     clearAllErrors();
 
-    // Validaciones del lado del cliente
     if (!email.trim()) {
       setFieldError('email', t('missingEmail'));
       return;
@@ -147,16 +143,32 @@ export default function Login() {
     }
   };
 
+  if (showResetPassword) {
+    return <PasswordReset onBackToLogin={() => setShowResetPassword(false)} />;
+  }
+
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
-      {/* Imagen de fondo con opacidad */}
+      {/* Fondo base oscuro */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800" />
+      
+      {/* Imagen de fondo con mayor opacidad y filtro */}
       <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
-        style={{ backgroundImage: `url(${loginBackground})` }}
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ 
+          backgroundImage: `url(${loginBackground})`,
+          opacity: 0.15,
+          filter: 'brightness(0.4) contrast(1.2) hue-rotate(200deg)' // Tonos azulados
+        }}
       />
       
-      {/* Overlay oscuro adicional */}
-      <div className="absolute inset-0 bg-black/40" />
+      {/* Overlay con gradiente radial centrado */}
+      <div 
+        className="absolute inset-0"
+        style={{
+          background: 'radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 70%)'
+        }}
+      />
       
       {/* Contenido principal */}
       <div className="relative z-10 flex flex-col lg:flex-row items-center justify-center min-h-screen w-full gap-8 px-4">
@@ -182,7 +194,10 @@ export default function Login() {
               {t('login')} / {t('register')}
             </h2>
 
-            <form className="flex flex-col gap-4 text-gray-100">
+            <form 
+              className="flex flex-col gap-4 text-gray-100"
+              onSubmit={handleLogin}
+            >
               <input
                 id="email"
                 name="email"
@@ -194,7 +209,7 @@ export default function Login() {
                   clearFieldError('email');
                 }}
                 autoComplete="email"
-                className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-base transition-colors ${
+                className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-base transition-colors text-gray-800 ${
                   fieldErrors.email 
                     ? 'border-red-500 focus:ring-red-500' 
                     : 'border-gray-300 focus:ring-green-500'
@@ -211,7 +226,7 @@ export default function Login() {
                   clearFieldError('password');
                 }}
                 autoComplete="current-password"
-                className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-base transition-colors ${
+                className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-base transition-colors text-gray-800 ${
                   fieldErrors.password 
                     ? 'border-red-500 focus:ring-red-500' 
                     : 'border-gray-300 focus:ring-green-500'
@@ -219,8 +234,7 @@ export default function Login() {
               />
               <div className="flex justify-between gap-3">
                 <button
-                  type="button"
-                  onClick={handleLogin}
+                  type="submit"
                   className="flex-1 px-4 py-2 bg-green-700 hover:bg-gray-500 text-white font-medium rounded-md transition-colors duration-200 text-base"
                 >
                   {t('confirmLogin')}
@@ -233,6 +247,15 @@ export default function Login() {
                   {t('confirmRegister')}
                 </button>
               </div>
+              
+              {/* Forgot password link */}
+              <button
+                type="button"
+                onClick={() => setShowResetPassword(true)}
+                className="text-md text-gray-300 font-bold hover:text-white hover:underline transition-colors text-center mt-2"
+              >
+                {t('forgotPassword')}
+              </button>
             </form>
 
             {/* social login buttons */}
