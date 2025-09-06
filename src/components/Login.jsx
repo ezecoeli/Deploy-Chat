@@ -21,6 +21,20 @@ export default function Login() {
     password: false
   });
 
+  // Estados para controlar floating labels
+  const [inputStates, setInputStates] = useState({
+    email: { focused: false, hasValue: false },
+    password: { focused: false, hasValue: false }
+  });
+
+  // Actualizar estado de inputs
+  const updateInputState = (fieldName, updates) => {
+    setInputStates(prev => ({
+      ...prev,
+      [fieldName]: { ...prev[fieldName], ...updates }
+    }));
+  };
+
   // funciones
   const clearFieldError = (fieldName) => {
     setFieldErrors(prev => ({
@@ -197,40 +211,72 @@ export default function Login() {
               className="flex flex-col gap-4 text-gray-100"
               onSubmit={handleLogin}
             >
-              <input
-                id="email"
-                name="email"
-                type="email"
-                placeholder={t('email')}
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  clearFieldError('email');
-                }}
-                autoComplete="email"
-                className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-base transition-colors text-gray-800 ${
-                  fieldErrors.email 
-                    ? 'border-red-500 focus:ring-red-500' 
-                    : 'border-gray-300 focus:ring-green-500'
-                }`}
-              />
-              <input
-                id="password"
-                name="password"
-                type="password"
-                placeholder={t('password')}
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  clearFieldError('password');
-                }}
-                autoComplete="current-password"
-                className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-base transition-colors text-gray-800 ${
-                  fieldErrors.password 
-                    ? 'border-red-500 focus:ring-red-500' 
-                    : 'border-gray-300 focus:ring-green-500'
-                }`}
-              />
+              {/* Email input con floating label */}
+              <div className="input-group">
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    updateInputState('email', { hasValue: e.target.value.length > 0 });
+                    clearFieldError('email');
+                  }}
+                  onFocus={() => updateInputState('email', { focused: true })}
+                  onBlur={() => updateInputState('email', { focused: false })}
+                  autoComplete="email"
+                  className={`input w-full ${
+                    fieldErrors.email 
+                      ? 'border-red-500 focus:border-red-500' 
+                      : ''
+                  }`}
+                />
+                <label 
+                  htmlFor="email" 
+                  className={`user-label ${
+                    inputStates.email.focused || inputStates.email.hasValue ? 'label-up' : ''
+                  } ${
+                    fieldErrors.email ? 'label-error' : ''
+                  }`}
+                >
+                  {t('email')}
+                </label>
+              </div>
+
+              {/* Password input con floating label */}
+              <div className="input-group">
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    updateInputState('password', { hasValue: e.target.value.length > 0 });
+                    clearFieldError('password');
+                  }}
+                  onFocus={() => updateInputState('password', { focused: true })}
+                  onBlur={() => updateInputState('password', { focused: false })}
+                  autoComplete="current-password"
+                  className={`input w-full ${
+                    fieldErrors.password 
+                      ? 'border-red-500 focus:border-red-500' 
+                      : ''
+                  }`}
+                />
+                <label 
+                  htmlFor="password" 
+                  className={`user-label ${
+                    inputStates.password.focused || inputStates.password.hasValue ? 'label-up' : ''
+                  } ${
+                    fieldErrors.password ? 'label-error' : ''
+                  }`}
+                >
+                  {t('password')}
+                </label>
+              </div>
+
               <div className="flex justify-between gap-3">
                 <button
                   type="submit"
