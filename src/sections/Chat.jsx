@@ -4,10 +4,9 @@ import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from '../hooks/useTranslation';
 import { useTerminalTheme } from '../hooks/useTerminalTheme';
 import { getAvatarById } from '../config/avatars';
-import LanguageToggle from '../components/LanguageToggle';
 import ThemeSelector from '../components/ThemeSelector';
 import UserProfileModal from '../components/UserProfileModal';
-import { FiSettings, FiUser, FiLogOut, FiChevronDown, FiUsers } from 'react-icons/fi';
+import { FiUser, FiLogOut, FiChevronDown, FiUsers } from 'react-icons/fi';
 
 export default function Chat() {
   const { user, logout, loading } = useAuth();
@@ -261,7 +260,7 @@ export default function Chat() {
     };
 
     loadInitialMessages();
-  }, [user, loading, currentChannel]); // Añadir currentChannel como dependencia
+  }, [user, loading, currentChannel]);
 
   // Auto-scroll a nuevos mensajes
   useEffect(() => {
@@ -426,75 +425,86 @@ export default function Chat() {
           
           {/* User Profile Section */}
           <div className="flex items-center gap-4">
-            {/* Language Toggle */}
-            <LanguageToggle />
+           
             <ThemeSelector />
             
             {/* User Menu */}
             <div className="relative">
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
-                className={`flex items-center gap-3 p-2 rounded-lg hover:bg-gray-700 transition-colors font-mono`}
-                style={{ color: theme.colors.text }}
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${theme.colors.input} hover:opacity-80`}
+                style={{ 
+                  color: theme.colors.text,
+                  fontFamily: theme.font 
+                }}
               >
-                {/* Avatar */}
-                <div className="w-8 h-8 rounded-full overflow-hidden bg-teal-200 flex items-center justify-center">
-                  {renderAvatar(userProfile?.avatar_url, userProfile?.username)}
+                <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-600 flex items-center justify-center flex-shrink-0">
+                  {renderAvatar(userProfile?.avatar_url || 'avatar-01', userProfile?.username || user?.email)}
                 </div>
-                
-                {/* Username */}
-                <span className="text-white font-medium hidden sm:block">
-                  {userProfile?.username || user?.email?.split('@')[0] || 'Usuario'}
-                </span>
-                
-                <FiChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${
-                  showUserMenu ? 'rotate-180' : ''
-                }`} />
+                <div className="hidden sm:block text-left">
+                  <p className="text-sm font-medium">
+                    {userProfile?.username || user?.email?.split('@')[0]}
+                  </p>
+                  <p className="text-xs opacity-70">
+                    Online
+                  </p>
+                </div>
+                <FiChevronDown className={`w-3 h-3 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
               </button>
 
-              {/* Dropdown Menu */}
               {showUserMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-slate-800 border border-slate-700 rounded-lg shadow-lg z-50">
-                  <div className="p-3 border-b border-slate-700">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-600 flex items-center justify-center">
-                        {renderAvatar(userProfile?.avatar_url, userProfile?.username, 'w-10 h-10')}
+                <>
+                  <div className="absolute right-0 mt-1 w-56 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50">
+                    <div className="p-3">
+                      {/* Header del dropdown */}
+                      <div className="flex items-center gap-3 mb-3 pb-2 border-b border-gray-600">
+                        <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-600 flex items-center justify-center">
+                          {renderAvatar(userProfile?.avatar_url || 'avatar-01', userProfile?.username || user?.email)}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-white">
+                            {userProfile?.username || user?.email?.split('@')[0]}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            {user?.email}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white font-medium truncate">
-                          {userProfile?.username || 'Usuario'}
-                        </p>
-                        <p className="text-gray-400 text-xs truncate">
-                          {user?.email}
-                        </p>
+
+                      {/* Opciones del menú */}
+                      <div className="space-y-1">
+                        <button
+                          onClick={() => {
+                            setShowProfileModal(true);
+                            setShowUserMenu(false);
+                          }}
+                          className="w-full text-left px-3 py-2 rounded text-sm transition-colors text-gray-300 hover:bg-gray-700 flex items-center gap-2"
+                        >
+                          <FiUser className="w-4 h-4" />
+                          <span>{t('editProfile') || 'Editar perfil'}</span>
+                        </button>
+                        
+                        <hr className="border-gray-600 my-2" />
+                        
+                        <button
+                          onClick={() => {
+                            logout();
+                            setShowUserMenu(false);
+                          }}
+                          className="w-full text-left px-3 py-2 rounded text-sm transition-colors text-red-400 hover:bg-red-900/20 flex items-center gap-2"
+                        >
+                          <FiLogOut className="w-4 h-4" />
+                          <span>{t('logout') || 'Cerrar sesión'}</span>
+                        </button>
                       </div>
                     </div>
                   </div>
                   
-                  <button
-                    onClick={() => {
-                      setShowProfileModal(true);
-                      setShowUserMenu(false);
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-2 text-left text-gray-300 hover:bg-slate-700 transition-colors"
-                  >
-                    <FiSettings className="w-4 h-4" />
-                    Editar Perfil
-                  </button>
-                  
-                  <hr className="border-slate-700" />
-                  
-                  <button
-                    onClick={() => {
-                      handleLogout();
-                      setShowUserMenu(false);
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-2 text-left text-red-400 hover:bg-slate-700 transition-colors"
-                  >
-                    <FiLogOut className="w-4 h-4" />
-                    {t('logout') || 'Cerrar sesión'}
-                  </button>
-                </div>
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setShowUserMenu(false)}
+                  />
+                </>
               )}
             </div>
           </div>
