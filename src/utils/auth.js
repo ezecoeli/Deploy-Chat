@@ -1,3 +1,7 @@
+import { supabase } from './supabaseClient';
+
+const pendingRequests = new Map();
+
 export const handleUserSession = async (session) => {
   if (!session?.user) {
     console.log('No hay sesión válida para procesar');
@@ -28,7 +32,7 @@ export const handleUserSession = async (session) => {
       try {
         console.log('Ejecutando upsert para usuario:', user.email);
         
-        // PRIMERO verificar si el usuario ya existe
+        // primero verificar si el usuario ya existe
         const { data: existingUser } = await supabase
           .from('users')
           .select('id, username, avatar_url')

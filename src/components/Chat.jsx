@@ -5,7 +5,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { getAvatarById } from '../config/avatars';
 import LanguageToggle from './LanguageToggle';
 import UserProfileModal from './UserProfileModal';
-import { FiSettings, FiUser, FiLogOut, FiChevronDown } from 'react-icons/fi';
+import { FiSettings, FiUser, FiLogOut, FiChevronDown, FiUsers } from 'react-icons/fi';
 
 export default function Chat() {
   const { user, logout, loading } = useAuth();
@@ -21,13 +21,60 @@ export default function Chat() {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [memberCount, setMemberCount] = useState(0); 
   const messagesEndRef = useRef(null);
 
   // Cargar perfil del usuario
   useEffect(() => {
     if (user) {
       loadUserProfile();
+      loadMemberCount(); 
     }
+  }, [user]);
+
+  // Función para cargar cantidad de miembros
+  const loadMemberCount = async () => {
+    try {
+      console.log('Cargando contador de miembros...');
+      const { count, error } = await supabase
+        .from('users')
+        .select('*', { count: 'exact', head: true });
+
+      if (error) throw error;
+      
+      console.log('Cantidad de miembros cargada:', count);
+      setMemberCount(count || 0);
+    } catch (error) {
+      console.error('Error loading member count:', error);
+      setMemberCount(0);
+    }
+  };
+
+  // Suscribirse a cambios en la tabla users para actualizar contador en tiempo real
+  useEffect(() => {
+    if (!user) return;
+
+    console.log('Iniciando suscripción a cambios de usuarios');
+    
+    const userSubscription = supabase
+      .channel('users_changes')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'users'
+      }, (payload) => {
+        console.log('Cambio en tabla users detectado:', payload.eventType);
+        // Recargar contador cuando hay cambios
+        loadMemberCount();
+      })
+      .subscribe((status) => {
+        console.log('Estado de suscripción users:', status);
+      });
+
+    return () => {
+      console.log('Limpiando suscripción de usuarios');
+      userSubscription.unsubscribe();
+    };
   }, [user]);
 
   const loadUserProfile = async () => {
@@ -166,40 +213,44 @@ export default function Chat() {
       return;
     }
 
-    // Solo establecer canal una vez al inicializar
-    if (!currentChannel) {
-      const hardcodedChannel = {
-        id: '95cd8c81-bd3f-4cf2-a9d1-ce8f0c53486c',
-        name: 'general',
-      };
-
-      console.log('Estableciendo canal inicial para usuario:', user.email);
-      setCurrentChannel(hardcodedChannel);
-      
-      // Cargar mensajes una sola vez
-      const loadInitialMessages = async () => {
-        try {
-          console.log('Cargando mensajes iniciales...');
-          const { data, error } = await supabase
-            .from('messages')
-            .select(`*, users:user_id (*)`)
-            .eq('channel_id', hardcodedChannel.id)
-            .order('created_at', { ascending: true })
-            .limit(100);
-
-          if (error) throw error;
-
-          console.log('Mensajes iniciales cargados:', data?.length || 0);
-          setMessages(data || []);
-        } catch (err) {
-          console.error('Error cargando mensajes iniciales:', err);
-          setError('Error cargando mensajes: ' + err.message);
-        }
-      };
-
-      loadInitialMessages();
+    // PREVENIR EJECUCIONES MÚLTIPLES
+    if (currentChannel) {
+      console.log('Canal ya establecido, saltando inicialización');
+      return;
     }
-  }, [user, loading]);
+
+    // Solo establecer canal una vez al inicializar
+    const hardcodedChannel = {
+      id: '95cd8c81-bd3f-4cf2-a9d1-ce8f0c53486c',
+      name: 'general',
+    };
+
+    console.log('Estableciendo canal inicial para usuario:', user.email);
+    setCurrentChannel(hardcodedChannel);
+    
+    // Cargar mensajes una sola vez
+    const loadInitialMessages = async () => {
+      try {
+        console.log('Cargando mensajes iniciales...');
+        const { data, error } = await supabase
+          .from('messages')
+          .select(`*, users:user_id (*)`)
+          .eq('channel_id', hardcodedChannel.id)
+          .order('created_at', { ascending: true })
+          .limit(100);
+
+        if (error) throw error;
+
+        console.log('Mensajes iniciales cargados:', data?.length || 0);
+        setMessages(data || []);
+      } catch (err) {
+        console.error('Error cargando mensajes iniciales:', err);
+        setError('Error cargando mensajes: ' + err.message);
+      }
+    };
+
+    loadInitialMessages();
+  }, [user, loading, currentChannel]); // Añadir currentChannel como dependencia
 
   // Auto-scroll a nuevos mensajes
   useEffect(() => {
@@ -344,7 +395,7 @@ export default function Chat() {
         <header className="flex justify-between items-center mb-4">
           <div>
             <h1 className="text-2xl font-bold text-white">
-              {t('chat') || 'Chat'}
+              Deploy Chat
             </h1>
             <p className="text-gray-400 text-sm">
               {currentChannel ? `#${currentChannel.name}` : 'Conectando...'}
@@ -425,10 +476,17 @@ export default function Chat() {
           </div>
         </header>
 
+        {/* MODIFICADO: Cambiar bienvenida por contador de miembros */}
         <div className="mb-2 flex items-center justify-between">
-          <p className="text-gray-400 text-sm">
-            {t('welcome')} {userProfile?.username || user?.email?.split('@')[0]}
-          </p>
+          <div className="flex items-center gap-2">
+            <FiUsers className="w-4 h-4 text-blue-400" />
+            <p className="text-gray-400 text-sm">
+              {memberCount === 1 
+                ? (t('oneMember') || '1 miembro')
+                : (t('membersCount')?.replace('{count}', memberCount) || `${memberCount} miembros`)
+              }
+            </p>
+          </div>
           
           {/* Estado dinámico de conexión */}
           <div className="flex items-center gap-2">
@@ -467,7 +525,7 @@ export default function Chat() {
                     }`}>
                       {/* Avatar del usuario */}
                       {!isOwnMessage && (
-                        <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-600 flex items-center justify-center flex-shrink-0">
+                        <div className="w-8 h-8 rounded-full overflow-hidden bg-cyan-300 flex items-center justify-center flex-shrink-0">
                           {renderAvatar(messageUser.avatar_url, messageUser.username)}
                         </div>
                       )}
@@ -475,16 +533,16 @@ export default function Chat() {
                       <div
                         className={`px-4 py-2 rounded-lg ${
                           isOwnMessage
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-700 text-gray-100'
+                            ? 'bg-teal-900 text-white'
+                            : 'bg-blue-900 text-white'
                         }`}
                       >
                         {!isOwnMessage && (
-                          <p className="text-xs text-gray-400 mb-1">
+                          <p className="text-xs text-green-300 mb-1">
                             {messageUser.username || messageUser.email}
                           </p>
                         )}
-                        <p className="text-sm">{message.content}</p>
+                        <p className="text-base">{message.content}</p>
                         <p
                           className={`text-xs mt-1 ${
                             isOwnMessage ? 'text-blue-200' : 'text-gray-400'
@@ -509,13 +567,13 @@ export default function Chat() {
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder={t('messageInput') || 'Escribe un mensaje...'}
-            className="flex-1 px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
             disabled={!currentChannel}
           />
           <button
             type="submit"
             disabled={!newMessage.trim() || !currentChannel}
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors duration-200"
+            className="px-6 py-2 bg-violet-600 hover:bg-violet-800 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors duration-200"
           >
             {t('sendMessage') || 'Enviar'}
           </button>

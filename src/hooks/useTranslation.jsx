@@ -10,19 +10,22 @@ const translations = {
     password: "Contraseña",
     confirmLogin: "Iniciar sesión",
     confirmRegister: "Registrarse",
-    welcome: "Bienvenido",
     logout: "Cerrar sesión",
     loginWithGithub: "Iniciar con GitHub",
     loginWithGoogle: "Iniciar con Google",
     checkEmail: "Revisa tu correo para confirmar la cuenta",
     
     // Chat
-    sendMessage: "Enviar mensaje",
+    sendMessage: "Enviar",
     typing: "escribiendo...",
     online: "conectado",
     offline: "desconectado",
-    messageInput: "Escribe un mensaje...",
+    messageInput: "Mensaje",
     noMessages: "No hay mensajes aún",
+
+    // Members count
+    oneMember: "1 miembro",
+    membersCount: "{count} miembros",
     
     // Channels
     general: "General",
@@ -88,19 +91,22 @@ const translations = {
     password: "Password",
     confirmLogin: "Login",
     confirmRegister: "Register",
-    welcome: "Welcome",
     logout: "Sign Out",
     loginWithGithub: "Sign in with GitHub",
     loginWithGoogle: "Sign in with Google",
     checkEmail: "Check your email to confirm your account",
     
     // Chat
-    sendMessage: "Send message",
+    sendMessage: "Send",
     typing: "typing...",
     online: "online",
     offline: "offline",
-    messageInput: "Type a message...",
+    messageInput: "Message",
     noMessages: "No messages yet",
+
+    // Members count  
+    oneMember: "1 member",
+    membersCount: "{count} members",
     
     // Channels
     general: "General",

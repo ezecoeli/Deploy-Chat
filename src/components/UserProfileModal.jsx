@@ -85,14 +85,17 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
 
     try {
       // Verificar si el username ya existe (diferente al usuario actual)
-      const { data: existingUser } = await supabase
+      const { data: existingUsers, error: checkError } = await supabase
         .from('users')
-        .select('id')
+        .select('id, username')
         .eq('username', formData.username.trim())
-        .neq('id', user.id)
-        .single();
+        .neq('id', user.id);
 
-      if (existingUser) {
+      // Manejar el error 406 específicamente
+      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows found (está bien)
+        console.error('Error verificando username:', checkError);
+        // Continuar sin verificación si hay error de permisos
+      } else if (existingUsers && existingUsers.length > 0) {
         setErrors({ username: 'Este nombre de usuario ya está en uso' });
         setIsLoading(false);
         return;

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import { handleUserSession } from '../utils/auth';
 
@@ -7,6 +7,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [lastAuthEventTime, setLastAuthEventTime] = useState(0);
 
   useEffect(() => {
     let mounted = true;
@@ -94,39 +95,29 @@ export const AuthProvider = ({ children }) => {
     // Listener de cambios de auth (solo para eventos manuales)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('useAuth: onAuthStateChange:', event);
+        const now = Date.now();
         
-        if (!mounted) return;
-
-        // Ignorar eventos automáticos durante recovery
-        const authFlow = sessionStorage.getItem('auth_flow_active');
-        if (authFlow === 'recovery') {
-          console.log('useAuth: Ignorando evento durante recovery:', event);
+        // Debounce: ignorar eventos muy frecuentes (menos de 1 segundo)
+        if (now - lastAuthEventTime < 1000 && event === 'SIGNED_IN') {
+          console.log('useAuth: Evento SIGNED_IN ignorado por debounce');
           return;
         }
-
-        try {
-          if (session?.user) {
-            console.log('useAuth: Usuario autenticado via onChange:', session.user.email);
-            setUser(session.user);
-            
-            if (event === 'SIGNED_IN') {
-              console.log('useAuth: Ejecutando handleUserSession...');
-              try {
-                await handleUserSession(session);
-              } catch (handleSessionError) {
-                console.error('useAuth: Error en handleUserSession:', handleSessionError);
-              }
-            }
-          } else {
-            console.log('useAuth: Usuario desautenticado');
-            setUser(null);
-          }
-        } catch (error) {
-          console.error('useAuth: Error handling auth change:', error);
-        }
         
-        if (mounted) {
+        setLastAuthEventTime(now);
+        console.log('useAuth: onAuthStateChange:', event);
+
+        if (event === 'SIGNED_IN' && session?.user) {
+          console.log('useAuth: Usuario autenticado via onChange:', session.user.email);
+          setUser(session.user);
+          setLoading(false);
+          
+          console.log('useAuth: Ejecutando handleUserSession...');
+          handleUserSession(session).catch(error => {
+            console.error('useAuth: Error en handleUserSession:', error);
+          });
+        } else if (event === 'SIGNED_OUT') {
+          console.log('useAuth: Usuario desautenticado');
+          setUser(null);
           setLoading(false);
         }
       }
