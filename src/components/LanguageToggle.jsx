@@ -11,7 +11,7 @@ export default function LanguageToggle() {
   return (
     <button
       onClick={toggleLanguage}
-      className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-900 dark:text-white hover:text-gray-900 dark:hover:text-white transition-colors duration-200"
+      className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-white  hover:text-gray-300 transition-colors duration-200"
       title={language === 'es' ? 'Switch to English' : 'Cambiar a español'}
     >
       <span className="text-lg">{language === 'es' ? '🇬🇧' : '🇪🇸'}</span>

@@ -27,7 +27,7 @@ export default function PasswordReset({ onBackToLogin }) {
     }
 
     setIsLoading(true);
-    setMessage('');
+    setMessage(''); // LIMPIAR mensaje anterior
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -36,12 +36,14 @@ export default function PasswordReset({ onBackToLogin }) {
 
       if (error) {
         setMessage(error.message);
+        setEmailSent(false); 
       } else {
-        setMessage(t('resetEmailSent'));
-        setEmailSent(true);
+        setMessage('');
+        setEmailSent(true); 
       }
     } catch (err) {
       setMessage(t('unexpectedError'));
+      setEmailSent(false);
     } finally {
       setIsLoading(false);
     }
@@ -49,10 +51,8 @@ export default function PasswordReset({ onBackToLogin }) {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
-      {/* Fondo base oscuro */}
+      {/* Fondos existentes */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800" />
-      
-      {/* Imagen de fondo */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ 
@@ -61,8 +61,6 @@ export default function PasswordReset({ onBackToLogin }) {
           filter: 'brightness(0.4) contrast(1.2) hue-rotate(200deg)'
         }}
       />
-      
-      {/* Overlay con gradiente */}
       <div 
         className="absolute inset-0"
         style={{
@@ -70,7 +68,6 @@ export default function PasswordReset({ onBackToLogin }) {
         }}
       />
       
-      {/* Contenido principal */}
       <div className="relative z-10 flex flex-col lg:flex-row items-center justify-center min-h-screen w-full gap-8 px-4">
         
         {/* Banner Image */}
@@ -107,7 +104,10 @@ export default function PasswordReset({ onBackToLogin }) {
                     type="email"
                     placeholder={t('email')}
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (message) setMessage(''); // limpiar mensaje al escribir
+                    }}
                     autoComplete="email"
                     className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 text-base text-gray-800"
                     disabled={isLoading}
@@ -124,8 +124,19 @@ export default function PasswordReset({ onBackToLogin }) {
                     {isLoading ? 'Enviando...' : t('sendResetEmail')}
                   </button>
                 </form>
+
+                {/* mensajes de error solo cuando no se envía el email */}
+                {message && (
+                  <div className="mt-4 flex items-center justify-center gap-2 text-red-400">
+                    <PiWarningCircleFill className="w-5 h-5" />
+                    <p className="text-center text-base">
+                      {message}
+                    </p>
+                  </div>
+                )}
               </>
             ) : (
+              /* mensaje de éxito cuando se envía el email */
               <div className="text-center">
                 <div className="mb-6 text-green-400">
                   <svg className="w-16 h-16 mx-auto mb-4" fill="currentColor" viewBox="0 0 20 20">
@@ -144,14 +155,6 @@ export default function PasswordReset({ onBackToLogin }) {
               {t('backToLogin')}
             </button>
 
-            {message && (
-              <div className="mt-4 flex items-center justify-center gap-2 text-red-400">
-                <PiWarningCircleFill className="w-5 h-5" />
-                <p className="text-center text-base">
-                  {message}
-                </p>
-              </div>
-            )}
           </div>
         </div>
       </div>

@@ -2,7 +2,10 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from '../hooks/useTranslation';
+import { getAvatarById } from '../config/avatars';
 import LanguageToggle from './LanguageToggle';
+import UserProfileModal from './UserProfileModal';
+import { FiSettings, FiUser, FiLogOut, FiChevronDown } from 'react-icons/fi';
 
 export default function Chat() {
   const { user, logout, loading } = useAuth();
@@ -15,7 +18,78 @@ export default function Chat() {
   const [isTyping, setIsTyping] = useState(false);
   const [typingUsers, setTypingUsers] = useState([]);
   const [connectionStatus, setConnectionStatus] = useState('online');
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const messagesEndRef = useRef(null);
+
+  // Cargar perfil del usuario
+  useEffect(() => {
+    if (user) {
+      loadUserProfile();
+    }
+  }, [user]);
+
+  const loadUserProfile = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('username, avatar_url')
+        .eq('id', user.id)
+        .single();
+
+      if (error) throw error;
+      
+      setUserProfile(data);
+    } catch (error) {
+      console.error('Error loading user profile:', error);
+      // Fallback a datos del auth
+      setUserProfile({
+        username: user.email.split('@')[0],
+        avatar_url: 'avatar-01' // Avatar por defecto
+      });
+    }
+  };
+
+  const handleProfileUpdated = (updatedProfile) => {
+    setUserProfile(updatedProfile);
+    // Recargar mensajes para actualizar avatares en el chat
+    if (currentChannel?.id) {
+      loadMessages(currentChannel.id);
+    }
+  };
+
+  const renderAvatar = (avatarUrl, username, size = 'w-8 h-8') => {
+    // Si es un avatar pre-cargado
+    const preloadedAvatar = getAvatarById(avatarUrl);
+    if (preloadedAvatar) {
+      return (
+        <img 
+          src={preloadedAvatar.src} 
+          alt={preloadedAvatar.name}
+          className={`${size} rounded-full object-cover`}
+        />
+      );
+    }
+    
+    // Si es una URL personalizada
+    if (avatarUrl && !avatarUrl.startsWith('avatar-')) {
+      return (
+        <img 
+          src={avatarUrl} 
+          alt={`Avatar de ${username}`}
+          className={`${size} rounded-full object-cover`}
+          onError={(e) => {
+            e.target.style.display = 'none';
+            e.target.nextSibling.style.display = 'flex';
+          }}
+        />
+      );
+    }
+    
+    // Fallback
+    return <FiUser className={`${size.replace('w-', '').replace('h-', '')} text-gray-400`} />;
+  };
 
   // Detectar cambios de conectividad
   useEffect(() => {
@@ -36,7 +110,6 @@ export default function Chat() {
       } else if (navigator.onLine) {
         setConnectionStatus('online');
         console.log('Usuario de vuelta (pestaña activa)');
-        
       }
     };
 
@@ -267,32 +340,94 @@ export default function Chat() {
     <div className="relative min-h-screen w-full overflow-hidden bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800">
       <div className="w-full max-w-4xl h-screen p-4 flex flex-col relative mx-auto">
         
-        {/* Toggle de idioma */}
-        <div className="absolute top-4 right-4 z-10">
-          <LanguageToggle />
-        </div>
-
-        {/* Header */}
-        <header className="flex justify-between items-center mb-4 pr-20">
+        {/* Header con perfil de usuario */}
+        <header className="flex justify-between items-center mb-4">
           <div>
             <h1 className="text-2xl font-bold text-white">
               {t('chat') || 'Chat'}
             </h1>
             <p className="text-gray-400 text-sm">
-              {t('welcome')} {user?.email}
+              {currentChannel ? `#${currentChannel.name}` : 'Conectando...'}
             </p>
           </div>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200"
-          >
-            {t('logout') || 'Cerrar sesión'}
-          </button>
+          
+          {/* User Profile Section */}
+          <div className="flex items-center gap-4">
+            {/* Language Toggle */}
+            <LanguageToggle />
+            
+            {/* User Menu */}
+            <div className="relative">
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-700 transition-colors"
+              >
+                {/* Avatar */}
+                <div className="w-8 h-8 rounded-full overflow-hidden bg-teal-200 flex items-center justify-center">
+                  {renderAvatar(userProfile?.avatar_url, userProfile?.username)}
+                </div>
+                
+                {/* Username */}
+                <span className="text-white font-medium hidden sm:block">
+                  {userProfile?.username || user?.email?.split('@')[0] || 'Usuario'}
+                </span>
+                
+                <FiChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${
+                  showUserMenu ? 'rotate-180' : ''
+                }`} />
+              </button>
+
+              {/* Dropdown Menu */}
+              {showUserMenu && (
+                <div className="absolute right-0 mt-2 w-48 bg-slate-800 border border-slate-700 rounded-lg shadow-lg z-50">
+                  <div className="p-3 border-b border-slate-700">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-600 flex items-center justify-center">
+                        {renderAvatar(userProfile?.avatar_url, userProfile?.username, 'w-10 h-10')}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-medium truncate">
+                          {userProfile?.username || 'Usuario'}
+                        </p>
+                        <p className="text-gray-400 text-xs truncate">
+                          {user?.email}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <button
+                    onClick={() => {
+                      setShowProfileModal(true);
+                      setShowUserMenu(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2 text-left text-gray-300 hover:bg-slate-700 transition-colors"
+                  >
+                    <FiSettings className="w-4 h-4" />
+                    Editar Perfil
+                  </button>
+                  
+                  <hr className="border-slate-700" />
+                  
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setShowUserMenu(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2 text-left text-red-400 hover:bg-slate-700 transition-colors"
+                  >
+                    <FiLogOut className="w-4 h-4" />
+                    {t('logout') || 'Cerrar sesión'}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </header>
 
         <div className="mb-2 flex items-center justify-between">
           <p className="text-gray-400 text-sm">
-            {currentChannel ? `#${currentChannel.name}` : 'Conectando...'}
+            {t('welcome')} {userProfile?.username || user?.email?.split('@')[0]}
           </p>
           
           {/* Estado dinámico de conexión */}
@@ -316,33 +451,48 @@ export default function Chat() {
             <div className="space-y-3">
               {messages.map((message) => {
                 const isOwnMessage = message.user_id === user?.id;
-                const messageUser = message.users || { email: 'Usuario desconocido' };
+                const messageUser = message.users || { 
+                  email: 'Usuario desconocido',
+                  username: 'Usuario desconocido',
+                  avatar_url: 'avatar-01'
+                };
                 
                 return (
                   <div
                     key={message.id}
                     className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
                   >
-                    <div
-                      className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                        isOwnMessage
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-700 text-gray-100'
-                      }`}
-                    >
+                    <div className={`flex gap-3 max-w-xs lg:max-w-md ${
+                      isOwnMessage ? 'flex-row-reverse' : 'flex-row'
+                    }`}>
+                      {/* Avatar del usuario */}
                       {!isOwnMessage && (
-                        <p className="text-xs text-gray-400 mb-1">
-                          {messageUser.email}
-                        </p>
+                        <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-600 flex items-center justify-center flex-shrink-0">
+                          {renderAvatar(messageUser.avatar_url, messageUser.username)}
+                        </div>
                       )}
-                      <p className="text-sm">{message.content}</p>
-                      <p
-                        className={`text-xs mt-1 ${
-                          isOwnMessage ? 'text-blue-200' : 'text-gray-400'
+                      
+                      <div
+                        className={`px-4 py-2 rounded-lg ${
+                          isOwnMessage
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-700 text-gray-100'
                         }`}
                       >
-                        {new Date(message.created_at).toLocaleTimeString()}
-                      </p>
+                        {!isOwnMessage && (
+                          <p className="text-xs text-gray-400 mb-1">
+                            {messageUser.username || messageUser.email}
+                          </p>
+                        )}
+                        <p className="text-sm">{message.content}</p>
+                        <p
+                          className={`text-xs mt-1 ${
+                            isOwnMessage ? 'text-blue-200' : 'text-gray-400'
+                          }`}
+                        >
+                          {new Date(message.created_at).toLocaleTimeString()}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 );
@@ -377,6 +527,22 @@ export default function Chat() {
           </div>
         )}
       </div>
+
+      {/* Modal de perfil */}
+      <UserProfileModal
+        isOpen={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+        user={user}
+        onProfileUpdated={handleProfileUpdated}
+      />
+
+      {/* Cerrar dropdown si se hace clic fuera */}
+      {showUserMenu && (
+        <div 
+          className="fixed inset-0 z-10" 
+          onClick={() => setShowUserMenu(false)}
+        />
+      )}
     </div>
   );
 }
