@@ -21,38 +21,37 @@ Crear una aplicación de chat en tiempo real para developers con característica
 ### Fase 3: Chat básico
 - [✅] Crear sala #general
 - [✅] Enviar y recibir mensajes en tiempo real
-- [ ] Mostrar avatar y nombre del usuario
-- [ ] Scroll automático al último mensaje
+- [✅] Mostrar avatar y nombre del usuario
+- [✅] Scroll automático al último mensaje
 
-### Fase 4: Canales y organización
-- [ ] Crear múltiples canales (#random, #tech, etc.)
-- [ ] Unirse/salir de canales
-- [ ] Mostrar lista de canales activos
-- [ ] Chats 1 a 1 (privados)
-
-### Fase 5: Experiencia visual y UX
-- [ ] Selector de idioma (ES/EN) 
-- [ ] Dark/light mode toggle
+### Fase 4: Experiencia visual y UX
+- [✅] Selector de idioma (ES/EN)
 - [ ] Animaciones de entrada con Framer Motion
 - [ ] Modo retro terminal
 - [ ] Avatares generados automáticamente
 
-### Fase 6: Funcionalidades extra
+### Fase 5: Funcionalidades extra
 - [ ] Mensajes con Markdown y highlight de código
 - [ ] Reacciones rápidas con emojis
 - [ ] Mensajes fijados
 - [ ] Estado de conexión (online / escribiendo…)
 
-### Fase 7: Integraciones
+### Fase 6: Integraciones
 - [ ] Giphy API → GIFs en mensajes
 - [ ] Unsplash API → imágenes
 - [ ] Quotes API → frase motivadora al entrar
 - [ ] Traducción automática de mensajes
 
-### Fase 8: Testing y despliegue
+### Fase 7: Testing y despliegue
 - [ ] Test funcional de chat y auth
 - [ ] Responsiveness en móvil y desktop
 - [ ] Deploy gratuito en Vercel o Netlify
+
+### Fase 8: Canales y organización
+- [ ] Crear múltiples canales (#random, #tech, etc.)
+- [ ] Unirse/salir de canales
+- [ ] Mostrar lista de canales activos
+- [ ] Chats 1 a 1 (privados)
 
 ## Notas
 - Todas las funciones deben ser gratuitas.
