@@ -173,7 +173,7 @@ body[data-theme="coolRetro"]::before {
       rgba(255, 176, 0, 0.03) 301px
     );
   pointer-events: none;
-  z-index: 9999;
+  z-index: 1000;
   opacity: 0.5;
 }
 
@@ -203,7 +203,7 @@ body[data-theme="coolRetro"]::after {
       rgba(255, 255, 255, 0.01) 75%, 
       transparent 100%);
   pointer-events: none;
-  z-index: 9998;
+  z-index: 999;
 }
 
 body[data-theme="coolRetro"] h1 {
@@ -214,7 +214,7 @@ body[data-theme="coolRetro"] h1 {
   letter-spacing: 1px !important;
   color: #ffcc00 !important;
   position: relative;
-  z-index: 10000;
+  z-index: 2000;
 }
 
 body[data-theme="coolRetro"] .font-mono,
@@ -241,13 +241,43 @@ body[data-theme="coolRetro"] .absolute.bg-gray-700 {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8) !important;
   backdrop-filter: blur(10px);
   position: absolute !important;
-  z-index: 10000 !important;
+  z-index: 50000 !important;
   transform: none !important;
+  pointer-events: auto !important;
+}
+
+body[data-theme="coolRetro"] .absolute.bg-gray-800 button,
+body[data-theme="coolRetro"] .absolute.bg-gray-700 button,
+body[data-theme="coolRetro"] .absolute.bg-gray-800 a,
+body[data-theme="coolRetro"] .absolute.bg-gray-700 a,
+body[data-theme="coolRetro"] .absolute.bg-gray-800 div[role="button"],
+body[data-theme="coolRetro"] .absolute.bg-gray-700 div[role="button"] {
+  color: #ffcc00 !important;
+  text-shadow: 0 0 3px #ffb000 !important;
+  font-weight: 500 !important;
+  position: relative !important;
+  z-index: 50001 !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  display: block !important;
+  width: 100% !important;
+}
+
+body[data-theme="coolRetro"] .absolute.bg-gray-800 button:hover,
+body[data-theme="coolRetro"] .absolute.bg-gray-700 button:hover,
+body[data-theme="coolRetro"] .absolute.bg-gray-800 a:hover,
+body[data-theme="coolRetro"] .absolute.bg-gray-700 a:hover,
+body[data-theme="coolRetro"] .absolute.bg-gray-800 div[role="button"]:hover,
+body[data-theme="coolRetro"] .absolute.bg-gray-700 div[role="button"]:hover {
+  color: #ffffff !important;
+  text-shadow: 0 0 6px #ffb000, 0 0 10px #ffb000 !important;
+  background: rgba(255, 176, 0, 0.2) !important;
+  border-radius: 4px !important;
 }
 
 body[data-theme="coolRetro"] header {
   position: relative !important;
-  z-index: 10000 !important;
+  z-index: 5000 !important;
   background: rgba(0, 0, 0, 0.9) !important;
   margin: 0 0 16px 0 !important;
   padding: 15px !important;
@@ -265,7 +295,7 @@ body[data-theme="coolRetro"] header p {
   text-shadow: 0 0 5px #ffb000 !important;
   font-weight: 600 !important;
   position: relative;
-  z-index: 10001;
+  z-index: 5001;
 }
 
 body[data-theme="coolRetro"] header button:hover,

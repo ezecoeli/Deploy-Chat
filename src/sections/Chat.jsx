@@ -25,6 +25,43 @@ export default function Chat() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [memberCount, setMemberCount] = useState(0); 
   const messagesEndRef = useRef(null);
+  const userMenuRef = useRef(null);
+
+  // Cerrar dropdown del usuario al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    if (showUserMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [showUserMenu]);
+
+  // Cerrar dropdowns con la tecla Escape
+  useEffect(() => {
+    const handleEscapeKey = (event) => {
+      if (event.key === 'Escape') {
+        setShowUserMenu(false);
+      }
+    };
+
+    if (showUserMenu) {
+      document.addEventListener('keydown', handleEscapeKey);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [showUserMenu]);
 
   // Cargar perfil del usuario
   useEffect(() => {
@@ -432,7 +469,7 @@ export default function Chat() {
             <ThemeSelector />
             
             {/* User Menu */}
-            <div className="relative">
+            <div className="relative" ref={userMenuRef}>
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${theme.colors.input} hover:opacity-80`}
@@ -456,58 +493,112 @@ export default function Chat() {
               </button>
 
               {showUserMenu && (
-                <>
-                  <div className="absolute right-0 mt-1 w-56 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50">
-                    <div className="p-3">
-                      {/* Header del dropdown */}
-                      <div className="flex items-center gap-3 mb-3 pb-2 border-b border-gray-600">
-                        <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-600 flex items-center justify-center">
-                          {renderAvatar(userProfile?.avatar_url || 'avatar-01', userProfile?.username || user?.email)}
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-white">
-                            {userProfile?.username || user?.email?.split('@')[0]}
-                          </p>
-                          <p className="text-xs text-gray-400">
-                            {user?.email}
-                          </p>
-                        </div>
+                <div 
+                  className="absolute right-0 mt-1 w-56 bg-gray-800 border border-gray-700 rounded-lg shadow-lg"
+                  style={{ 
+                    zIndex: currentTheme === 'coolRetro' ? 51000 : 50,
+                    backgroundColor: currentTheme === 'coolRetro' ? 'rgba(0, 0, 0, 0.95)' : undefined,
+                    border: currentTheme === 'coolRetro' ? '1px solid #ffb000' : undefined
+                  }}
+                >
+                  <div className="p-3">
+                    {/* Header del dropdown */}
+                    <div className="flex items-center gap-3 mb-3 pb-2 border-b border-gray-600">
+                      <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-600 flex items-center justify-center">
+                        {renderAvatar(userProfile?.avatar_url || 'avatar-01', userProfile?.username || user?.email)}
                       </div>
-
-                      {/* Opciones del menú */}
-                      <div className="space-y-1">
-                        <button
-                          onClick={() => {
-                            setShowProfileModal(true);
-                            setShowUserMenu(false);
+                      <div>
+                        <p 
+                          className="text-sm font-medium"
+                          style={{ 
+                            color: currentTheme === 'coolRetro' ? '#ffcc00' : '#ffffff',
+                            textShadow: currentTheme === 'coolRetro' ? '0 0 3px #ffb000' : 'none'
                           }}
-                          className="w-full text-left px-3 py-2 rounded text-sm transition-colors text-gray-300 hover:bg-gray-700 flex items-center gap-2"
                         >
-                          <FiUser className="w-4 h-4" />
-                          <span>{t('editProfile') || 'Editar perfil'}</span>
-                        </button>
-                        
-                        <hr className="border-gray-600 my-2" />
-                        
-                        <button
-                          onClick={() => {
-                            logout();
-                            setShowUserMenu(false);
+                          {userProfile?.username || user?.email?.split('@')[0]}
+                        </p>
+                        <p 
+                          className="text-xs"
+                          style={{ 
+                            color: currentTheme === 'coolRetro' ? '#cc8800' : '#9ca3af',
+                            textShadow: currentTheme === 'coolRetro' ? '0 0 2px #ffb000' : 'none'
                           }}
-                          className="w-full text-left px-3 py-2 rounded text-sm transition-colors text-red-400 hover:bg-red-900/20 flex items-center gap-2"
                         >
-                          <FiLogOut className="w-4 h-4" />
-                          <span>{t('logout') || 'Cerrar sesión'}</span>
-                        </button>
+                          {user?.email}
+                        </p>
                       </div>
                     </div>
+
+                    {/* Opciones del menú */}
+                    <div className="space-y-1">
+                      <button
+                        onClick={() => {
+                          setShowProfileModal(true);
+                          setShowUserMenu(false);
+                        }}
+                        className="w-full text-left px-3 py-2 rounded text-sm transition-colors hover:bg-gray-700 flex items-center gap-2"
+                        style={{ 
+                          color: currentTheme === 'coolRetro' ? '#ffcc00' : '#d1d5db',
+                          textShadow: currentTheme === 'coolRetro' ? '0 0 3px #ffb000' : 'none',
+                          backgroundColor: currentTheme === 'coolRetro' ? 'transparent' : undefined
+                        }}
+                        onMouseEnter={(e) => {
+                          if (currentTheme === 'coolRetro') {
+                            e.target.style.backgroundColor = 'rgba(255, 176, 0, 0.2)';
+                            e.target.style.color = '#ffffff';
+                            e.target.style.textShadow = '0 0 6px #ffb000';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (currentTheme === 'coolRetro') {
+                            e.target.style.backgroundColor = 'transparent';
+                            e.target.style.color = '#ffcc00';
+                            e.target.style.textShadow = '0 0 3px #ffb000';
+                          }
+                        }}
+                      >
+                        <FiUser className="w-4 h-4" />
+                        <span>{t('editProfile') || 'Editar perfil'}</span>
+                      </button>
+                      
+                      <hr 
+                        className="my-2"
+                        style={{ 
+                          borderColor: currentTheme === 'coolRetro' ? '#664400' : '#4b5563'
+                        }}
+                      />
+                      
+                      <button
+                        onClick={() => {
+                          logout();
+                          setShowUserMenu(false);
+                        }}
+                        className="w-full text-left px-3 py-2 rounded text-sm transition-colors hover:bg-red-900/20 flex items-center gap-2"
+                        style={{ 
+                          color: currentTheme === 'coolRetro' ? '#ff9999' : '#ef4444',
+                          textShadow: currentTheme === 'coolRetro' ? '0 0 3px #ff6666' : 'none'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (currentTheme === 'coolRetro') {
+                            e.target.style.backgroundColor = 'rgba(255, 99, 99, 0.2)';
+                            e.target.style.color = '#ffffff';
+                            e.target.style.textShadow = '0 0 6px #ff6666';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (currentTheme === 'coolRetro') {
+                            e.target.style.backgroundColor = 'transparent';
+                            e.target.style.color = '#ff9999';
+                            e.target.style.textShadow = '0 0 3px #ff6666';
+                          }
+                        }}
+                      >
+                        <FiLogOut className="w-4 h-4" />
+                        <span>{t('logout') || 'Cerrar sesión'}</span>
+                      </button>
+                    </div>
                   </div>
-                  
-                  <div 
-                    className="fixed inset-0 z-40" 
-                    onClick={() => setShowUserMenu(false)}
-                  />
-                </>
+                </div>
               )}
             </div>
           </div>
@@ -678,14 +769,6 @@ export default function Chat() {
         user={user}
         onProfileUpdated={handleProfileUpdated}
       />
-
-      {/* Cerrar dropdown si se hace clic fuera */}
-      {showUserMenu && (
-        <div 
-          className="fixed inset-0 z-10" 
-          onClick={() => setShowUserMenu(false)}
-        />
-      )}
     </div>
   );
 }
