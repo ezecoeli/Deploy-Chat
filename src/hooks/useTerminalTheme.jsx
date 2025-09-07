@@ -148,11 +148,11 @@ const themeChangeEvent = new EventTarget();
 export const useTerminalTheme = () => {
     const [currentTheme, setCurrentTheme] = useState(() => {
         const saved = localStorage.getItem('terminal-theme');
-        //  Por defecto 'default'
+        //  'default'
         return saved && terminalThemes[saved] ? saved : 'default';
     });
 
-    // Escuchar cambios de tema desde otras instancias
+    // Listen for theme changes from other instances
     useEffect(() => {
         const handleThemeChange = (event) => {
             const newTheme = event.detail.theme;
@@ -176,7 +176,7 @@ export const useTerminalTheme = () => {
         if (terminalThemes[themeName]) {
             setCurrentTheme(themeName);
 
-            // Emitir evento para notificar a otras instancias
+            // Emit event to notify other instances
             themeChangeEvent.dispatchEvent(
                 new CustomEvent('themeChanged', {
                     detail: { theme: themeName }
@@ -196,10 +196,10 @@ export const useTerminalTheme = () => {
     };
 
     useEffect(() => {
-        // Aplicar tema al body automáticamente
+        // Apply theme to body automatically
         document.body.setAttribute('data-theme', currentTheme);
 
-        // Aplicar efectos especiales para coolRetro
+        // Apply special effects for coolRetro
         if (currentTheme === 'coolRetro') {
             document.body.classList.add('cool-retro-active');
         } else {

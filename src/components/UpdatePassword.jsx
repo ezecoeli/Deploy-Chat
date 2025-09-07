@@ -8,87 +8,54 @@ export default function UpdatePassword({ resetData, onPasswordUpdated }) {
   const [isLoading, setIsLoading] = useState(false);
   const [sessionSet, setSessionSet] = useState(false);
 
-  // Debug logging
-  useEffect(() => {
-    console.log('UpdatePassword montado con resetData:', resetData);
-    console.log('UpdatePassword sessionStorage completo:', {
-      auth_recovery_access_token: sessionStorage.getItem('auth_recovery_access_token'),
-      auth_recovery_refresh_token: sessionStorage.getItem('auth_recovery_refresh_token'),
-      auth_recovery_code: sessionStorage.getItem('auth_recovery_code'),
-      auth_recovery_type: sessionStorage.getItem('auth_recovery_type'),
-      auth_flow_active: sessionStorage.getItem('auth_flow_active')
-    });
-  }, [resetData]);
-
   useEffect(() => {
     if (!resetData) {
-      console.log('UpdatePassword: No resetData provided');
       setSessionSet(true);
       return;
     }
 
     const setRecoverySession = async () => {
       if (sessionSet) return;
-
-      console.log('UpdatePassword: Procesando resetData:', {
-        hasAccessToken: !!resetData.accessToken,
-        hasCode: !!resetData.code,
-        type: resetData.type
-      });
       
       setIsLoading(true);
 
       try {
-        // Para código PKCE, verificar si ya hay sesión o intentar múltiples estrategias
+        // For PKCE code, check if there is already a session or try multiple strategies
         if (resetData.code && resetData.type === 'pkce') {
-          console.log('UpdatePassword: Manejando código PKCE...');
-          
-          // Verificar si ya hay sesión activa
+          // Check if there is already an active session
           const { data: currentSession, error: sessionError } = await supabase.auth.getSession();
           
           if (currentSession.session?.user && !sessionError) {
-            console.log('UpdatePassword: Sesión ya establecida automáticamente:', currentSession.session.user.email);
             setSessionSet(true);
             setIsLoading(false);
             return;
           }
           
-          // Intentar intercambio manual
+          // try to exchange code for session
           const currentUrl = new URL(window.location.href);
           const urlCode = currentUrl.searchParams.get('code');
           
           if (urlCode) {
-            console.log('UpdatePassword: Intentando intercambio manual...');
-            
             try {
               const { data, error } = await supabase.auth.exchangeCodeForSession(urlCode);
               
               if (!error && data.user) {
-                console.log('UpdatePassword: Intercambio manual exitoso:', data.user.email);
                 setSessionSet(true);
                 window.history.replaceState({}, '', '/reset-password');
-              } else {
-                console.log('UpdatePassword: Intercambio manual falló, pero continuando...');
-                
               }
             } catch (exchangeError) {
-              console.log('UpdatePassword: Error en intercambio manual:', exchangeError.message);
-              
+              // error during exchange, will try next method
             }
           }
           
-          // Esperar  y verificar sesión de nuevo
+          // wait a moment and re-check session
           if (!sessionSet) {
-            console.log('UpdatePassword: Esperando establecimiento automático de sesión...');
-            
             setTimeout(async () => {
               const { data: delayedSession } = await supabase.auth.getSession();
               
               if (delayedSession.session?.user) {
-                console.log('UpdatePassword: Sesión establecida después de delay:', delayedSession.session.user.email);
                 setSessionSet(true);
               } else {
-                console.log('UpdatePassword: No se pudo establecer sesión PKCE');
                 setMessage('Error: No se pudo establecer la sesión de recuperación');
               }
               setIsLoading(false);
@@ -97,27 +64,22 @@ export default function UpdatePassword({ resetData, onPasswordUpdated }) {
             return;
           }
         }
-        // Si tenemos tokens directos, usarlos
+        // if access token is provided, set session directly
         else if (resetData.accessToken) {
-          console.log('UpdatePassword: Estableciendo sesión con tokens directos...');
-          
           const { data, error } = await supabase.auth.setSession({
             access_token: resetData.accessToken,
             refresh_token: resetData.refreshToken || ''
           });
 
           if (error) {
-            console.error('UpdatePassword: Error estableciendo sesión:', error);
             setMessage('Error: Enlace de recuperación inválido o expirado');
           } else {
-            console.log('UpdatePassword: Sesión establecida con tokens:', data.user?.email);
             setSessionSet(true);
           }
         } else {
           setMessage('Error: No se encontraron datos de recuperación válidos');
         }
       } catch (err) {
-        console.error('UpdatePassword: Error inesperado:', err);
         setMessage('Error inesperado al procesar el enlace de recuperación');
       } finally {
         if (resetData.type !== 'pkce' || sessionSet) {
@@ -146,9 +108,7 @@ export default function UpdatePassword({ resetData, onPasswordUpdated }) {
     setMessage('');
 
     try {
-      console.log('UpdatePassword: Actualizando contraseña...');
-      
-      // Verificar sesión antes de actualizar
+      // check current session before updating password
       const { data: sessionCheck } = await supabase.auth.getSession();
       if (!sessionCheck.session?.user) {
         setMessage('Error: Sesión expirada. Por favor, solicita un nuevo enlace.');
@@ -161,15 +121,12 @@ export default function UpdatePassword({ resetData, onPasswordUpdated }) {
       });
 
       if (error) {
-        console.error('UpdatePassword: Error actualizando contraseña:', error);
         setMessage('Error al actualizar la contraseña: ' + error.message);
       } else {
-        console.log('UpdatePassword: Contraseña actualizada exitosamente');
         setMessage('Contraseña actualizada exitosamente. Redirigiendo...');
         
-        // Logout para limpiar la sesión temporal
+        // clear form
         setTimeout(async () => {
-          console.log('UpdatePassword: Cerrando sesión temporal...');
           await supabase.auth.signOut();
           
           if (onPasswordUpdated) {
@@ -178,14 +135,13 @@ export default function UpdatePassword({ resetData, onPasswordUpdated }) {
         }, 2000);
       }
     } catch (err) {
-      console.error('UpdatePassword: Error inesperado:', err);
       setMessage('Error inesperado al actualizar la contraseña');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Mostrar loading mientras se establece la sesión
+  // show loading while session is being set
   if (!sessionSet && isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800">
@@ -200,7 +156,7 @@ export default function UpdatePassword({ resetData, onPasswordUpdated }) {
     );
   }
 
-  // Mostrar error si no se pudo establecer la sesión
+  // show error if session not set and not loading
   if (!sessionSet && !isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800">
@@ -220,7 +176,7 @@ export default function UpdatePassword({ resetData, onPasswordUpdated }) {
     );
   }
 
-  // Formulario de actualización de contraseña
+  // update password form
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800">
       <div className="bg-white/10 backdrop-blur-md rounded-xl p-8 w-full max-w-md mx-4 border border-white/20 shadow-2xl">

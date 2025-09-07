@@ -23,12 +23,12 @@ export const AVATAR_OPTIONS = [
   { id: 'avatar-10', src: avatar10, name: 'Avatar 10' }
 ];
 
-// Función helper para obtener avatar por ID
+// helper function to get avatar by id
 export const getAvatarById = (id) => {
   return AVATAR_OPTIONS.find(avatar => avatar.id === id);
 };
 
-// Función helper para avatar por defecto
+// helper function to get default avatar
 export const getDefaultAvatar = () => {
-  return AVATAR_OPTIONS[0]; // Primer avatar como default
+  return AVATAR_OPTIONS[0]; // First avatar as default
 };

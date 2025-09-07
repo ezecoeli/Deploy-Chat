@@ -4,35 +4,28 @@ const pendingRequests = new Map();
 
 export const handleUserSession = async (session) => {
   if (!session?.user) {
-    console.log('No hay sesión válida para procesar');
     return false;
   }
 
   const user = session.user;
   const userId = user.id;
-  
-  console.log('Guardando usuario:', { id: userId, email: user.email });
 
-  // Verificar si ya hay un request pendiente para este usuario
+  // Check if there's already a pending request for this user
   if (pendingRequests.has(userId)) {
-    console.log('Request ya en progreso para usuario:', user.email);
     try {
       return await pendingRequests.get(userId);
     } catch (error) {
-      console.error('Error en request pendiente:', error);
       pendingRequests.delete(userId);
       return false;
     }
   }
 
-  // Crear la promesa con timeout
+  // Create promise with timeout
   const userPromise = Promise.race([
-    // Request principal
+    // Main request
     (async () => {
       try {
-        console.log('Ejecutando upsert para usuario:', user.email);
-        
-        // primero verificar si el usuario ya existe
+        // First check if the user already exists
         const { data: existingUser } = await supabase
           .from('users')
           .select('id, username, avatar_url')
@@ -42,16 +35,15 @@ export const handleUserSession = async (session) => {
         let userData;
         
         if (existingUser) {
-          // Usuario existe - solo actualizar campos básicos, mantener personalizaciones
+          // User exists - only update basic fields, keep customizations
           userData = {
             id: userId,
             email: user.email,
             status: 'online'
-            // NO sobrescribir username ni avatar_url
+            // DO NOT overwrite username or avatar_url
           };
-          console.log('Usuario existente encontrado, manteniendo personalizaciones');
         } else {
-          // Usuario nuevo - usar valores por defecto
+          // New user - use default values
           userData = {
             id: userId,
             email: user.email,
@@ -59,10 +51,9 @@ export const handleUserSession = async (session) => {
                      user.user_metadata?.full_name || 
                      user.email.split('@')[0],
             avatar_url: user.user_metadata?.avatar_url || 
-                       'avatar-01', // Usar avatar por defecto en lugar de Gravatar
+                       'avatar-01', // Use default avatar instead of Gravatar
             status: 'online'
           };
-          console.log('Usuario nuevo, usando valores por defecto');
         }
         
         const { data, error } = await supabase
@@ -73,37 +64,32 @@ export const handleUserSession = async (session) => {
           });
 
         if (error) {
-          console.error('Error en upsert:', error);
           throw error;
         }
 
-        console.log('Usuario actualizado exitosamente:', data);
         return true;
 
       } catch (error) {
-        console.error('Error en handleUserSession:', error.message);
         throw error;
       }
     })(),
     
-    // Timeout 
+    // Timeout
     new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Timeout: handleUserSession tardó más de 20 segundos')), 20000)
+      setTimeout(() => reject(new Error('Timeout: handleUserSession took more than 20 seconds')), 20000)
     )
   ]);
 
-  // Guardar en cache
+  // Save to cache
   pendingRequests.set(userId, userPromise);
 
   try {
     const result = await userPromise;
-    console.log('handleUserSession completado exitosamente');
     return result;
   } catch (error) {
-    console.error('handleUserSession falló:', error.message);
     return false;
   } finally {
-    // Limpiar cache
+    // Clean cache
     pendingRequests.delete(userId);
   }
 };

@@ -11,7 +11,7 @@ export default function ThemeSelector() {
   const terminalThemes = allThemes;
   const dropdownRef = useRef(null);
 
-  // Cerrar dropdown al hacer clic fuera
+  // close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -30,7 +30,7 @@ export default function ThemeSelector() {
     };
   }, [isOpen]);
 
-  // Cerrar dropdown con la tecla Escape
+  // close dropdown with escape key
   useEffect(() => {
     const handleEscapeKey = (event) => {
       if (event.key === 'Escape') {
@@ -59,7 +59,7 @@ export default function ThemeSelector() {
 
   return (
     <div className="flex items-center gap-2">
-      {/* Selector de idioma  */}
+      {/* language selector */}
       <button
         onClick={handleLanguageChange}
         className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${theme.colors.input} hover:opacity-80`}
@@ -77,7 +77,7 @@ export default function ThemeSelector() {
         </span>
       </button>
 
-      {/* Selector de temas */}
+      {/* theme selector */}
       <div className="relative" ref={dropdownRef}>
         <button
           onClick={() => setIsOpen(!isOpen)}
@@ -97,13 +97,16 @@ export default function ThemeSelector() {
           <div 
             className="absolute top-full right-0 sm:left-0 mt-1 w-56 bg-gray-800 border border-gray-700 rounded-lg shadow-lg"
             style={{ 
-              zIndex: currentTheme === 'coolRetro' ? 51000 : 50,
+              zIndex: currentTheme === 'coolRetro' ? 52000 : 50,
               backgroundColor: currentTheme === 'coolRetro' ? 'rgba(0, 0, 0, 0.95)' : undefined,
-              border: currentTheme === 'coolRetro' ? '1px solid #ffb000' : undefined
+              border: currentTheme === 'coolRetro' ? '1px solid #ffb000' : undefined,
+              right: currentTheme === 'coolRetro' ? 0 : 'auto',
+              left: currentTheme === 'coolRetro' ? 'auto' : 0,
+              transform: currentTheme === 'coolRetro' ? 'translateX(8px)' : 'none' 
             }}
           >
             <div className="p-3">
-              {/* Header del dropdown */}
+              {/* dropdown header */}
               <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-600">
                 <FiTerminal className="w-4 h-4 text-blue-400" />
                 <span 
@@ -116,8 +119,8 @@ export default function ThemeSelector() {
                   Terminal Themes
                 </span>
               </div>
-              
-              {/* Lista de temas */}
+
+              {/* theme list */}
               <div className="space-y-1">
                 {themes.map((themeOption) => {
                   const isActive = currentTheme === themeOption.key;
@@ -163,8 +166,8 @@ export default function ThemeSelector() {
                   );
                 })}
               </div>
-              
-              {/* Footer informativo */}
+
+              {/* Footer informative */}
               <div className="mt-3 pt-2 border-t border-gray-600">
                 <p 
                   className="text-xs font-mono"

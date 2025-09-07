@@ -174,10 +174,10 @@ const translations = {
   }
 };
 
-// Contexto para el idioma
+// language context
 const LanguageContext = createContext();
 
-// Provider del idioma
+// Language provider
 export function LanguageProvider({ children }) {
   const [language, setLanguage] = useState(
     localStorage.getItem('language') || 'es'
@@ -188,7 +188,7 @@ export function LanguageProvider({ children }) {
     localStorage.setItem('language', newLang);
   };
 
-  // Función para obtener traducciones
+  // Function to get translations
   const t = (key) => translations[language][key] || key;
 
   return (
@@ -198,7 +198,7 @@ export function LanguageProvider({ children }) {
   );
 }
 
-// Hook para usar las traducciones
+// Hook to use translations
 export function useTranslation() {
   const context = useContext(LanguageContext);
   if (!context) {

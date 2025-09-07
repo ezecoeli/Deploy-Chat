@@ -26,8 +26,9 @@ export default function Chat() {
   const [memberCount, setMemberCount] = useState(0); 
   const messagesEndRef = useRef(null);
   const userMenuRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
 
-  // Cerrar dropdown del usuario al hacer clic fuera
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
@@ -46,7 +47,7 @@ export default function Chat() {
     };
   }, [showUserMenu]);
 
-  // Cerrar dropdowns con la tecla Escape
+  // Close dropdowns with the Escape key
   useEffect(() => {
     const handleEscapeKey = (event) => {
       if (event.key === 'Escape') {
@@ -63,7 +64,7 @@ export default function Chat() {
     };
   }, [showUserMenu]);
 
-  // Cargar perfil del usuario
+  // load user profile and member count on user change
   useEffect(() => {
     if (user) {
       loadUserProfile();
@@ -71,7 +72,7 @@ export default function Chat() {
     }
   }, [user]);
 
-  // Aplicar fuente del tema al body
+  // Apply theme font to body
   useEffect(() => {
     document.body.style.fontFamily = theme.font;
     return () => {
@@ -79,29 +80,24 @@ export default function Chat() {
     };
   }, [theme.font]);
 
-  // Función para cargar cantidad de miembros
+  // load member function to get total users count
   const loadMemberCount = async () => {
     try {
-      console.log('Cargando contador de miembros...');
       const { count, error } = await supabase
         .from('users')
         .select('*', { count: 'exact', head: true });
 
       if (error) throw error;
       
-      console.log('Cantidad de miembros cargada:', count);
       setMemberCount(count || 0);
     } catch (error) {
-      console.error('Error loading member count:', error);
       setMemberCount(0);
     }
   };
 
-  // Suscribirse a cambios en la tabla users para actualizar contador en tiempo real
+  // Subscribe to changes in the users table to update count in real-time
   useEffect(() => {
     if (!user) return;
-
-    console.log('Iniciando suscripción a cambios de usuarios');
     
     const userSubscription = supabase
       .channel('users_changes')
@@ -110,16 +106,12 @@ export default function Chat() {
         schema: 'public',
         table: 'users'
       }, (payload) => {
-        console.log('Cambio en tabla users detectado:', payload.eventType);
-        // Recargar contador cuando hay cambios
+        // Reload member count on any change
         loadMemberCount();
       })
-      .subscribe((status) => {
-        console.log('Estado de suscripción users:', status);
-      });
+      .subscribe();
 
     return () => {
-      console.log('Limpiando suscripción de usuarios');
       userSubscription.unsubscribe();
     };
   }, [user]);
@@ -136,25 +128,24 @@ export default function Chat() {
       
       setUserProfile(data);
     } catch (error) {
-      console.error('Error loading user profile:', error);
-      // Fallback a datos del auth
+      // Fallback to auth data
       setUserProfile({
         username: user.email.split('@')[0],
-        avatar_url: 'avatar-01' // Avatar por defecto
+        avatar_url: 'avatar-01' // Default avatar
       });
     }
   };
 
   const handleProfileUpdated = (updatedProfile) => {
     setUserProfile(updatedProfile);
-    // Recargar mensajes para actualizar avatares en el chat
+    // Reload messages to update avatars in chat
     if (currentChannel?.id) {
       loadMessages(currentChannel.id);
     }
   };
 
   const renderAvatar = (avatarUrl, username, size = 'w-8 h-8') => {
-    // Si es un avatar pre-cargado
+    // if is a preloaded avatar
     const preloadedAvatar = getAvatarById(avatarUrl);
     if (preloadedAvatar) {
       return (
@@ -165,8 +156,8 @@ export default function Chat() {
         />
       );
     }
-    
-    // Si es una URL personalizada
+
+    // If it's a custom URL
     if (avatarUrl && !avatarUrl.startsWith('avatar-')) {
       return (
         <img 
@@ -185,25 +176,21 @@ export default function Chat() {
     return <FiUser className={`${size.replace('w-', '').replace('h-', '')} text-gray-400`} />;
   };
 
-  // Detectar cambios de conectividad
+  // Detect change in connection status
   useEffect(() => {
     const handleOnline = () => {
       setConnectionStatus('online');
-      console.log('Conectado a internet');
     };
     
     const handleOffline = () => {
       setConnectionStatus('offline');
-      console.log('Sin conexión a internet');
     };
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
         setConnectionStatus('away');
-        console.log('Usuario ausente (pestaña oculta)');
       } else if (navigator.onLine) {
         setConnectionStatus('online');
-        console.log('Usuario de vuelta (pestaña activa)');
       }
     };
 
@@ -218,15 +205,13 @@ export default function Chat() {
     };
   }, []);
 
-  // Función para cargar mensajes
+  // load messages function
   const loadMessages = useCallback(async (channelId) => {
     if (!channelId) {
-      console.log('No se puede cargar mensajes: channelId no válido');
       return;
     }
 
     try {
-      console.log('Recargando mensajes para canal:', channelId);
       const { data, error } = await supabase
         .from('messages')
         .select(`*, users:user_id (*)`)
@@ -236,49 +221,40 @@ export default function Chat() {
 
       if (error) throw error;
 
-      console.log('Mensajes recargados:', data?.length || 0);
       setMessages(data || []);
     } catch (err) {
-      console.error('Error recargando mensajes:', err);
       setError('Error cargando mensajes: ' + err.message);
     }
   }, []);
 
-  // Configurar canal inicial y cargar mensajes
+  // setup initial channel and load messages
   useEffect(() => {
-    console.log('Chat useEffect - loading:', loading, 'user:', user?.email, 'currentChannel:', currentChannel?.name);
-    
     if (loading) {
-      console.log('Auth aún cargando, esperando...');
       return;
     }
 
     if (!user) {
-      console.log('No hay usuario, limpiando estado');
       setCurrentChannel(null);
       setMessages([]);
       return;
     }
 
-    // PREVENIR EJECUCIONES MÚLTIPLES
+    // Prevent multiple initializations
     if (currentChannel) {
-      console.log('Canal ya establecido, saltando inicialización');
       return;
     }
 
-    // Solo establecer canal una vez al inicializar
+    // Only set channel once on initialization
     const hardcodedChannel = {
       id: '95cd8c81-bd3f-4cf2-a9d1-ce8f0c53486c',
       name: 'general',
     };
 
-    console.log('Estableciendo canal inicial para usuario:', user.email);
     setCurrentChannel(hardcodedChannel);
-    
-    // Cargar mensajes una sola vez
+
+    // Load messages only once
     const loadInitialMessages = async () => {
       try {
-        console.log('Cargando mensajes iniciales...');
         const { data, error } = await supabase
           .from('messages')
           .select(`*, users:user_id (*)`)
@@ -288,10 +264,8 @@ export default function Chat() {
 
         if (error) throw error;
 
-        console.log('Mensajes iniciales cargados:', data?.length || 0);
         setMessages(data || []);
       } catch (err) {
-        console.error('Error cargando mensajes iniciales:', err);
         setError('Error cargando mensajes: ' + err.message);
       }
     };
@@ -299,19 +273,16 @@ export default function Chat() {
     loadInitialMessages();
   }, [user, loading, currentChannel]);
 
-  // Auto-scroll a nuevos mensajes
+  // Auto-scroll to new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Suscribirse a nuevos mensajes en tiempo real
+  // Subscribe to new messages and typing events
   useEffect(() => {
     if (!currentChannel?.id || !user) {
-      console.log('No hay canal o usuario para suscripción');
       return;
     }
-
-    console.log('Iniciando suscripción a canal:', currentChannel.id);
     
     let retryCount = 0;
     const maxRetries = 3;
@@ -325,12 +296,9 @@ export default function Chat() {
           table: 'messages',
           filter: `channel_id=eq.${currentChannel.id}`
         }, (payload) => {
-          console.log('Nuevo mensaje recibido:', payload.new);
-          
           setMessages(current => {
             const messageExists = current.some(msg => msg.id === payload.new.id);
             if (messageExists) {
-              console.log('Mensaje ya existe, ignorando');
               return current;
             }
             
@@ -340,13 +308,39 @@ export default function Chat() {
             }];
           });
         })
-        .subscribe((status) => {
-          console.log('Estado de suscripción:', status);
+        // Subscribe to typing events
+        .on('broadcast', { event: 'typing' }, (payload) => {
+          const { user_id, username, is_typing } = payload.payload;
+
+          // Don't show our own typing indicator
+          if (user_id === user.id) return;
           
-          // Reintentar en caso de error
+          setTypingUsers(current => {
+            if (is_typing) {
+              // Add user if not already present
+              if (!current.find(u => u.user_id === user_id)) {
+                return [...current, { user_id, username }];
+              }
+              return current;
+            } else {
+              // Remove user
+              return current.filter(u => u.user_id !== user_id);
+            }
+          });
+
+          // Auto-remove after 3 seconds if no more events
+          if (is_typing) {
+            setTimeout(() => {
+              setTypingUsers(current => 
+                current.filter(u => u.user_id !== user_id)
+              );
+            }, 3000);
+          }
+        })
+        .subscribe((status) => {
+          // Retry on error
           if (status === 'CHANNEL_ERROR' && retryCount < maxRetries) {
             retryCount++;
-            console.log(`Reintentando suscripción (${retryCount}/${maxRetries})...`);
             setTimeout(() => {
               subscription.unsubscribe();
               createSubscription();
@@ -358,17 +352,15 @@ export default function Chat() {
     };
 
     const subscription = createSubscription();
-    console.log('Suscrito a mensajes del canal:', currentChannel.id);
 
     return () => {
-      console.log('Limpiando suscripción del canal:', currentChannel.id);
       if (subscription) {
         subscription.unsubscribe();
       }
     };
   }, [currentChannel?.id, user?.id]);
 
-  // Función para obtener el estado visual de conexión
+  // Function to get the visual connection status
   const getStatusInfo = () => {
     switch (connectionStatus) {
       case 'online':
@@ -398,9 +390,64 @@ export default function Chat() {
     }
   };
 
+  // Function to handle typing
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setNewMessage(value);
+
+    // Detect if user is typing
+    if (value.trim() && !isTyping) {
+      setIsTyping(true);
+      
+      // Broadcast typing event
+      if (currentChannel?.id) {
+        supabase.channel(`messages:${currentChannel.id}`)
+          .send({
+            type: 'broadcast',
+            event: 'typing',
+            payload: {
+              user_id: user.id,
+              username: userProfile?.username || user?.email?.split('@')[0],
+              is_typing: true
+            }
+          });
+      }
+    }
+
+    // Clear previous timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    // Set new timeout to stop typing
+    typingTimeoutRef.current = setTimeout(() => {
+      setIsTyping(false);
+      
+      // Broadcast stop typing event
+      if (currentChannel?.id) {
+        supabase.channel(`messages:${currentChannel.id}`)
+          .send({
+            type: 'broadcast',
+            event: 'typing',
+            payload: {
+              user_id: user.id,
+              username: userProfile?.username || user?.email?.split('@')[0],
+              is_typing: false
+            }
+          });
+      }
+    }, 1000);
+  };
+
   const sendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || !currentChannel || !user) return;
+
+    // Stop typing indicator when sending message
+    setIsTyping(false);
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
 
     try {
       const { error } = await supabase
@@ -418,17 +465,22 @@ export default function Chat() {
       setNewMessage('');
       setError('');
     } catch (err) {
-      console.error('Error enviando mensaje:', err);
       setError('Error enviando mensaje: ' + err.message);
     }
   };
 
+  // logout 
   const handleLogout = async () => {
     try {
+      // clean up typing status before logout
+      setIsTyping(false);
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      
       await logout();
     } catch (err) {
-      console.error('Error en logout:', err);
-      setError('Error cerrando sesión');
+      setError(t('logoutError') || 'Error cerrando sesión');
     }
   };
 
@@ -486,7 +538,7 @@ export default function Chat() {
                     {userProfile?.username || user?.email?.split('@')[0]}
                   </p>
                   <p className="text-xs opacity-70">
-                    Online
+                    {statusInfo.text}
                   </p>
                 </div>
                 <FiChevronDown className={`w-3 h-3 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
@@ -502,63 +554,37 @@ export default function Chat() {
                   }}
                 >
                   <div className="p-3">
-                    {/* Header del dropdown */}
-                    <div className="flex items-center gap-3 mb-3 pb-2 border-b border-gray-600">
-                      <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-600 flex items-center justify-center">
-                        {renderAvatar(userProfile?.avatar_url || 'avatar-01', userProfile?.username || user?.email)}
-                      </div>
-                      <div>
-                        <p 
-                          className="text-sm font-medium"
-                          style={{ 
-                            color: currentTheme === 'coolRetro' ? '#ffcc00' : '#ffffff',
-                            textShadow: currentTheme === 'coolRetro' ? '0 0 3px #ffb000' : 'none'
-                          }}
-                        >
-                          {userProfile?.username || user?.email?.split('@')[0]}
-                        </p>
-                        <p 
-                          className="text-xs"
-                          style={{ 
-                            color: currentTheme === 'coolRetro' ? '#cc8800' : '#9ca3af',
-                            textShadow: currentTheme === 'coolRetro' ? '0 0 2px #ffb000' : 'none'
-                          }}
-                        >
-                          {user?.email}
-                        </p>
-                      </div>
+                    {/* Header */}
+                    <div className="mb-3 pb-2 border-b border-gray-600">
+                      <p 
+                        className="text-xs font-mono text-center"
+                        style={{ 
+                          color: currentTheme === 'coolRetro' ? '#cc8800' : '#9ca3af',
+                          textShadow: currentTheme === 'coolRetro' ? '0 0 2px #ffb000' : 'none'
+                        }}
+                      >
+                        // user_menu
+                      </p>
                     </div>
 
-                    {/* Opciones del menú */}
+                    {/* menu options */}
                     <div className="space-y-1">
                       <button
                         onClick={() => {
                           setShowProfileModal(true);
                           setShowUserMenu(false);
                         }}
-                        className="w-full text-left px-3 py-2 rounded text-sm transition-colors hover:bg-gray-700 flex items-center gap-2"
+                        className={`w-full text-left px-3 py-2 rounded text-sm transition-colors hover:bg-gray-700 flex items-center gap-2 ${
+                          currentTheme === 'coolRetro' ? 'crt-menu-item' : ''
+                        }`}
                         style={{ 
                           color: currentTheme === 'coolRetro' ? '#ffcc00' : '#d1d5db',
                           textShadow: currentTheme === 'coolRetro' ? '0 0 3px #ffb000' : 'none',
-                          backgroundColor: currentTheme === 'coolRetro' ? 'transparent' : undefined
-                        }}
-                        onMouseEnter={(e) => {
-                          if (currentTheme === 'coolRetro') {
-                            e.target.style.backgroundColor = 'rgba(255, 176, 0, 0.2)';
-                            e.target.style.color = '#ffffff';
-                            e.target.style.textShadow = '0 0 6px #ffb000';
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (currentTheme === 'coolRetro') {
-                            e.target.style.backgroundColor = 'transparent';
-                            e.target.style.color = '#ffcc00';
-                            e.target.style.textShadow = '0 0 3px #ffb000';
-                          }
+                          backgroundColor: 'transparent'
                         }}
                       >
-                        <FiUser className="w-4 h-4" />
-                        <span>{t('editProfile') || 'Editar perfil'}</span>
+                        <FiUser className="w-4 h-4 flex-shrink-0" />
+                        <span className="flex-1">{t('editProfile') || 'Editar perfil'}</span>
                       </button>
                       
                       <hr 
@@ -570,31 +596,20 @@ export default function Chat() {
                       
                       <button
                         onClick={() => {
-                          logout();
+                          handleLogout();
                           setShowUserMenu(false);
                         }}
-                        className="w-full text-left px-3 py-2 rounded text-sm transition-colors hover:bg-red-900/20 flex items-center gap-2"
+                        className={`w-full text-left px-3 py-2 rounded text-sm transition-colors hover:bg-red-900/20 flex items-center gap-2 ${
+                          currentTheme === 'coolRetro' ? 'crt-menu-item-danger' : ''
+                        }`}
                         style={{ 
                           color: currentTheme === 'coolRetro' ? '#ff9999' : '#ef4444',
-                          textShadow: currentTheme === 'coolRetro' ? '0 0 3px #ff6666' : 'none'
-                        }}
-                        onMouseEnter={(e) => {
-                          if (currentTheme === 'coolRetro') {
-                            e.target.style.backgroundColor = 'rgba(255, 99, 99, 0.2)';
-                            e.target.style.color = '#ffffff';
-                            e.target.style.textShadow = '0 0 6px #ff6666';
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (currentTheme === 'coolRetro') {
-                            e.target.style.backgroundColor = 'transparent';
-                            e.target.style.color = '#ff9999';
-                            e.target.style.textShadow = '0 0 3px #ff6666';
-                          }
+                          textShadow: currentTheme === 'coolRetro' ? '0 0 3px #ff6666' : 'none',
+                          backgroundColor: 'transparent'
                         }}
                       >
-                        <FiLogOut className="w-4 h-4" />
-                        <span>{t('logout') || 'Cerrar sesión'}</span>
+                        <FiLogOut className="w-4 h-4 flex-shrink-0" />
+                        <span className="flex-1">{t('logout') || 'Cerrar sesión'}</span>
                       </button>
                     </div>
                   </div>
@@ -604,7 +619,7 @@ export default function Chat() {
           </div>
         </header>
 
-        {/* contador de miembros con tema */}
+        {/* member count */}
         <div className="mb-2 flex items-center justify-between font-mono">
           <div className="flex items-center gap-2">
             <FiUsers className="w-4 h-4" style={{ color: theme.colors.accent }} />
@@ -615,18 +630,20 @@ export default function Chat() {
               }
             </p>
           </div>
-          {/* Estado de conexión  */}
+          {/* statusInfo */}
           <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${
-              connectionStatus === 'online' ? 'animate-pulse' : ''
-            }`} style={{ backgroundColor: theme.colors.statusOnline }}></div>
-            <span className="text-sm" style={{ color: theme.colors.textSecondary }}>
-              {connectionStatus}
+            <div 
+              className={`w-2 h-2 rounded-full ${statusInfo.color} ${
+                connectionStatus === 'online' ? 'animate-pulse' : ''
+              }`}
+            />
+            <span className={`text-sm ${statusInfo.textColor}`}>
+              {statusInfo.text}
             </span>
           </div>
         </div>
 
-        {/* Área de mensajes */}
+        {/* message area */}
         <div 
           className={`flex-1 rounded-lg p-4 mb-4 overflow-y-auto ${theme.colors.message}`}
           style={{
@@ -704,12 +721,33 @@ export default function Chat() {
                   </div>
                 );
               })}
+
+              {/* users typing indicator */}
+              {typingUsers.length > 0 && (
+                <div className="flex items-center gap-2 px-3 py-2 opacity-70">
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" />
+                    <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0.1s' }} />
+                    <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0.2s' }} />
+                  </div>
+                  <span 
+                    className="text-xs font-mono"
+                    style={{ color: theme.colors.textSecondary }}
+                  >
+                    {typingUsers.length === 1 
+                      ? `${typingUsers[0].username} está escribiendo...`
+                      : `${typingUsers.length} usuarios están escribiendo...`
+                    }
+                  </span>
+                </div>
+              )}
+              
               <div ref={messagesEndRef} />
             </div>
           )}
         </div>
 
-        {/* Área de envío de mensajes */}
+        {/* send message form */}
         <form onSubmit={sendMessage} className="flex gap-2 font-mono">
           <div 
             className="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg" 
@@ -731,7 +769,7 @@ export default function Chat() {
             <input
               type="text"
               value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
+              onChange={handleInputChange}
               placeholder={currentTheme === 'default' ? t('typeMessage') || "Escribe un mensaje..." : "echo 'Hello World!'"}
               className="flex-1 rounded-md p-1 outline-none"
               style={{ 
@@ -762,7 +800,7 @@ export default function Chat() {
         )}
       </div>
 
-      {/* Modal de perfil */}
+      {/* user profile modal */}
       <UserProfileModal
         isOpen={showProfileModal}
         onClose={() => setShowProfileModal(false)}

@@ -11,17 +11,13 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     let mounted = true;
-    console.log('useAuth: useEffect iniciado');
 
     const initializeAuth = async () => {
       try {
         const authFlow = sessionStorage.getItem('auth_flow_active');
         
-        console.log('useAuth: Verificando flujo de auth:', authFlow);
-        
-        // Si es recovery, NO inicializar sesión automática
+        // if it's recovery flow, clear user and loading
         if (authFlow === 'recovery') {
-          console.log('useAuth: Recovery flow activo, manteniendo user = null');
           setUser(null);
           if (mounted) {
             setLoading(false);
@@ -29,101 +25,84 @@ export const AuthProvider = ({ children }) => {
           return;
         }
         
-        // Si hay tokens de login pendientes, establecer sesión
+        // if it's login flow, set session from stored tokens
         if (authFlow === 'login') {
           const accessToken = sessionStorage.getItem('auth_login_access_token');
           const refreshToken = sessionStorage.getItem('auth_login_refresh_token');
           
           if (accessToken) {
-            console.log('useAuth: Estableciendo sesión con tokens de login');
-            
             const { data, error } = await supabase.auth.setSession({
               access_token: accessToken,
               refresh_token: refreshToken || ''
             });
             
-            if (error) {
-              console.error('useAuth: Error estableciendo sesión de login:', error);
-            } else if (data.user && mounted) {
-              console.log('useAuth: Sesión de login establecida:', data.user.email);
+            if (!error && data.user && mounted) {
               setUser(data.user);
               
               try {
                 await handleUserSession(data);
               } catch (handleSessionError) {
-                console.error('useAuth: Error en handleUserSession:', handleSessionError);
+                // Error in handleUserSession, but continue
               }
             }
-            
-            // Limpiar tokens de login
+
+            // Clear login tokens
             sessionStorage.removeItem('auth_login_access_token');
             sessionStorage.removeItem('auth_login_refresh_token');
             sessionStorage.removeItem('auth_flow_active');
           }
         } else {
-          // Flujo normal: verificar sesión existente
-          console.log('useAuth: Verificando sesión existente...');
-          
+          // Normal flow: check existing session
           const { data: { session }, error } = await supabase.auth.getSession();
           
-          if (error) {
-            console.error('useAuth: Error getting session:', error);
-          } else if (session?.user && mounted) {
-            console.log('useAuth: Sesión existente encontrada:', session.user.email);
+          if (!error && session?.user && mounted) {
             setUser(session.user);
             
             try {
               await handleUserSession(session);
             } catch (handleSessionError) {
-              console.error('useAuth: Error en handleUserSession:', handleSessionError);
+              // Error in handleUserSession, but continue
             }
           } else {
-            console.log('useAuth: No hay sesión existente');
             setUser(null);
           }
         }
       } catch (error) {
-        console.error('useAuth: Error in initializeAuth:', error);
+        // inicialization failed, but continue
       } finally {
         if (mounted) {
-          console.log('useAuth: Inicialización completa, loading = false');
           setLoading(false);
         }
       }
     };
 
-    // Listener de cambios de auth (solo para eventos manuales)
+    // changes auth listener (eg. sign in, sign out, token refresh)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         const now = Date.now();
-        
-        // Debounce: ignorar eventos muy frecuentes (menos de 1 segundo)
+
+        // Debounce: ignore very frequent events (less than 1 second)
         if (now - lastAuthEventTime < 1000 && event === 'SIGNED_IN') {
-          console.log('useAuth: Evento SIGNED_IN ignorado por debounce');
           return;
         }
         
         setLastAuthEventTime(now);
-        console.log('useAuth: onAuthStateChange:', event);
 
         if (event === 'SIGNED_IN' && session?.user) {
-          console.log('useAuth: Usuario autenticado via onChange:', session.user.email);
           setUser(session.user);
           setLoading(false);
           
-          console.log('useAuth: Ejecutando handleUserSession...');
           handleUserSession(session).catch(error => {
-            console.error('useAuth: Error en handleUserSession:', error);
+            // Error in handleUserSession, but continue
           });
         } else if (event === 'SIGNED_OUT') {
-          console.log('useAuth: Usuario desautenticado');
           setUser(null);
           setLoading(false);
         }
       }
     );
 
-    // Delay para asegurar que main.jsx terminó de procesar
+    // Delay to ensure main.jsx has finished processing
     const timer = setTimeout(initializeAuth, 100);
 
     return () => {
@@ -135,8 +114,6 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      console.log('useAuth: Iniciando logout...');
-      
       if (user) {
         await supabase
           .from('users')
@@ -144,7 +121,7 @@ export const AuthProvider = ({ children }) => {
           .eq('id', user.id);
       }
 
-      // Limpiar los tokens de auth
+      // Clear auth tokens
       sessionStorage.removeItem('auth_flow_active');
       sessionStorage.removeItem('auth_recovery_access_token');
       sessionStorage.removeItem('auth_recovery_refresh_token');
@@ -154,18 +131,14 @@ export const AuthProvider = ({ children }) => {
       sessionStorage.removeItem('auth_login_refresh_token');
 
       const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('useAuth: Error during logout:', error);
-      } else {
+      if (!error) {
         setUser(null);
-        console.log('useAuth: Logout exitoso');
       }
     } catch (error) {
-      console.error('useAuth: Error in logout:', error);
+      // logout failed, but clear user anyway
+      setUser(null);
     }
   };
-
-  console.log('useAuth: render - user:', user?.email || 'null', 'loading:', loading);
 
   const value = { user, loading, logout };
 

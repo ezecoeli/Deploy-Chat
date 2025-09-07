@@ -15,7 +15,7 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
   const [message, setMessage] = useState('');
   const [errors, setErrors] = useState({});
 
-  // Cargar datos del usuario cuando se abre el modal
+  // Load user data when modal opens
   useEffect(() => {
     if (isOpen && user) {
       loadUserProfile();
@@ -32,7 +32,7 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
 
       if (error) throw error;
 
-      // Detectar si es un avatar pre-cargado
+      // Detect if it's a preloaded avatar
       const preloadedAvatar = AVATAR_OPTIONS.find(av => 
         data.avatar_url === av.id
       );
@@ -43,10 +43,10 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
         customAvatarUrl: !preloadedAvatar ? (data.avatar_url || '') : ''
       });
     } catch (error) {
-      console.error('Error loading profile:', error);
+      // Fallback to default values
       setFormData({
         username: user.email.split('@')[0],
-        selectedAvatar: 'avatar-01', // Avatar por defecto
+        selectedAvatar: 'avatar-01', // Default avatar
         customAvatarUrl: ''
       });
     }
@@ -55,7 +55,7 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
   const validateForm = () => {
     const newErrors = {};
 
-    // Validar username
+    // Validate username
     if (!formData.username.trim()) {
       newErrors.username = 'El nombre de usuario es requerido';
     } else if (formData.username.trim().length < 2) {
@@ -66,7 +66,7 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
       newErrors.username = 'Solo se permiten letras, números, espacios y guiones bajos';
     }
 
-    // Validar avatar
+    // Validate avatar
     if (!formData.selectedAvatar && !formData.customAvatarUrl.trim()) {
       newErrors.avatar = 'Selecciona un avatar';
     }
@@ -84,27 +84,26 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
     setMessage('');
 
     try {
-      // Verificar si el username ya existe (diferente al usuario actual)
+      // Check if username already exists (different from current user)
       const { data: existingUsers, error: checkError } = await supabase
         .from('users')
         .select('id, username')
         .eq('username', formData.username.trim())
         .neq('id', user.id);
 
-      // Manejar el error 406 específicamente
-      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows found (está bien)
-        console.error('Error verificando username:', checkError);
-        // Continuar sin verificación si hay error de permisos
+      // Handle error 406 specifically
+      if (checkError && checkError.code !== 'PGRST116') { 
+        // Continue without verification if there's permission error
       } else if (existingUsers && existingUsers.length > 0) {
         setErrors({ username: 'Este nombre de usuario ya está en uso' });
         setIsLoading(false);
         return;
       }
 
-      // Determinar avatar URL final
+      // Determine final avatar URL
       const finalAvatarUrl = formData.selectedAvatar || formData.customAvatarUrl.trim();
 
-      // Actualizar perfil
+      // Update profile
       const { data, error } = await supabase
         .from('users')
         .update({
@@ -118,19 +117,18 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
 
       setMessage('Perfil actualizado exitosamente');
       
-      // Callback para actualizar la UI
+      // Callback to update UI
       if (onProfileUpdated) {
         onProfileUpdated(data[0]);
       }
 
-      // Cerrar modal después de un delay
+      // Close modal after delay
       setTimeout(() => {
         onClose();
         setMessage('');
       }, 1500);
 
     } catch (error) {
-      console.error('Error updating profile:', error);
       setMessage('Error al actualizar el perfil');
     } finally {
       setIsLoading(false);
@@ -141,7 +139,7 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
     setFormData(prev => ({
       ...prev,
       selectedAvatar: avatarId,
-      customAvatarUrl: '' // Limpiar URL personalizada
+      customAvatarUrl: '' // Clear custom URL
     }));
     setErrors(prev => ({ ...prev, avatar: '' }));
   };
@@ -150,7 +148,7 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
     setFormData(prev => ({
       ...prev,
       customAvatarUrl: url,
-      selectedAvatar: '' // Limpiar selección de avatar pre-cargado
+      selectedAvatar: '' // Clear preloaded avatar selection
     }));
     setErrors(prev => ({ ...prev, avatar: '' }));
   };
