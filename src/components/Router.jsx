@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import Login from './Login';
-import Chat from './Chat';
+import Login from '../sections/Login';
+import Chat from '../sections/Chat';
 import UpdatePassword from './UpdatePassword';
 
 export default function Router() {

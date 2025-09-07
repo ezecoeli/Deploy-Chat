@@ -2,14 +2,17 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from '../hooks/useTranslation';
+import { useTerminalTheme } from '../hooks/useTerminalTheme';
 import { getAvatarById } from '../config/avatars';
-import LanguageToggle from './LanguageToggle';
-import UserProfileModal from './UserProfileModal';
+import LanguageToggle from '../components/LanguageToggle';
+import ThemeSelector from '../components/ThemeSelector';
+import UserProfileModal from '../components/UserProfileModal';
 import { FiSettings, FiUser, FiLogOut, FiChevronDown, FiUsers } from 'react-icons/fi';
 
 export default function Chat() {
   const { user, logout, loading } = useAuth();
   const { t } = useTranslation();
+  const { theme, currentTheme } = useTerminalTheme();
   
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
@@ -31,6 +34,14 @@ export default function Chat() {
       loadMemberCount(); 
     }
   }, [user]);
+
+  // Aplicar fuente del tema al body
+  useEffect(() => {
+    document.body.style.fontFamily = theme.font;
+    return () => {
+      document.body.style.fontFamily = '';
+    };
+  }, [theme.font]);
 
   // Función para cargar cantidad de miembros
   const loadMemberCount = async () => {
@@ -388,17 +399,28 @@ export default function Chat() {
   const statusInfo = getStatusInfo();
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800">
+    <div 
+    className={`relative min-h-screen w-full overflow-hidden bg-gradient-to-br ${theme.colors.bg}`}
+  >
       <div className="w-full max-w-4xl h-screen p-4 flex flex-col relative mx-auto">
         
-        {/* Header con perfil de usuario */}
+        {/* Header */}
         <header className="flex justify-between items-center mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-white">
+            <h1 
+              className="text-2xl font-bold font-mono"
+              style={{ 
+                color: theme.colors.primary,
+                textShadow: theme.effects.textShadow 
+              }}
+            >
               Deploy Chat
             </h1>
-            <p className="text-gray-400 text-sm">
-              {currentChannel ? `#${currentChannel.name}` : 'Conectando...'}
+            <p 
+              className="text-sm font-mono"
+              style={{ color: theme.colors.textSecondary }}
+            >
+              {currentChannel ? `${theme.prompt} cd #${currentChannel.name}` : 'Connecting...'}
             </p>
           </div>
           
@@ -406,12 +428,14 @@ export default function Chat() {
           <div className="flex items-center gap-4">
             {/* Language Toggle */}
             <LanguageToggle />
+            <ThemeSelector />
             
             {/* User Menu */}
             <div className="relative">
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-700 transition-colors"
+                className={`flex items-center gap-3 p-2 rounded-lg hover:bg-gray-700 transition-colors font-mono`}
+                style={{ color: theme.colors.text }}
               >
                 {/* Avatar */}
                 <div className="w-8 h-8 rounded-full overflow-hidden bg-teal-200 flex items-center justify-center">
@@ -476,42 +500,49 @@ export default function Chat() {
           </div>
         </header>
 
-        {/* MODIFICADO: Cambiar bienvenida por contador de miembros */}
-        <div className="mb-2 flex items-center justify-between">
+        {/* contador de miembros con tema */}
+        <div className="mb-2 flex items-center justify-between font-mono">
           <div className="flex items-center gap-2">
-            <FiUsers className="w-4 h-4 text-blue-400" />
-            <p className="text-gray-400 text-sm">
+            <FiUsers className="w-4 h-4" style={{ color: theme.colors.accent }} />
+            <p className="text-sm" style={{ color: theme.colors.textSecondary }}>
               {memberCount === 1 
-                ? (t('oneMember') || '1 miembro')
-                : (t('membersCount')?.replace('{count}', memberCount) || `${memberCount} miembros`)
+                ? (t('oneMember') || '1 user online')
+                : (t('membersCount')?.replace('{count}', memberCount) || `${memberCount} users online`)
               }
             </p>
           </div>
-          
-          {/* Estado dinámico de conexión */}
+          {/* Estado de conexión  */}
           <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 ${statusInfo.color} rounded-full ${
+            <div className={`w-2 h-2 rounded-full ${
               connectionStatus === 'online' ? 'animate-pulse' : ''
-            }`}></div>
-            <span className={`text-sm ${statusInfo.textColor}`}>
-              {statusInfo.text}
+            }`} style={{ backgroundColor: theme.colors.statusOnline }}></div>
+            <span className="text-sm" style={{ color: theme.colors.textSecondary }}>
+              {connectionStatus}
             </span>
           </div>
         </div>
 
         {/* Área de mensajes */}
-        <div className="flex-1 bg-gray-800 rounded-lg p-4 mb-4 overflow-y-auto">
+        <div className={`flex-1 rounded-lg p-4 mb-4 overflow-y-auto ${theme.colors.message}`}>
           {messages.length === 0 ? (
-            <div className="text-center text-gray-500 mt-8">
-              <p>{t('noMessages') || 'No hay mensajes aún. ¡Sé el primero en escribir!'}</p>
+            <div className="text-center mt-8">
+              <p 
+                className={currentTheme === 'default' ? 'text-gray-500' : 'font-mono'}
+                style={{ color: theme.colors.textSecondary }}
+              >
+                {currentTheme === 'default' 
+                  ? "No hay mensajes aún. ¡Sé el primero en escribir!"
+                  : `${theme.prompt} echo "No messages yet. Start the conversation!"`
+                }
+              </p>
             </div>
           ) : (
             <div className="space-y-3">
               {messages.map((message) => {
                 const isOwnMessage = message.user_id === user?.id;
                 const messageUser = message.users || { 
-                  email: 'Usuario desconocido',
-                  username: 'Usuario desconocido',
+                  email: 'unknown_user',
+                  username: 'unknown_user',
                   avatar_url: 'avatar-01'
                 };
                 
@@ -523,33 +554,36 @@ export default function Chat() {
                     <div className={`flex gap-3 max-w-xs lg:max-w-md ${
                       isOwnMessage ? 'flex-row-reverse' : 'flex-row'
                     }`}>
-                      {/* Avatar del usuario */}
                       {!isOwnMessage && (
-                        <div className="w-8 h-8 rounded-full overflow-hidden bg-cyan-300 flex items-center justify-center flex-shrink-0">
+                        <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-600 flex items-center justify-center flex-shrink-0">
                           {renderAvatar(messageUser.avatar_url, messageUser.username)}
                         </div>
                       )}
                       
-                      <div
-                        className={`px-4 py-2 rounded-lg ${
-                          isOwnMessage
-                            ? 'bg-teal-900 text-white'
-                            : 'bg-blue-900 text-white'
-                        }`}
-                      >
+                      <div className="font-mono">
                         {!isOwnMessage && (
-                          <p className="text-xs text-green-300 mb-1">
-                            {messageUser.username || messageUser.email}
-                          </p>
+                          <div className="flex items-center gap-1 mb-1">
+                            <span style={{ color: theme.colors.accent }}>
+                              {messageUser.username || messageUser.email}@deploy-chat
+                            </span>
+                            <span style={{ color: theme.colors.textSecondary }}>
+                              :{theme.prompt}
+                            </span>
+                          </div>
                         )}
-                        <p className="text-base">{message.content}</p>
-                        <p
-                          className={`text-xs mt-1 ${
-                            isOwnMessage ? 'text-blue-200' : 'text-gray-400'
-                          }`}
+                        <div 
+                          className="px-3 py-2 rounded"
+                          style={{ 
+                            backgroundColor: isOwnMessage ? theme.colors.accent + '20' : 'rgba(0,0,0,0.3)',
+                            border: `1px solid ${theme.colors.border}`,
+                            color: theme.colors.text
+                          }}
                         >
-                          {new Date(message.created_at).toLocaleTimeString()}
-                        </p>
+                          <p className="text-sm">{message.content}</p>
+                          <p className="text-xs mt-1 opacity-70">
+                            // {new Date(message.created_at).toLocaleTimeString()}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -561,27 +595,43 @@ export default function Chat() {
         </div>
 
         {/* Área de envío de mensajes */}
-        <form onSubmit={sendMessage} className="flex gap-2">
-          <input
-            type="text"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            placeholder={t('messageInput') || 'Escribe un mensaje...'}
-            className="flex-1 px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600"
-            disabled={!currentChannel}
-          />
+        <form onSubmit={sendMessage} className="flex gap-2 font-mono">
+          <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg" 
+               style={{ backgroundColor: 'rgba(0,0,0,0.5)', border: `1px solid ${theme.colors.border}` }}>
+            <span 
+              className="px-2 py-1 rounded-md font-medium"
+              style={{ 
+                color: theme.colors.accent,
+                backgroundColor: `${theme.colors.accent}15`,
+                border: `1px solid ${theme.colors.accent}30`
+              }}
+            >
+              {userProfile?.username || user?.email?.split('@')[0]}@deploy-chat:{theme.prompt}
+            </span>
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder={currentTheme === 'default' ? t('typeMessage') || "Escribe un mensaje..." : "echo 'Hello World!'"}
+              className="flex-1 bg-gray-800 rounded-md p-1 outline-none placeholder-gray-500"
+              style={{ color: theme.colors.text }}
+              disabled={!currentChannel}
+            />
+          </div>
           <button
             type="submit"
             disabled={!newMessage.trim() || !currentChannel}
-            className="px-6 py-2 bg-violet-600 hover:bg-violet-800 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors duration-200"
+            className={`px-6 py-2 rounded-lg transition-colors duration-200 ${
+              currentTheme === 'default' ? 'font-medium' : 'font-mono'
+            } ${theme.colors.button}`}
           >
-            {t('sendMessage') || 'Enviar'}
+            {currentTheme === 'default' ? t('send') : t('execute')}
           </button>
         </form>
 
         {error && (
-          <div className="mt-2 p-3 bg-red-600 text-white rounded-lg text-sm">
-            {error}
+          <div className="mt-2 p-3 bg-red-900 border border-red-600 text-red-100 rounded-lg text-sm font-mono">
+            Error: {error}
           </div>
         )}
       </div>

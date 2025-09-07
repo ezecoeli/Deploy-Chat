@@ -22,6 +22,9 @@ const translations = {
     offline: "desconectado",
     messageInput: "Mensaje",
     noMessages: "No hay mensajes aún",
+    send: "Enviar",
+    execute: "Ejecutar",
+    typeMessage: "mensaje...",
 
     // Members count
     oneMember: "1 miembro",
@@ -103,6 +106,9 @@ const translations = {
     offline: "offline",
     messageInput: "Message",
     noMessages: "No messages yet",
+    send: "Send", 
+    execute: "Execute",
+    typeMessage: "message...",
 
     // Members count  
     oneMember: "1 member",

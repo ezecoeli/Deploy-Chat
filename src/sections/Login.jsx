@@ -3,8 +3,8 @@ import { FaGoogle, FaGithub } from 'react-icons/fa';
 import { PiWarningCircleFill } from "react-icons/pi";
 import { supabase } from '../utils/supabaseClient';
 import { useTranslation } from '../hooks/useTranslation';
-import LanguageToggle from './LanguageToggle';
-import PasswordReset from './PasswordReset';
+import LanguageToggle from '../components/LanguageToggle';
+import PasswordReset from '../components/PasswordReset';
 import banner from '../assets/banner-transp.png';
 import loginBackground from '../assets/login-bg.png';
 

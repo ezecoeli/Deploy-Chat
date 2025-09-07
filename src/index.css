@@ -12,7 +12,7 @@
   }
 }
 
-/* EFECTO DE BORDE BRILLANTE PARA FORM */
+/**** EFECTO DE BORDE BRILLANTE PARA FORM ****/
 .login-border {
   position: relative;
   overflow: hidden; 
@@ -32,7 +32,7 @@
   opacity: 0.5;
 }
 
-/* FLOATING LABELS - RESPONSIVE */
+/**** FLOATING LABELS ****/
 .input-group {
   position: relative;
 }
