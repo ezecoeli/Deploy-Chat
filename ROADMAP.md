@@ -26,7 +26,7 @@ Crear una aplicación de chat en tiempo real para developers con característica
 
 ### Fase 4: Experiencia visual y UX
 - [✅] Selector de idioma (ES/EN)
-- [ ] **Terminal Themes** (Matrix, Ubuntu, Mac, Retro) - 4 temas distintivos
+- [✅] **Terminal Themes** (Matrix, Ubuntu, Mac, Retro)
 - [ ] **Mensajes estilo comandos de terminal** con prompts personalizados
 - [ ] **Syntax highlighting** para bloques de código
 - [ ] **Avatares generados automáticamente** estilo developer

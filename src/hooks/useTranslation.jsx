@@ -44,6 +44,7 @@ const translations = {
     language: "Idioma",
     settings: "Configuración",
     profile: "Perfil",
+    editProfile: "Editar perfil",
     
     // Navigation
     home: "Inicio",
@@ -128,7 +129,8 @@ const translations = {
     language: "Language",
     settings: "Settings",
     profile: "Profile",
-    
+    editProfile: "Edit Profile",
+
     // Navigation
     home: "Home",
     channels: "Channels",

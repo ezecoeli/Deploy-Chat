@@ -399,8 +399,11 @@ export default function Chat() {
 
   return (
     <div 
-    className={`relative min-h-screen w-full overflow-hidden bg-gradient-to-br ${theme.colors.bg}`}
-  >
+      className={`relative min-h-screen w-full overflow-hidden bg-gradient-to-br ${theme.colors.bg}`}
+      style={{
+        background: currentTheme === 'coolRetro' ? '#000000' : undefined
+      }}
+    >
       <div className="w-full max-w-4xl h-screen p-4 flex flex-col relative mx-auto">
         
         {/* Header */}
@@ -533,7 +536,13 @@ export default function Chat() {
         </div>
 
         {/* Área de mensajes */}
-        <div className={`flex-1 rounded-lg p-4 mb-4 overflow-y-auto ${theme.colors.message}`}>
+        <div 
+          className={`flex-1 rounded-lg p-4 mb-4 overflow-y-auto ${theme.colors.message}`}
+          style={{
+            background: currentTheme === 'coolRetro' ? '#000000' : undefined,
+            border: currentTheme === 'coolRetro' ? '1px solid #ffb000' : undefined
+          }}
+        >
           {messages.length === 0 ? (
             <div className="text-center mt-8">
               <p 
@@ -584,9 +593,14 @@ export default function Chat() {
                         <div 
                           className="px-3 py-2 rounded"
                           style={{ 
-                            backgroundColor: isOwnMessage ? theme.colors.accent + '20' : 'rgba(0,0,0,0.3)',
-                            border: `1px solid ${theme.colors.border}`,
-                            color: theme.colors.text
+                            backgroundColor: isOwnMessage 
+                              ? 'rgba(230, 160, 0, 0.1)' 
+                              : 'rgba(0,0,0,0.4)', 
+                            border: `1px solid ${currentTheme === 'coolRetro' ? '#664400' : theme.colors.border}`,
+                            color: theme.colors.text,
+                            textShadow: currentTheme === 'coolRetro' 
+                              ? '0 0 3px #e6a000'
+                              : 'none'
                           }}
                         >
                           <p className="text-sm">{message.content}</p>
@@ -606,8 +620,13 @@ export default function Chat() {
 
         {/* Área de envío de mensajes */}
         <form onSubmit={sendMessage} className="flex gap-2 font-mono">
-          <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg" 
-               style={{ backgroundColor: 'rgba(0,0,0,0.5)', border: `1px solid ${theme.colors.border}` }}>
+          <div 
+            className="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg" 
+            style={{ 
+              backgroundColor: currentTheme === 'coolRetro' ? '#000000' : 'rgba(0,0,0,0.5)', 
+              border: `1px solid ${theme.colors.border}` 
+            }}
+          >
             <span 
               className="px-2 py-1 rounded-md font-medium"
               style={{ 
@@ -623,8 +642,14 @@ export default function Chat() {
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               placeholder={currentTheme === 'default' ? t('typeMessage') || "Escribe un mensaje..." : "echo 'Hello World!'"}
-              className="flex-1 bg-gray-800 rounded-md p-1 outline-none placeholder-gray-500"
-              style={{ color: theme.colors.text }}
+              className="flex-1 rounded-md p-1 outline-none"
+              style={{ 
+                color: theme.colors.text,
+                background: currentTheme === 'coolRetro' ? '#000000' : '#374151',
+                border: currentTheme === 'coolRetro' ? '1px solid #664400' : 'none',
+                textShadow: currentTheme === 'coolRetro' ? '0 0 2px #e6a000' : 'none',
+                fontFamily: currentTheme === 'coolRetro' ? '"Courier New", monospace' : 'inherit'
+              }}
               disabled={!currentChannel}
             />
           </div>
