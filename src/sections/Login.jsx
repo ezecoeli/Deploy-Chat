@@ -7,6 +7,7 @@ import LanguageToggle from '../components/LanguageToggle';
 import PasswordReset from '../components/PasswordReset';
 import banner from '../assets/banner-transp.png';
 import loginBackground from '../assets/login-bg.png';
+import { motion } from 'framer-motion';
 
 export default function Login() {
   const { t } = useTranslation();
@@ -21,13 +22,13 @@ export default function Login() {
     password: false
   });
 
-  // Estados para controlar floating labels
+  // floating label states
   const [inputStates, setInputStates] = useState({
     email: { focused: false, hasValue: false },
     password: { focused: false, hasValue: false }
   });
 
-  // Actualizar estado de inputs
+  // Update input state
   const updateInputState = (fieldName, updates) => {
     setInputStates(prev => ({
       ...prev,
@@ -35,7 +36,7 @@ export default function Login() {
     }));
   };
 
-  // Detectar autocompletado
+  // Detect autofill
   useEffect(() => {
     const checkAutofill = () => {
       const emailInput = document.getElementById('email');
@@ -64,7 +65,7 @@ export default function Login() {
     };
   }, [inputStates.email.hasValue, inputStates.password.hasValue]);
 
-  // funciones
+  // functions
   const clearFieldError = (fieldName) => {
     setFieldErrors(prev => ({
       ...prev,
@@ -191,11 +192,11 @@ export default function Login() {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
-      {/* Fondo base oscuro */}
+      {/* dark background */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800" />
-      
-      {/* Imagen de fondo  */}
-      <div 
+
+      {/* Background image */}
+      <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ 
           backgroundImage: `url(${loginBackground})`,
@@ -203,29 +204,37 @@ export default function Login() {
           filter: 'brightness(0.4) contrast(1.2) hue-rotate(200deg)'
         }}
       />
-      
-      {/* Overlay con gradiente */}
-      <div 
+
+      {/* gradient overlay */}
+      <div
         className="absolute inset-0"
         style={{
           background: 'radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 70%)'
         }}
       />
       
-      {/* Contenido principal */}
+      {/* main content */}
       <div className="relative z-10 min-h-screen pb-16 flex flex-col lg:flex-row items-center justify-center gap-4 lg:gap-8 px-2 sm:px-4 py-4">
         
         {/* Banner Image */}
         <div className="w-full lg:w-auto p-2 sm:p-4">
-          <img
+          <motion.img
             src={banner}
             alt="Login Banner"
             className="max-h-[200px] sm:max-h-[300px] lg:max-h-[600px] object-contain mx-auto"
+            initial={{ opacity: 0, scale: 0.8, y: -30 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
           />
         </div>
 
         {/* Login Form Container */}
-        <div className="w-[280px] sm:w-[320px] md:w-96 p-2 sm:p-4 relative overflow-hidden z-0 login-border rounded-lg">
+        <motion.div
+          className="w-[280px] sm:w-[320px] md:w-96 p-2 sm:p-4 relative overflow-hidden z-0 login-border rounded-lg"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
           <div className="relative z-10 bg-black/90 backdrop-blur-sm p-3 sm:p-4 md:p-6 rounded-lg">
             {/* language toggle */}
             <div className="flex justify-end mb-2 sm:mb-4">
@@ -361,7 +370,7 @@ export default function Login() {
               </div>
             )}
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Footer */}

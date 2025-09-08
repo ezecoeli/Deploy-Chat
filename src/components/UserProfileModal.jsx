@@ -3,6 +3,7 @@ import { supabase } from '../utils/supabaseClient';
 import { useTranslation } from '../hooks/useTranslation';
 import { AVATAR_OPTIONS, getAvatarById } from '../config/avatars';
 import { FiUser, FiX, FiCheck, FiLoader } from 'react-icons/fi';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdated }) {
   const { t } = useTranslation();
@@ -190,166 +191,180 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
     return null;
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-800 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-700">
-          <div className="flex items-center gap-3">
-            <FiUser className="w-6 h-6 text-blue-400" />
-            <h2 className="text-xl font-bold text-white">
-              Editar Perfil
-            </h2>
-          </div>
-          <button
-            onClick={handleClose}
-            disabled={isLoading}
-            className="text-gray-400 hover:text-white transition-colors disabled:opacity-50"
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <motion.div
+            className="bg-slate-800 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto"
+            initial={{ scale: 0.95, opacity: 0, y: 40 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.95, opacity: 0, y: 40 }}
+            transition={{ duration: 0.3 }}
           >
-            <FiX className="w-6 h-6" />
-          </button>
-        </div>
-
-        {/* Content */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          
-          {/* Username Field */}
-          <div>
-            <label className="block text-sm font-medium text-gray-200 mb-2">
-              Nombre de usuario
-            </label>
-            <input
-              type="text"
-              value={formData.username}
-              onChange={(e) => {
-                setFormData(prev => ({ ...prev, username: e.target.value }));
-                setErrors(prev => ({ ...prev, username: '' }));
-              }}
-              disabled={isLoading}
-              className={`w-full px-3 py-2 bg-slate-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-colors ${
-                errors.username 
-                  ? 'border-red-500 focus:ring-red-500' 
-                  : 'border-slate-600 focus:ring-blue-500'
-              }`}
-              placeholder="Ingresa tu nombre de usuario"
-            />
-            {errors.username && (
-              <p className="mt-1 text-sm text-red-400">{errors.username}</p>
-            )}
-          </div>
-
-          {/* Avatar Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-200 mb-3">
-              Elige tu avatar
-            </label>
-            
-            {/* Avatar Grid */}
-            <div className="grid grid-cols-5 gap-2 mb-4">
-              {AVATAR_OPTIONS.map((avatar) => (
-                <button
-                  key={avatar.id}
-                  type="button"
-                  onClick={() => handleAvatarSelect(avatar.id)}
-                  disabled={isLoading}
-                  className={`aspect-square rounded-lg border-2 transition-all p-1 hover:scale-105 disabled:opacity-50 ${
-                    formData.selectedAvatar === avatar.id
-                      ? 'border-blue-500 bg-blue-500/20 scale-105'
-                      : 'border-slate-600 hover:border-slate-500'
-                  }`}
-                  title={avatar.name}
-                >
-                  <img 
-                    src={avatar.src} 
-                    alt={avatar.name}
-                    className="w-full h-full object-cover rounded-md"
-                  />
-                </button>
-              ))}
-            </div>
-
-            {/* Custom Avatar URL */}
-            <div className="mt-4">
-              <label className="block text-sm text-gray-300 mb-2">
-                O ingresa una URL personalizada
-              </label>
-              <input
-                type="url"
-                value={formData.customAvatarUrl}
-                onChange={(e) => handleCustomUrlChange(e.target.value)}
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-slate-700">
+              <div className="flex items-center gap-3">
+                <FiUser className="w-6 h-6 text-blue-400" />
+                <h2 className="text-xl font-bold text-white">
+                  Editar Perfil
+                </h2>
+              </div>
+              <button
+                onClick={handleClose}
                 disabled={isLoading}
-                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors text-sm"
-                placeholder="https://ejemplo.com/mi-avatar.jpg"
-              />
+                className="text-gray-400 hover:text-white transition-colors disabled:opacity-50"
+              >
+                <FiX className="w-6 h-6" />
+              </button>
             </div>
 
-            {errors.avatar && (
-              <p className="mt-1 text-sm text-red-400">{errors.avatar}</p>
-            )}
-          </div>
-
-          {/* Preview */}
-          <div className="bg-slate-700/50 rounded-lg p-4">
-            <p className="text-sm text-gray-300 mb-3">
-              Vista previa
-            </p>
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-600 flex items-center justify-center">
-                {getPreviewAvatar()}
-                <FiUser className="w-6 h-6 text-gray-400" />
-              </div>
+            {/* Content */}
+            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              
+              {/* Username Field */}
               <div>
-                <p className="font-medium text-white">
-                  {formData.username || 'Nombre de usuario'}
-                </p>
-                <p className="text-sm text-gray-400">{user?.email}</p>
+                <label className="block text-sm font-medium text-gray-200 mb-2">
+                  Nombre de usuario
+                </label>
+                <input
+                  type="text"
+                  value={formData.username}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, username: e.target.value }));
+                    setErrors(prev => ({ ...prev, username: '' }));
+                  }}
+                  disabled={isLoading}
+                  className={`w-full px-3 py-2 bg-slate-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-colors ${
+                    errors.username 
+                      ? 'border-red-500 focus:ring-red-500' 
+                      : 'border-slate-600 focus:ring-blue-500'
+                  }`}
+                  placeholder="Ingresa tu nombre de usuario"
+                />
+                {errors.username && (
+                  <p className="mt-1 text-sm text-red-400">{errors.username}</p>
+                )}
               </div>
-            </div>
-          </div>
 
-          {/* Message */}
-          {message && (
-            <div className={`p-3 rounded-lg text-center text-sm ${
-              message.includes('Error') || message.includes('error')
-                ? 'bg-red-500/20 text-red-400 border border-red-500/30'
-                : 'bg-green-500/20 text-green-400 border border-green-500/30'
-            }`}>
-              {message}
-            </div>
-          )}
+              {/* Avatar Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-200 mb-3">
+                  Elige tu avatar
+                </label>
+                
+                {/* Avatar Grid */}
+                <div className="grid grid-cols-5 gap-2 mb-4">
+                  {AVATAR_OPTIONS.map((avatar) => (
+                    <button
+                      key={avatar.id}
+                      type="button"
+                      onClick={() => handleAvatarSelect(avatar.id)}
+                      disabled={isLoading}
+                      className={`aspect-square rounded-lg border-2 transition-all p-1 hover:scale-105 disabled:opacity-50 ${
+                        formData.selectedAvatar === avatar.id
+                          ? 'border-blue-500 bg-blue-500/20 scale-105'
+                          : 'border-slate-600 hover:border-slate-500'
+                      }`}
+                      title={avatar.name}
+                    >
+                      <img 
+                        src={avatar.src} 
+                        alt={avatar.name}
+                        className="w-full h-full object-cover rounded-md"
+                      />
+                    </button>
+                  ))}
+                </div>
 
-          {/* Actions */}
-          <div className="flex gap-3 pt-4">
-            <button
-              type="button"
-              onClick={handleClose}
-              disabled={isLoading}
-              className="flex-1 px-4 py-2 bg-slate-600 hover:bg-slate-500 text-white rounded-lg transition-colors disabled:opacity-50"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {isLoading ? (
-                <>
-                  <FiLoader className="w-4 h-4 animate-spin" />
-                  Guardando...
-                </>
-              ) : (
-                <>
-                  <FiCheck className="w-4 h-4" />
-                  Guardar Cambios
-                </>
+                {/* Custom Avatar URL */}
+                <div className="mt-4">
+                  <label className="block text-sm text-gray-300 mb-2">
+                    O ingresa una URL personalizada
+                  </label>
+                  <input
+                    type="url"
+                    value={formData.customAvatarUrl}
+                    onChange={(e) => handleCustomUrlChange(e.target.value)}
+                    disabled={isLoading}
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors text-sm"
+                    placeholder="https://ejemplo.com/mi-avatar.jpg"
+                  />
+                </div>
+
+                {errors.avatar && (
+                  <p className="mt-1 text-sm text-red-400">{errors.avatar}</p>
+                )}
+              </div>
+
+              {/* Preview */}
+              <div className="bg-slate-700/50 rounded-lg p-4">
+                <p className="text-sm text-gray-300 mb-3">
+                  Vista previa
+                </p>
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-600 flex items-center justify-center">
+                    {getPreviewAvatar()}
+                    <FiUser className="w-6 h-6 text-gray-400" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-white">
+                      {formData.username || 'Nombre de usuario'}
+                    </p>
+                    <p className="text-sm text-gray-400">{user?.email}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Message */}
+              {message && (
+                <div className={`p-3 rounded-lg text-center text-sm ${
+                  message.includes('Error') || message.includes('error')
+                    ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                    : 'bg-green-500/20 text-green-400 border border-green-500/30'
+                }`}>
+                  {message}
+                </div>
               )}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  disabled={isLoading}
+                  className="flex-1 px-4 py-2 bg-slate-600 hover:bg-slate-500 text-white rounded-lg transition-colors disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isLoading ? (
+                    <>
+                      <FiLoader className="w-4 h-4 animate-spin" />
+                      Guardando...
+                    </>
+                  ) : (
+                    <>
+                      <FiCheck className="w-4 h-4" />
+                      Guardar Cambios
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

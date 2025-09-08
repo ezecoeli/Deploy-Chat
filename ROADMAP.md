@@ -29,8 +29,7 @@ Crear una aplicación de chat en tiempo real para developers con característica
 - [✅] **Terminal Themes** (Matrix, Ubuntu, Mac, Retro)
 - [✅] **Mensajes estilo comandos de terminal** con prompts personalizados
 - [✅] **Syntax highlighting** para bloques de código
-- [ ] **Avatares generados automáticamente** estilo developer
-- [ ] **Animaciones de entrada** con Framer Motion
+- [✅] **Animaciones de entrada** con Framer Motion
 
 ### Fase 5: Funcionalidades Developer-Focused
 - [ ] **Chat Commands System**:

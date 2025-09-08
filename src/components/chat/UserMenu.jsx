@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { getAvatarById } from '../../config/avatars';
 import { FiUser, FiLogOut, FiChevronDown } from 'react-icons/fi';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function UserMenu({ 
   user, 
@@ -128,69 +129,71 @@ export default function UserMenu({
       </button>
 
       {showUserMenu && (
-        <div 
-          className="absolute right-0 mt-1 w-56 bg-gray-800 border border-gray-700 rounded-lg shadow-lg"
-          style={{ 
-            zIndex: currentTheme === 'coolRetro' ? 51000 : 50,
-            backgroundColor: currentTheme === 'coolRetro' ? 'rgba(0, 0, 0, 0.95)' : undefined,
-            border: currentTheme === 'coolRetro' ? '1px solid #ffb000' : undefined
-          }}
-        >
-          <div className="p-3">
-            {/* Header */}
-            <div className="mb-3 pb-2 border-b border-gray-600">
-              <p 
-                className="text-xs font-mono text-center"
-                style={{ 
-                  color: currentTheme === 'coolRetro' ? '#cc8800' : '#9ca3af',
-                  textShadow: currentTheme === 'coolRetro' ? '0 0 2px #ffb000' : 'none'
-                }}
-              >
-                // user_menu
-              </p>
-            </div>
+        <AnimatePresence>
+          <motion.div
+            className="absolute right-0 mt-1 w-56 bg-gray-800 border border-gray-700 rounded-lg shadow-lg"
+            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+            transition={{ duration: 0.25 }}
+            style={{ zIndex: 50 }}
+          >
+            <div className="p-3">
+              {/* Header */}
+              <div className="mb-3 pb-2 border-b border-gray-600">
+                <p 
+                  className="text-xs font-mono text-center"
+                  style={{ 
+                    color: currentTheme === 'coolRetro' ? '#cc8800' : '#9ca3af',
+                    textShadow: currentTheme === 'coolRetro' ? '0 0 2px #ffb000' : 'none'
+                  }}
+                >
+                  // user_menu
+                </p>
+              </div>
 
-            {/* Menu options */}
-            <div className="space-y-1">
-              <button
-                onClick={handleProfileClick}
-                className={`w-full text-left px-3 py-2 rounded text-sm transition-colors hover:bg-gray-700 flex items-center gap-2 ${
-                  currentTheme === 'coolRetro' ? 'crt-menu-item' : ''
-                }`}
-                style={{ 
-                  color: currentTheme === 'coolRetro' ? '#ffcc00' : '#d1d5db',
-                  textShadow: currentTheme === 'coolRetro' ? '0 0 3px #ffb000' : 'none',
-                  backgroundColor: 'transparent'
-                }}
-              >
-                <FiUser className="w-4 h-4 flex-shrink-0" />
-                <span className="flex-1">{t('editProfile') || 'Editar perfil'}</span>
-              </button>
-              
-              <hr 
-                className="my-2"
-                style={{ 
-                  borderColor: currentTheme === 'coolRetro' ? '#664400' : '#4b5563'
-                }}
-              />
-              
-              <button
-                onClick={handleLogoutClick}
-                className={`w-full text-left px-3 py-2 rounded text-sm transition-colors hover:bg-red-900/20 flex items-center gap-2 ${
-                  currentTheme === 'coolRetro' ? 'crt-menu-item-danger' : ''
-                }`}
-                style={{ 
-                  color: currentTheme === 'coolRetro' ? '#ff9999' : '#ef4444',
-                  textShadow: currentTheme === 'coolRetro' ? '0 0 3px #ff6666' : 'none',
-                  backgroundColor: 'transparent'
-                }}
-              >
-                <FiLogOut className="w-4 h-4 flex-shrink-0" />
-                <span className="flex-1">{t('logout') || 'Cerrar sesión'}</span>
-              </button>
+              {/* Menu options */}
+              <div className="space-y-1">
+                <button
+                  onClick={handleProfileClick}
+                  className={`w-full text-left px-3 py-2 rounded text-sm transition-colors hover:bg-gray-700 flex items-center gap-2 ${
+                    currentTheme === 'coolRetro' ? 'crt-menu-item' : ''
+                  }`}
+                  style={{ 
+                    color: currentTheme === 'coolRetro' ? '#ffcc00' : '#d1d5db',
+                    textShadow: currentTheme === 'coolRetro' ? '0 0 3px #ffb000' : 'none',
+                    backgroundColor: 'transparent'
+                  }}
+                >
+                  <FiUser className="w-4 h-4 flex-shrink-0" />
+                  <span className="flex-1">{t('editProfile') || 'Editar perfil'}</span>
+                </button>
+                
+                <hr 
+                  className="my-2"
+                  style={{ 
+                    borderColor: currentTheme === 'coolRetro' ? '#664400' : '#4b5563'
+                  }}
+                />
+                
+                <button
+                  onClick={handleLogoutClick}
+                  className={`w-full text-left px-3 py-2 rounded text-sm transition-colors hover:bg-red-900/20 flex items-center gap-2 ${
+                    currentTheme === 'coolRetro' ? 'crt-menu-item-danger' : ''
+                  }`}
+                  style={{ 
+                    color: currentTheme === 'coolRetro' ? '#ff9999' : '#ef4444',
+                    textShadow: currentTheme === 'coolRetro' ? '0 0 3px #ff6666' : 'none',
+                    backgroundColor: 'transparent'
+                  }}
+                >
+                  <FiLogOut className="w-4 h-4 flex-shrink-0" />
+                  <span className="flex-1">{t('logout') || 'Cerrar sesión'}</span>
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </AnimatePresence>
       )}
     </div>
   );
