@@ -52,7 +52,7 @@ const terminalThemes = {
         prompt: '~$',
         font: '"Ubuntu Mono", "Liberation Mono", "Consolas", monospace',
         colors: {
-            bg: 'from-purple-900 via-gray-900 to-orange-900',
+            bg: 'from-gray-900 to-black',
             primary: '#ffffff',
             secondary: '#e95420',
             text: '#ffffff',
@@ -75,7 +75,7 @@ const terminalThemes = {
         prompt: '%',
         font: '"SF Mono", "Monaco", "Menlo", monospace',
         colors: {
-            bg: 'from-gray-900 via-slate-800 to-blue-900',
+            bg: 'from-gray-900 via-slate-800 to-black',
             primary: '#ffffff',
             secondary: '#007aff',
             text: '#ffffff',
@@ -93,31 +93,36 @@ const terminalThemes = {
         }
     },
 
-    retro: {
-        name: 'Retro DOS',
-        prompt: 'C:\\>',
-        font: '"Courier New", "Courier", monospace',
+    msdos: {
+        name: 'MS-DOS Prompt',
+        prompt: 'C:\\WINDOWS>',
+        font: '"Perfect DOS VGA 437", "Courier New", "Lucida Console", monospace',
         colors: {
-            bg: 'from-amber-900 via-yellow-800 to-orange-900',
-            primary: '#ffd700',
-            secondary: '#ff8c00',
-            text: '#ffd700',
-            textSecondary: '#ffaa00',
-            accent: '#ff8c00',
-            border: '#b8860b',
-            input: 'bg-black border-yellow-500',
-            button: 'bg-yellow-600 hover:bg-yellow-700 text-black',
-            message: 'bg-yellow-900 border-l-4 border-l-yellow-500',
-            statusOnline: '#22c55e'
+            bg: 'from-black to-black',
+            primary: '#ffffff',
+            secondary: '#ffffff',
+            text: '#ffffff',
+            textSecondary: '#c0c7c8',
+            accent: '#ffffff',
+            border: '#c0c7c8',
+            input: 'bg-black border-[#c0c7c8] border-1',
+            button: 'bg-[#000080] hover:bg-[#0000ff] text-white border-1 border-[#c0c7c8] font-bold',
+            message: 'bg-black border-l-2 border-l-[#c0c7c8]',
+            statusOnline: '#00ff00',
+            headerBg: '#000080',
+            headerText: '#ffffff'
         },
         effects: {
-            textShadow: '0 0 5px #ffd700',
-            glow: 'shadow-yellow-500/50'
+            textShadow: 'none',
+            glow: 'none',
+            pixelated: true,
+            dosMode: true,
+            dosHeader: true  
         }
     },
 
     coolRetro: {
-        name: 'CR Terminal',
+        name: 'Amber CRT',
         prompt: '$',
         font: '"Courier New", "Monaco", "Lucida Console", monospace',
         colors: {

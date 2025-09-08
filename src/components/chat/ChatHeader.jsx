@@ -13,20 +13,32 @@ export default function ChatHeader({
   onLogout 
 }) {
   return (
-    <header className="flex justify-between items-center mb-4">
+    <header 
+      className={`flex justify-between items-center mb-4 ${
+        currentTheme === 'msdos' ? 'p-2 border border-[c0c7c8]' : ''
+      }`}
+      style={{
+        backgroundColor: currentTheme === 'msdos' ? theme.colors.headerBg : 'transparent',
+        fontFamily: theme.font
+      }}
+    >
       <div>
         <h1 
           className="text-2xl font-bold font-mono"
           style={{ 
-            color: theme.colors.primary,
-            textShadow: theme.effects.textShadow 
+            color: currentTheme === 'msdos' ? theme.colors.headerText : theme.colors.primary,
+            textShadow: currentTheme === 'msdos' ? 'none' : theme.effects.textShadow,
+            fontFamily: theme.font
           }}
         >
           Deploy Chat
         </h1>
         <p 
           className="text-sm font-mono"
-          style={{ color: theme.colors.textSecondary }}
+          style={{ 
+            color: currentTheme === 'msdos' ? theme.colors.headerText : theme.colors.textSecondary,
+            fontFamily: theme.font
+          }}
         >
           {currentChannel ? `${theme.prompt} cd #${currentChannel.name}` : 'Connecting...'}
         </p>

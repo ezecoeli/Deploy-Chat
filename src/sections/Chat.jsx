@@ -4,7 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from '../hooks/useTranslation';
 import { useTerminalTheme } from '../hooks/useTerminalTheme';
 import UserProfileModal from '../components/UserProfileModal';
-import ChatHeader from '../components/chat/ChatHeader';      // ← NUEVO IMPORT
+import ChatHeader from '../components/chat/ChatHeader';
 import ConnectionStatus from '../components/chat/ConnectionStatus';
 import MessageArea from '../components/chat/MessageArea';
 import MessageInput from '../components/chat/MessageInput';
@@ -71,9 +71,18 @@ export default function Chat() {
     }
 
     try {
+      // MEJORADO: Consulta más específica con campos explícitos del usuario
       const { data, error } = await supabase
         .from('messages')
-        .select(`*, users:user_id (*)`)
+        .select(`
+          *,
+          users:user_id (
+            id,
+            email,
+            username,
+            avatar_url
+          )
+        `)
         .eq('channel_id', channelId)
         .order('created_at', { ascending: true })
         .limit(100);
@@ -114,9 +123,18 @@ export default function Chat() {
     // Load messages only once
     const loadInitialMessages = async () => {
       try {
+        // MEJORADO: Misma consulta específica que en loadMessages
         const { data, error } = await supabase
           .from('messages')
-          .select(`*, users:user_id (*)`)
+          .select(`
+            *,
+            users:user_id (
+              id,
+              email,
+              username,
+              avatar_url
+            )
+          `)
           .eq('channel_id', hardcodedChannel.id)
           .order('created_at', { ascending: true })
           .limit(100);
@@ -149,17 +167,57 @@ export default function Chat() {
           schema: 'public',
           table: 'messages',
           filter: `channel_id=eq.${currentChannel.id}`
-        }, (payload) => {
+        }, async (payload) => { // CAMBIADO: Función ahora es async para consultar usuario
+          // SOLUCIONADO: Obtener información completa del usuario que envió el mensaje
+          let messageWithUser = { ...payload.new };
+          
+          if (payload.new.user_id === user.id) {
+            // Si es nuestro mensaje, usar nuestra información actualizada
+            messageWithUser.users = {
+              id: user.id,
+              email: user.email,
+              username: userProfile?.username || user.email.split('@')[0],
+              avatar_url: userProfile?.avatar_url || 'avatar-01'
+            };
+          } else {
+            // NUEVO: Si es de otro usuario, consultar su información en la base de datos
+            try {
+              const { data: userData, error } = await supabase
+                .from('users')
+                .select('id, email, username, avatar_url')
+                .eq('id', payload.new.user_id)
+                .single();
+              
+              if (!error && userData) {
+                messageWithUser.users = userData;
+              } else {
+                // Fallback si no se encuentra el usuario
+                messageWithUser.users = {
+                  id: payload.new.user_id,
+                  email: 'unknown_user',
+                  username: 'unknown_user',
+                  avatar_url: 'avatar-01'
+                };
+              }
+            } catch (err) {
+              // Fallback en caso de error de red o consulta
+              messageWithUser.users = {
+                id: payload.new.user_id,
+                email: 'unknown_user',
+                username: 'unknown_user',
+                avatar_url: 'avatar-01'
+              };
+            }
+          }
+
           setMessages(current => {
             const messageExists = current.some(msg => msg.id === payload.new.id);
             if (messageExists) {
               return current;
             }
             
-            return [...current, {
-              ...payload.new,
-              users: payload.new.user_id === user.id ? user : null
-            }];
+            // MEJORADO: Ahora agrega el mensaje con información completa del usuario
+            return [...current, messageWithUser];
           });
         })
         // Subscribe to typing events
@@ -212,7 +270,7 @@ export default function Chat() {
         subscription.unsubscribe();
       }
     };
-  }, [currentChannel?.id, user?.id]);
+  }, [currentChannel?.id, user?.id, userProfile]); // AGREGADO: userProfile como dependencia
 
   // Callback handlers for components
   const handleOpenProfile = () => {

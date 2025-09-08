@@ -100,6 +100,20 @@ export default function MessageInput({
     }
   };
 
+  // template placeholders based on theme
+  const getThemePlaceholder = (currentTheme, t) => {
+    const placeholders = {
+      default: t('typeMessage') || "Escribe un mensaje...",
+      msdos: "echo Hello World!",   
+      matrix: "echo 'Follow the white rabbit...'", 
+      ubuntu: "echo 'Ubuntu means humanity'",        
+      macOS: "echo 'Think Different'",               
+      coolRetro: "echo 'AMBER_TERMINAL_READY'" 
+    };
+    
+    return placeholders[currentTheme] || "echo 'Hello World!'";
+  };
+
   // Clean up typing timeout on unmount
   React.useEffect(() => {
     return () => {
@@ -132,11 +146,11 @@ export default function MessageInput({
           type="text"
           value={newMessage}
           onChange={handleInputChange}
-          placeholder={currentTheme === 'default' ? t('typeMessage') || "Escribe un mensaje..." : "echo 'Hello World!'"}
-          className="flex-1 rounded-md p-1 outline-none"
+          placeholder={getThemePlaceholder(currentTheme, t)}
+          className="flex-1 rounded-lg p-1 outline-none"
           style={{ 
             color: theme.colors.text,
-            background: currentTheme === 'coolRetro' ? '#000000' : '#374151',
+            background: currentTheme === 'coolRetro' ? '#000000' : '#111111',
             border: currentTheme === 'coolRetro' ? '1px solid #664400' : 'none',
             textShadow: currentTheme === 'coolRetro' ? '0 0 2px #e6a000' : 'none',
             fontFamily: currentTheme === 'coolRetro' ? '"Courier New", monospace' : 'inherit'
