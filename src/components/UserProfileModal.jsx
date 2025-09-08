@@ -109,18 +109,18 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
 
       if (error) throw error;
 
-      setMessage('Perfil actualizado exitosamente');
-      
+      setMessage(t('profileUpdated'));
+
       // Callback to update UI
       if (onProfileUpdated) {
         onProfileUpdated(data[0]);
       }
 
-      // Close modal after delay
+      /* Close modal after delay
       setTimeout(() => {
         onClose();
         setMessage('');
-      }, 1500);
+      }, 1500);*/
 
     } catch (error) {
       setMessage('Error al actualizar el perfil');
@@ -200,7 +200,7 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
               {/* Username Field */}
               <div>
                 <label className="block text-sm font-medium text-gray-200 mb-2">
-                  {t('profile')}
+                  {t('profile')}:
                 </label>
                 <input
                   type="text"
@@ -225,7 +225,7 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
               {/* Avatar Selection */}
               <div>
                 <label className="block text-sm font-medium text-gray-200 mb-3">
-                  {t('chooseAvatar') || 'Elige tu avatar'}
+                  {t('chooseAvatar') || 'Elige tu avatar'}:
                 </label>
                 
                 {/* Avatar Grid */}
@@ -261,7 +261,7 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
               {/* Preview */}
               <div className="bg-slate-700/50 rounded-lg p-4">
                 <p className="text-sm text-gray-300 mb-3">
-                  {t('preview') || 'Vista previa'}
+                  {t('preview') || 'Vista previa'}:
                 </p>
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-600 flex items-center justify-center">
@@ -279,7 +279,7 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
 
               {/* Message */}
               {message && (
-                <div className={`p-3 rounded-lg text-center text-sm ${
+                <div className={`p-2 rounded-lg text-center text-sm ${
                   message.includes('Error') || message.includes('error')
                     ? 'bg-red-500/20 text-red-400 border border-red-500/30'
                     : 'bg-green-500/20 text-green-400 border border-green-500/30'

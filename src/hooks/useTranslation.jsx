@@ -33,6 +33,7 @@ const translations = {
     saveChanges: "Guardar Cambios",
     profile: "Perfil",
     editProfile: "Editar perfil",
+    profileUpdated: "Perfil actualizado exitosamente",
 
     // Members count
     oneMember: "1 miembro",
@@ -126,6 +127,7 @@ const translations = {
     saveChanges: "Save Changes",
     profile: "Profile",
     editProfile: "Edit Profile",
+    profileUpdated: "Profile updated successfully",
 
     // Members count  
     oneMember: "1 member",
@@ -144,8 +146,6 @@ const translations = {
     lightMode: "Light mode",
     language: "Language",
     settings: "Settings",
-    profile: "Profile",
-    editProfile: "Edit Profile",
 
     // Navigation
     home: "Home",
