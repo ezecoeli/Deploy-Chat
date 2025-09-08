@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { getAvatarById } from '../../config/avatars';
 import { FiUser } from 'react-icons/fi';
+import MessageRenderer from './MessageRenderer';
 
 export default function MessageArea({ 
   messages, 
@@ -117,7 +118,7 @@ export default function MessageArea({
                           : 'none'
                       }}
                     >
-                      <p className="text-sm">{message.content}</p>
+                      <MessageRenderer content={message.content} />
                       <p className="text-xs mt-1 opacity-70">
                         // {new Date(message.created_at).toLocaleTimeString()}
                       </p>
