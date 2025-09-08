@@ -25,6 +25,14 @@ const translations = {
     send: "Enviar",
     execute: "Ejecutar",
     typeMessage: "mensaje...",
+    chooseAvatar: "Elige tu avatar",
+    customAvatarUrl: "O ingresa una URL personalizada",
+    preview: "Vista previa",
+    cancel: "Cancelar",
+    saving: "Guardando...",
+    saveChanges: "Guardar Cambios",
+    profile: "Perfil",
+    editProfile: "Editar perfil",
 
     // Members count
     oneMember: "1 miembro",
@@ -110,6 +118,14 @@ const translations = {
     send: "Send", 
     execute: "Execute",
     typeMessage: "message...",
+    chooseAvatar: "Choose your avatar",
+    customAvatarUrl: "Or enter a custom URL",
+    preview: "Preview",
+    cancel: "Cancel",
+    saving: "Saving...",
+    saveChanges: "Save Changes",
+    profile: "Profile",
+    editProfile: "Edit Profile",
 
     // Members count  
     oneMember: "1 member",

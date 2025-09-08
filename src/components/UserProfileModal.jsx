@@ -10,7 +10,6 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
   const [formData, setFormData] = useState({
     username: '',
     selectedAvatar: '',
-    customAvatarUrl: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -41,14 +40,12 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
       setFormData({
         username: data.username || user.email.split('@')[0],
         selectedAvatar: preloadedAvatar ? data.avatar_url : '',
-        customAvatarUrl: !preloadedAvatar ? (data.avatar_url || '') : ''
       });
     } catch (error) {
       // Fallback to default values
       setFormData({
         username: user.email.split('@')[0],
         selectedAvatar: 'avatar-01', // Default avatar
-        customAvatarUrl: ''
       });
     }
   };
@@ -67,11 +64,7 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
       newErrors.username = 'Solo se permiten letras, números, espacios y guiones bajos';
     }
 
-    // Validate avatar
-    if (!formData.selectedAvatar && !formData.customAvatarUrl.trim()) {
-      newErrors.avatar = 'Selecciona un avatar';
-    }
-
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -102,7 +95,7 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
       }
 
       // Determine final avatar URL
-      const finalAvatarUrl = formData.selectedAvatar || formData.customAvatarUrl.trim();
+      const finalAvatarUrl = formData.selectedAvatar;
 
       // Update profile
       const { data, error } = await supabase
@@ -140,20 +133,11 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
     setFormData(prev => ({
       ...prev,
       selectedAvatar: avatarId,
-      customAvatarUrl: '' // Clear custom URL
     }));
     setErrors(prev => ({ ...prev, avatar: '' }));
   };
 
-  const handleCustomUrlChange = (url) => {
-    setFormData(prev => ({
-      ...prev,
-      customAvatarUrl: url,
-      selectedAvatar: '' // Clear preloaded avatar selection
-    }));
-    setErrors(prev => ({ ...prev, avatar: '' }));
-  };
-
+  
   const handleClose = () => {
     if (!isLoading) {
       onClose();
@@ -173,24 +157,9 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
         />
       ) : null;
     }
-    
-    if (formData.customAvatarUrl.trim()) {
-      return (
-        <img 
-          src={formData.customAvatarUrl} 
-          alt="Avatar personalizado"
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            e.target.style.display = 'none';
-            e.target.nextSibling.style.display = 'flex';
-          }}
-        />
-      );
-    }
-    
     return null;
   };
-
+    
   return (
     <AnimatePresence>
       {isOpen && (
@@ -213,7 +182,7 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
               <div className="flex items-center gap-3">
                 <FiUser className="w-6 h-6 text-blue-400" />
                 <h2 className="text-xl font-bold text-white">
-                  Editar Perfil
+                  {t('editProfile')}
                 </h2>
               </div>
               <button
@@ -231,7 +200,7 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
               {/* Username Field */}
               <div>
                 <label className="block text-sm font-medium text-gray-200 mb-2">
-                  Nombre de usuario
+                  {t('profile')}
                 </label>
                 <input
                   type="text"
@@ -246,7 +215,7 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
                       ? 'border-red-500 focus:ring-red-500' 
                       : 'border-slate-600 focus:ring-blue-500'
                   }`}
-                  placeholder="Ingresa tu nombre de usuario"
+                  placeholder={t('profile')}
                 />
                 {errors.username && (
                   <p className="mt-1 text-sm text-red-400">{errors.username}</p>
@@ -256,7 +225,7 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
               {/* Avatar Selection */}
               <div>
                 <label className="block text-sm font-medium text-gray-200 mb-3">
-                  Elige tu avatar
+                  {t('chooseAvatar') || 'Elige tu avatar'}
                 </label>
                 
                 {/* Avatar Grid */}
@@ -283,21 +252,7 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
                   ))}
                 </div>
 
-                {/* Custom Avatar URL */}
-                <div className="mt-4">
-                  <label className="block text-sm text-gray-300 mb-2">
-                    O ingresa una URL personalizada
-                  </label>
-                  <input
-                    type="url"
-                    value={formData.customAvatarUrl}
-                    onChange={(e) => handleCustomUrlChange(e.target.value)}
-                    disabled={isLoading}
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors text-sm"
-                    placeholder="https://ejemplo.com/mi-avatar.jpg"
-                  />
-                </div>
-
+                
                 {errors.avatar && (
                   <p className="mt-1 text-sm text-red-400">{errors.avatar}</p>
                 )}
@@ -306,7 +261,7 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
               {/* Preview */}
               <div className="bg-slate-700/50 rounded-lg p-4">
                 <p className="text-sm text-gray-300 mb-3">
-                  Vista previa
+                  {t('preview') || 'Vista previa'}
                 </p>
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-600 flex items-center justify-center">
@@ -315,7 +270,7 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
                   </div>
                   <div>
                     <p className="font-medium text-white">
-                      {formData.username || 'Nombre de usuario'}
+                      {formData.username || t('profile')}
                     </p>
                     <p className="text-sm text-gray-400">{user?.email}</p>
                   </div>
@@ -341,7 +296,7 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
                   disabled={isLoading}
                   className="flex-1 px-4 py-2 bg-slate-600 hover:bg-slate-500 text-white rounded-lg transition-colors disabled:opacity-50"
                 >
-                  Cancelar
+                  {t('cancel') || 'Cancelar'}
                 </button>
                 <button
                   type="submit"
@@ -351,12 +306,12 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
                   {isLoading ? (
                     <>
                       <FiLoader className="w-4 h-4 animate-spin" />
-                      Guardando...
+                      {t('saving') || 'Guardando...'}
                     </>
                   ) : (
                     <>
                       <FiCheck className="w-4 h-4" />
-                      Guardar Cambios
+                      {t('saveChanges') || 'Guardar Cambios'}
                     </>
                   )}
                 </button>
