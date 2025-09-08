@@ -4,7 +4,7 @@ import { createContext, useContext, useState } from 'react';
 const translations = {
   es: {
     // Auth
-    login: "Login",
+    login: "Iniciar sesión",
     register: "Registro",
     email: "Correo electrónico",
     password: "Contraseña",

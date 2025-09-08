@@ -201,7 +201,7 @@ export default function Login() {
         style={{ 
           backgroundImage: `url(${loginBackground})`,
           opacity: 0.15,
-          filter: 'brightness(0.4) contrast(1.2) hue-rotate(200deg)'
+          filter: 'brightness(0.8) contrast(1.2) hue-rotate(200deg)'
         }}
       />
 
@@ -230,18 +230,18 @@ export default function Login() {
 
         {/* Login Form Container */}
         <motion.div
-          className="w-[280px] sm:w-[320px] md:w-96 p-2 sm:p-4 relative overflow-hidden z-0 login-border rounded-lg"
+          className="login-form"
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
-          <div className="relative z-10 bg-black/90 backdrop-blur-sm p-3 sm:p-4 md:p-6 rounded-lg">
+          <div className="content">
             {/* language toggle */}
             <div className="flex justify-end mb-2 sm:mb-4">
               <LanguageToggle />
             </div>
 
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 sm:mb-6 md:mb-8 text-center text-gray-200">
+            <h2 className="text-lg sm:text-2xl md:text-2xl font-bold mb-4 sm:mb-6 md:mb-8 text-center text-gray-200">
               {t('login')} / {t('register')}
             </h2>
 
@@ -319,14 +319,14 @@ export default function Login() {
               <div className="flex justify-between gap-2 sm:gap-3">
                 <button
                   type="submit"
-                  className="flex-1 px-2 sm:px-4 py-2 bg-green-700 hover:bg-gray-500 text-white font-medium rounded-md transition-colors duration-200 text-sm sm:text-base"
+                  className="flex-1 px-2 sm:px-4 py-2 bg-green-700 hover:bg-green-600 text-white font-medium rounded-md transition-colors duration-200 text-sm sm:text-base"
                 >
                   {t('confirmLogin')}
                 </button>
                 <button
                   type="button"
                   onClick={handleSignUp}
-                  className="flex-1 px-2 sm:px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white font-medium rounded-md transition-colors duration-200 text-sm sm:text-base"
+                  className="flex-1 px-2 sm:px-4 py-2 bg-violet-800 hover:bg-violet-600 text-white font-medium rounded-md transition-colors duration-200 text-sm sm:text-base"
                 >
                   {t('confirmRegister')}
                 </button>
@@ -346,7 +346,7 @@ export default function Login() {
             <div className="flex flex-col gap-2 sm:gap-3 mt-4 sm:mt-6">
               <button
                 onClick={() => handleSocialLogin('google')}
-                className="flex items-center justify-center gap-2 px-2 sm:px-4 py-2 bg-white text-gray-800 font-medium rounded-md hover:bg-gray-300 transition-colors duration-200 text-sm sm:text-base"
+                className="flex items-center justify-center gap-2 px-2 sm:px-4 py-2 bg-gray-200 text-gray-800 font-medium rounded-md hover:bg-gray-400 transition-colors duration-200 text-sm sm:text-base"
               >
                 <FaGoogle className="w-4 h-4 sm:w-5 sm:h-5" />
                 {t('loginWithGoogle')}
@@ -354,7 +354,7 @@ export default function Login() {
 
               <button
                 onClick={() => handleSocialLogin('github')}
-                className="flex items-center justify-center gap-2 px-2 sm:px-4 py-2 bg-[#004d9f] hover:bg-gray-500 text-white font-medium rounded-md transition-colors duration-200 text-sm sm:text-base"
+                className="flex items-center justify-center gap-2 px-2 sm:px-4 py-2 bg-gray-700 hover:bg-gray-800 text-white font-medium rounded-md transition-colors duration-200 text-sm sm:text-base"
               >
                 <FaGithub className="w-4 h-4 sm:w-5 sm:h-5" />
                 {t('loginWithGithub')}
@@ -363,8 +363,8 @@ export default function Login() {
 
             {message && (
               <div className="mt-3 sm:mt-4 flex items-center justify-center gap-2 text-red-400">
-                <PiWarningCircleFill className="w-4 h-4 sm:w-5 sm:h-5" />
-                <p className="text-center text-sm sm:text-base">
+                <PiWarningCircleFill className="w-4 h-4" />
+                <p className="text-center text-xs">
                   {message}
                 </p>
               </div>
