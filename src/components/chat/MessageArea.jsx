@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { getAvatarById } from '../../config/avatars';
 import { FiUser } from 'react-icons/fi';
 import MessageRenderer from './MessageRenderer';
+import ReactionBar from '../ReactionBar';
 
 export default function MessageArea({ 
   messages, 
@@ -165,6 +166,14 @@ export default function MessageArea({
                         // {new Date(message.created_at).toLocaleTimeString()}
                       </p>
                     </div>
+
+                    <ReactionBar 
+                      messageId={message.id}
+                      userId={user?.id}
+                      currentTheme={currentTheme}
+                      isOwnMessage={isOwnMessage}
+                    />
+                    
                   </div>
                 </div>
               </div>
