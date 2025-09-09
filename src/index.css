@@ -689,3 +689,23 @@ body[data-theme="coolRetro"] .crt-menu-item-danger:hover {
   background: linear-gradient(180deg, #50ff30, #00cc00);
   box-shadow: 0 0 8px rgba(57, 255, 20, 0.7);
 }
+
+/* Ubuntu theme scrollbar */
+.ubuntu-scrollbar::-webkit-scrollbar {
+  width: 12px;
+}
+
+.ubuntu-scrollbar::-webkit-scrollbar-track {
+  background: #300a24;
+  border-radius: 6px;
+}
+
+.ubuntu-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #e95420, #bf3f00);
+  border-radius: 6px;
+  border: 1px solid #772953;
+}
+
+.ubuntu-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #ff6b2d, #e95420);
+}

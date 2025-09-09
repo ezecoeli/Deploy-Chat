@@ -26,7 +26,7 @@ const terminalThemes = {
 
     matrix: {
         name: 'Matrix Terminal',
-        prompt: '$',
+        prompt: 'Neo>',
         font: '"JetBrains Mono", "Fira Code", "Consolas", monospace',
         colors: {
             bg: 'from-black via-gray-900 to-green-900',
@@ -52,21 +52,26 @@ const terminalThemes = {
         prompt: '~$',
         font: '"Ubuntu Mono", "Liberation Mono", "Consolas", monospace',
         colors: {
-            bg: 'from-gray-900 to-black',
+            bg: 'from-[#300a24] via-[#2c0e1f] to-[#1a0510]',
             primary: '#ffffff',
             secondary: '#e95420',
             text: '#ffffff',
-            textSecondary: '#cccccc',
+            textSecondary: '#d3d3d3',
             accent: '#e95420',
             border: '#772953',
-            input: 'bg-gray-800 border-orange-500',
-            button: 'bg-orange-600 hover:bg-orange-700 text-white',
-            message: 'bg-gray-800 border-l-4 border-l-orange-500',
-            statusOnline: '#22c55e'
+            input: 'bg-[#300a24] border-orange-500',
+            button: 'bg-orange-600 hover:bg-orange-700 text-white font-bold',
+            message: 'bg-[#300a24] border-l-4 border-l-orange-500',
+            statusOnline: '#22c55e',
+            directory: '#5555ff',
+            command: '#55ff55', 
+            username: '#e95420', 
+            hostname: '#ffffff' 
         },
         effects: {
             textShadow: 'none',
-            glow: 'shadow-orange-500/30'
+            glow: 'shadow-orange-500/30',
+            ubuntuMode: true
         }
     },
 
@@ -95,7 +100,7 @@ const terminalThemes = {
 
     windows95: {
         name: 'Windows 95',
-        prompt: 'C:\\WINDOWS>',
+        prompt: 'C:\>',
         font: '"Perfect DOS VGA 437", "Courier New", "Lucida Console", monospace',
         colors: {
             bg: 'from-black to-black',
@@ -123,7 +128,7 @@ const terminalThemes = {
 
     coolRetro: {
         name: 'Amber CRT',
-        prompt: '$',
+        prompt: 'C>',
         font: '"Courier New", "Monaco", "Lucida Console", monospace',
         colors: {
             bg: 'from-black to-black',

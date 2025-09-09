@@ -108,7 +108,7 @@ export default function MessageInput({
       matrix: "echo 'Follow the white rabbit...'", 
       ubuntu: "echo 'Ubuntu means humanity'",        
       macOS: "echo 'Think Different'",               
-      coolRetro: "echo 'AMBER_TERMINAL_READY'" 
+      coolRetro: "DIR *.EXE",
     };
     
     return placeholders[currentTheme] || "echo 'Hello World!'";
