@@ -13,7 +13,8 @@ export default function MessageInput({
 }) {
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth); 
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const textareaRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
   // detect window resize for responsive prompt
@@ -28,6 +29,16 @@ export default function MessageInput({
       window.removeEventListener('resize', handleResize);
     };
   }, []);
+
+  // Auto-resize textarea based on content
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      const scrollHeight = textareaRef.current.scrollHeight;
+      const maxHeight = 120; // 6 lines approximately
+      textareaRef.current.style.height = `${Math.min(scrollHeight, maxHeight)}px`;
+    }
+  }, [newMessage]);
   
   const handleInputChange = (e) => {
     const value = e.target.value;
@@ -74,6 +85,20 @@ export default function MessageInput({
     }, 1000);
   };
 
+  // Handle key combinations
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      if (e.shiftKey) {
+        // Shift + Enter = new line 
+        return;
+      } else {
+        // Enter = send message
+        e.preventDefault();
+        sendMessage(e);
+      }
+    }
+  };
+
   const sendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || !currentChannel || !user) return;
@@ -112,7 +137,8 @@ export default function MessageInput({
       coolRetro: "DIR *.EXE",
     };
     
-    return placeholders[currentTheme] || "echo 'Hello World!'";
+    const basePlaceholder = placeholders[currentTheme] || "echo 'Hello World!'";
+    return basePlaceholder;
   };
 
   // Responsive prompt 
@@ -160,9 +186,9 @@ export default function MessageInput({
           : 'rgba(0, 0, 0, 0.3)',
       }}
     >
-      <form onSubmit={sendMessage} className="flex gap-1 sm:gap-2 font-mono">
+      <form onSubmit={sendMessage} className="flex gap-1 sm:gap-2 font-mono items-start"> 
         <div 
-          className="flex-1 flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 rounded-lg" 
+          className="flex-1 flex items-start gap-1 sm:gap-2 px-2 sm:px-3 py-2 rounded-lg relative"
           style={{ 
             backgroundColor: currentTheme === 'coolRetro' ? '#000000' : 'rgba(0,0,0,0.5)', 
             border: `1px solid ${theme.colors.border}` 
@@ -174,34 +200,61 @@ export default function MessageInput({
               color: theme.colors.accent,
               backgroundColor: `${theme.colors.accent}15`,
               border: `1px solid ${theme.colors.accent}30`,
+              alignSelf: 'flex-start',
+              marginTop: '2px',
             }}
           >
             {getResponsivePrompt()}
           </span>
-          <input
-            type="text"
+          
+          <textarea
+            ref={textareaRef}
             value={newMessage}
             onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
             placeholder={getThemePlaceholder(currentTheme, t)}
-            className="flex-1 rounded-lg pl-1 outline-none text-sm sm:text-base"
+            className="flex-1 rounded-lg pl-1 outline-none text-sm sm:text-base resize-none"
             style={{ 
               color: theme.colors.text,
-              background: currentTheme === 'coolRetro' ? '#000000' : '#171717',
+              background: currentTheme === 'coolRetro' ? '#324345' : '#171717',
               border: currentTheme === 'coolRetro' ? '1px solid #664400' : 'none',
               textShadow: currentTheme === 'coolRetro' ? '0 0 2px #e6a000' : 'none',
               fontFamily: currentTheme === 'coolRetro' ? '"Courier New", monospace' : 'inherit',
+              minHeight: '28px',
+              maxHeight: '120px',
+              lineHeight: '1.4',
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+              paddingTop: '4px',
+              paddingBottom: '4px',
+              overflow: 'hidden',
+              overflowY: 'auto', 
             }}
             disabled={!currentChannel}
+            rows={1} 
           />
+
+          {/* Character counter for long messages */}
+          {newMessage.length > 500 && (
+            <div 
+              className="absolute -top-6 right-0 text-xs"
+              style={{ color: theme.colors.accent }}
+            >
+              {newMessage.length}/2000
+            </div>
+          )}
         </div>
+        
         <button
           type="submit"
           disabled={!newMessage.trim() || !currentChannel}
-          className={`px-3 sm:px-6 py-2 rounded-lg transition-colors duration-200 text-sm sm:text-base flex-shrink-0 ${
+          className={`px-3 sm:px-6 py-2 rounded-lg transition-colors duration-200 text-sm sm:text-base flex-shrink-0 self-start ${ 
             currentTheme === 'default' ? 'font-medium' : 'font-mono'
           } ${theme.colors.button}`}
+          style={{
+            marginTop: '2px',
+          }}
         >
-          
           <span className="hidden sm:inline">
             {currentTheme === 'default' ? t('send') : t('execute')}
           </span>
@@ -210,6 +263,7 @@ export default function MessageInput({
           </span>
         </button>
       </form>
+      
     </div>
   );
 }

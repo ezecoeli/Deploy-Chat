@@ -139,20 +139,24 @@ export default function MessageArea({
                       style={{ 
                         backgroundColor: currentTheme === 'matrix' 
                           ? isOwnMessage 
-                            ? 'rgba(0, 255, 0, 0.15)'
-                            : 'rgba(0, 100, 0, 0.3)'
+                            ? 'rgba(0, 255, 0, 0.2)'
+                            : 'rgba(0, 100, 0, 0.5)'
                           : isOwnMessage 
                           ? 'rgba(230, 160, 0, 0.1)' 
                           : 'rgba(0,0,0,0.4)', 
                         border: currentTheme === 'matrix' 
                           ? `1px solid ${isOwnMessage ? '#00ff00' : '#004400'}` 
                           : `1px solid ${currentTheme === 'coolRetro' ? '#664400' : theme.colors.border}`,
-                        color: theme.colors.text,
+                        color: currentTheme === 'matrix' 
+                          ? '#00ff88'
+                          : currentTheme === 'coolRetro' 
+                          ? '#ffee44'
+                          : '#ffffff',
                         textShadow: currentTheme === 'coolRetro' 
-                          ? '0 0 3px #e6a000'
+                          ? '0 0 4px #ffee44, 0 0 8px rgba(255, 238, 68, 0.5)'
                           : currentTheme === 'matrix'
-                          ? '0 0 2px #00ff00'
-                          : 'none',
+                          ? '0 0 3px #00ff88, 0 0 6px rgba(0, 255, 136, 0.4)'
+                          : '0 0 2px rgba(0, 0, 0, 0.8)',
                         wordBreak: 'break-word'
                       }}
                     >
