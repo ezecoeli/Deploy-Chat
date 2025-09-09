@@ -1,6 +1,62 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function CodeBlock({ code, language = 'js' }) {
+  const [currentTheme, setCurrentTheme] = useState('');
+
+  // Monitor theme changes
+  useEffect(() => {
+    const updateTheme = () => {
+      const body = document.body;
+      const theme = body.getAttribute('data-theme');
+      setCurrentTheme(theme || 'default');
+    };
+
+    // Initial theme
+    updateTheme();
+
+    // Create observer to watch for data-theme changes
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+          updateTheme();
+        }
+      });
+    });
+
+    // Start observing
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['data-theme']
+    });
+
+    // Cleanup
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  // Get scrollbar class based on current theme
+  const getScrollbarClass = () => {
+    switch (currentTheme) {
+      case 'matrix':
+        return 'matrix-scrollbar';
+      case 'windows95':
+        return 'windows95-scrollbar';
+      case 'ubuntu':
+        return 'ubuntu-scrollbar';
+      case 'macOS':
+        return 'mac-scrollbar';
+      case 'coolRetro':
+        return 'coolretro-scrollbar';
+      case 'hackingMode':
+        return 'hackingmode-scrollbar';
+      case 'default':
+        return 'default-scrollbar';
+      default:
+        return 'custom-scrollbar';
+    }
+  };
+
   let highlighted = code;
 
   if (language === 'js' || language === 'javascript') {
@@ -47,8 +103,18 @@ export default function CodeBlock({ code, language = 'js' }) {
   }
 
   return (
-    <pre style={{ background: '#111', color: '#fff', padding: '1em', borderRadius: '8px', fontFamily: 'monospace', overflowX: 'auto' }}>
-      <code dangerouslySetInnerHTML={{ __html: highlighted }} />
-    </pre>
+    <div className="my-2">
+      <pre 
+        className={`bg-gray-900 rounded-lg p-3 sm:p-4 font-mono text-sm overflow-auto max-h-60 ${getScrollbarClass()}`}
+        style={{ 
+          background: '#111', 
+          color: '#fff', 
+          fontFamily: 'monospace',
+          border: '1px solid rgba(255, 255, 255, 0.1)'
+        }}
+      >
+        <code dangerouslySetInnerHTML={{ __html: highlighted }} />
+      </pre>
+    </div>
   );
 }

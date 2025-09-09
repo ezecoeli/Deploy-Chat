@@ -322,15 +322,13 @@ body[data-theme="coolRetro"] .bg-gray-700:not(.absolute) {
 
 body[data-theme="coolRetro"] .absolute.bg-gray-800,
 body[data-theme="coolRetro"] .absolute.bg-gray-700 {
-  background: rgba(0, 0, 0, 0.95) !important;
-  border: 1px solid rgba(255, 176, 0, 0.5) !important;
-  border-radius: 8px !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8) !important;
-  backdrop-filter: blur(10px);
-  position: absolute !important;
-  z-index: 50000 !important;
-  transform: none !important;
-  pointer-events: auto !important;
+  background: rgba(26, 26, 46, 0.95) !important;
+  border: 2px solid rgba(94, 189, 62, 0.6) !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(10px) !important;
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(94, 189, 62, 0.2) !important;
 }
 
 body[data-theme="coolRetro"] .absolute.bg-gray-800 button,
@@ -708,4 +706,313 @@ body[data-theme="coolRetro"] .crt-menu-item-danger:hover {
 
 .ubuntu-scrollbar::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, #ff6b2d, #e95420);
+}
+
+/************* RAINBOW MAC THEME ***************/
+/* Main container with Mac-style background */
+body[data-theme="macOS"] .w-full.max-w-4xl {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f172a 100%);
+  border: 2px solid rgba(94, 189, 62, 0.3);
+  border-radius: 20px;
+  box-shadow: 
+    0 0 30px rgba(94, 189, 62, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+/* Rainbow Mac scrollbar */
+.mac-scrollbar::-webkit-scrollbar {
+  width: 12px;
+}
+
+.mac-scrollbar::-webkit-scrollbar-track {
+  background: rgba(26, 26, 46, 0.8);
+  border-radius: 6px;
+  border: 1px solid rgba(94, 189, 62, 0.2);
+}
+
+.mac-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, 
+    #5EBD3E 0%,
+    #FFB900 20%,
+    #F78200 40%,
+    #E23838 60%,
+    #973999 80%,
+    #009CDF 100%
+  );
+  border-radius: 6px;
+  border: 1px solid rgba(94, 189, 62, 0.4);
+  box-shadow: 0 0 10px rgba(94, 189, 62, 0.3);
+}
+
+.mac-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, 
+    rgba(94, 189, 62, 1) 0%,
+    rgba(255, 185, 0, 1) 20%,
+    rgba(247, 130, 0, 1) 40%,
+    rgba(226, 56, 56, 1) 60%,
+    rgba(151, 57, 153, 1) 80%,
+    rgba(0, 156, 223, 1) 100%
+  );
+  box-shadow: 0 0 15px rgba(94, 189, 62, 0.5);
+}
+
+.mac-scrollbar::-webkit-scrollbar-button {
+  background: linear-gradient(45deg, rgba(94, 189, 62, 0.5), rgba(226, 56, 56, 0.5));
+  border-radius: 6px;
+  height: 12px;
+}
+
+.mac-scrollbar::-webkit-scrollbar-button:hover {
+  background: linear-gradient(45deg, rgba(94, 189, 62, 0.8), rgba(226, 56, 56, 0.8));
+}
+
+/* Rainbow title effect  */
+body[data-theme="macOS"] h1 {
+  background: linear-gradient(45deg, 
+    #5EBD3E 0%, 
+    #FFB900 20%,
+    #F78200 40%,
+    #E23838 60%,
+    #973999 80%,
+    #009CDF 100%
+  );
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  animation: rainbow-flow 4s ease-in-out infinite;
+  text-shadow: none;
+  filter: drop-shadow(0 0 10px rgba(94, 189, 62, 0.5));
+}
+
+@keyframes rainbow-flow {
+  0%, 100% { 
+    background-position: 0% 50%; 
+    filter: drop-shadow(0 0 10px rgba(94, 189, 62, 0.5));
+  }
+  20% { 
+    background-position: 20% 25%; 
+    filter: drop-shadow(0 0 10px rgba(255, 185, 0, 0.5));
+  }
+  40% { 
+    background-position: 40% 50%; 
+    filter: drop-shadow(0 0 10px rgba(247, 130, 0, 0.5));
+  }
+  60% { 
+    background-position: 60% 75%; 
+    filter: drop-shadow(0 0 10px rgba(226, 56, 56, 0.5));
+  }
+  80% { 
+    background-position: 80% 25%; 
+    filter: drop-shadow(0 0 10px rgba(151, 57, 153, 0.5));
+  }
+}
+
+/* Rainbow text effects for messages */
+body[data-theme="macOS"] .font-mono {
+  text-shadow: 0 0 8px rgba(94, 189, 62, 0.6);
+}
+
+/* Apple-style rainbow buttons  */
+body[data-theme="macOS"] button {
+  background: linear-gradient(135deg, 
+    #5EBD3E 0%, 
+    #FFB900 20%, 
+    #F78200 40%, 
+    #E23838 60%, 
+    #973999 80%, 
+    #009CDF 100%
+  ) !important;
+  border: 2px solid rgba(94, 189, 62, 0.6) !important;
+  border-radius: 12px !important;
+  box-shadow: 
+    0 4px 15px rgba(94, 189, 62, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  transition: all 0.3s ease !important;
+  font-weight: bold !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+body[data-theme="macOS"] button:hover {
+  background: linear-gradient(135deg, 
+    rgba(94, 189, 62, 1) 0%, 
+    rgba(255, 185, 0, 1) 20%, 
+    rgba(247, 130, 0, 1) 40%, 
+    rgba(226, 56, 56, 1) 60%, 
+    rgba(151, 57, 153, 1) 80%, 
+    rgba(0, 156, 223, 1) 100%
+  ) !important;
+  box-shadow: 
+    0 6px 20px rgba(94, 189, 62, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  transform: translateY(-1px) !important;
+}
+
+body[data-theme="macOS"] button:active {
+  transform: translateY(0px) !important;
+  box-shadow: 
+    0 2px 10px rgba(94, 189, 62, 0.4),
+    inset 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Rainbow input styling */
+body[data-theme="macOS"] input {
+  background: rgba(26, 26, 46, 0.8) !important;
+  border: 2px solid rgba(94, 189, 62, 0.6) !important;
+  border-radius: 8px !important;
+  color: #ffffff !important;
+  text-shadow: 0 0 5px rgba(94, 189, 62, 0.6) !important;
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.1),
+    0 0 10px rgba(94, 189, 62, 0.2) !important;
+}
+
+body[data-theme="macOS"] input:focus {
+  border-color: rgba(94, 189, 62, 1) !important;
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.1),
+    0 0 15px rgba(94, 189, 62, 0.4) !important;
+  outline: none !important;
+}
+
+/* Rainbow status indicators */
+body[data-theme="macOS"] .status-online {
+  color: #5EBD3E !important;
+  text-shadow: 0 0 8px rgba(94, 189, 62, 0.8) !important;
+}
+
+
+body[data-theme="macOS"] .w-full.max-w-4xl::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, 
+    #5EBD3E, #FFB900, #F78200, #E23838, #973999, #009CDF
+  );
+  background-size: 400% 400%;
+  border-radius: 22px;
+  z-index: -1;
+  animation: rainbow-border 6s ease infinite;
+  opacity: 0.3;
+}
+
+@keyframes rainbow-border {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Message bubbles with Mac styling */
+body[data-theme="macOS"] .message-bubble {
+  background: rgba(26, 26, 46, 0.8) !important;
+  border-left: 4px solid rgba(94, 189, 62, 0.8) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(94, 189, 62, 0.2) !important;
+}
+
+/* Rainbow Mac Theme - Dropdown menu styling */
+body[data-theme="macOS"] .dropdown-menu {
+  background: rgba(26, 26, 46, 0.95) !important;
+  border: 2px solid rgba(94, 189, 62, 0.6) !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(10px) !important;
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(94, 189, 62, 0.2) !important;
+}
+
+/* Rainbow Mac - Dropdown items */
+body[data-theme="macOS"] .dropdown-item {
+  background: transparent !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 8px 16px !important;
+  border-radius: 8px !important;
+  margin: 4px !important;
+  transition: all 0.2s ease !important;
+  font-weight: 500 !important;
+}
+
+body[data-theme="macOS"] .dropdown-item:hover {
+  background: linear-gradient(135deg, 
+    rgba(94, 189, 62, 0.2) 0%, 
+    rgba(255, 185, 0, 0.2) 20%, 
+    rgba(247, 130, 0, 0.2) 40%, 
+    rgba(226, 56, 56, 0.2) 60%, 
+    rgba(151, 57, 153, 0.2) 80%, 
+    rgba(0, 156, 223, 0.2) 100%
+  ) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(94, 189, 62, 0.4) !important;
+  box-shadow: 0 0 10px rgba(94, 189, 62, 0.3) !important;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Sign Out button */
+body[data-theme="macOS"] .dropdown-item.text-red-600 {
+  color: #ff6b6b !important;
+  font-weight: bold !important;
+}
+
+body[data-theme="macOS"] .dropdown-item.text-red-600:hover {
+  background: rgba(226, 56, 56, 0.2) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(226, 56, 56, 0.6) !important;
+  box-shadow: 0 0 15px rgba(226, 56, 56, 0.4) !important;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Edit Profile button */
+body[data-theme="macOS"] .dropdown-item:not(.text-red-600) {
+  color: #ffffff !important;
+}
+
+body[data-theme="macOS"] .dropdown-item:not(.text-red-600):hover {
+  background: linear-gradient(135deg, 
+    rgba(94, 189, 62, 0.3) 0%, 
+    rgba(0, 156, 223, 0.3) 100%
+  ) !important;
+  border: 1px solid rgba(94, 189, 62, 0.6) !important;
+  box-shadow: 0 0 15px rgba(94, 189, 62, 0.4) !important;
+}
+
+/* Dropdown arrow/trigger button */
+body[data-theme="macOS"] .dropdown-trigger {
+  background: linear-gradient(135deg, 
+    #5EBD3E 0%, 
+    #FFB900 20%, 
+    #F78200 40%, 
+    #E23838 60%, 
+    #973999 80%, 
+    #009CDF 100%
+  ) !important;
+  border: 2px solid rgba(94, 189, 62, 0.6) !important;
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+  font-weight: bold !important;
+}
+
+body[data-theme="macOS"] .dropdown-trigger:hover {
+  box-shadow: 
+    0 6px 20px rgba(94, 189, 62, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Override any conflicting CRT styles for macOS theme */
+body[data-theme="macOS"] .absolute.bg-gray-800 button,
+body[data-theme="macOS"] .absolute.bg-gray-700 button {
+  color: #ffffff !important;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5) !important;
+  font-weight: 500 !important;
+}
+
+body[data-theme="macOS"] .absolute.bg-gray-800 button:hover,
+body[data-theme="macOS"] .absolute.bg-gray-700 button:hover {
+  color: #ffffff !important;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.8) !important;
 }

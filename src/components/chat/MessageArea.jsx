@@ -25,6 +25,8 @@ export default function MessageArea({
         return 'windows95-scrollbar';
       case 'ubuntu':
         return 'ubuntu-scrollbar';
+      case 'macOS':
+        return 'mac-scrollbar';
       case 'coolRetro':
         return 'coolretro-scrollbar';
       case 'hackingMode':

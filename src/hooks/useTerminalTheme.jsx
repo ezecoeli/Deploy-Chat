@@ -76,25 +76,34 @@ const terminalThemes = {
     },
 
     macOS: {
-        name: 'macOS Terminal',
+        name: 'macOS',
         prompt: '%',
-        font: '"SF Mono", "Monaco", "Menlo", monospace',
+        font: '"Monaco", "Menlo", "SF Mono", monospace',
         colors: {
-            bg: 'from-gray-900 via-slate-800 to-black',
+            bg: 'from-black via-[#1a1a2e] to-[#16213e]',
             primary: '#ffffff',
-            secondary: '#007aff',
+            secondary: '#ff6b6b',
             text: '#ffffff',
-            textSecondary: '#a1a1aa',
-            accent: '#007aff',
-            border: '#374151',
-            input: 'bg-slate-800 border-blue-500',
-            button: 'bg-blue-600 hover:bg-blue-700 text-white',
-            message: 'bg-slate-800 border-l-4 border-l-blue-500',
-            statusOnline: '#22c55e'
+            textSecondary: '#a8a8a8',
+            accent: '#4ecdc4',
+            border: '#ff6b6b',
+            input: 'bg-[#1a1a2e] border-[#4ecdc4]',
+            button: 'bg-gradient-to-r from-[#ff6b6b] via-[#4ecdc4] to-[#45b7d1] hover:from-[#ff5252] hover:via-[#26d0ce] hover:to-[#1e88e5] text-white font-bold',
+            message: 'bg-[#1a1a2e] border-l-4 border-l-[#4ecdc4]',
+            statusOnline: '#4ecdc4',
+            // rainbow colors
+            rainbow1: '#5EBD3E',
+            rainbow2: '#FFB900',
+            rainbow3: '#F78200',
+            rainbow4: '#E23838',
+            rainbow5: '#973999',
+            rainbow6: '#009CDF'
         },
         effects: {
-            textShadow: 'none',
-            glow: 'shadow-blue-500/30'
+            textShadow: '0 0 8px rgba(78, 205, 196, 0.6)',
+            glow: 'shadow-cyan-400/30',
+            rainbow: true,
+            retroMac: true
         }
     },
 
