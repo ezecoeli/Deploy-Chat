@@ -18,6 +18,24 @@ export default function MessageArea({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Function to get scrollbar class based on theme
+  const getScrollbarClass = () => {
+    switch (currentTheme) {
+      case 'matrix':
+        return 'matrix-scrollbar';
+      case 'windows95':
+        return 'windows95-scrollbar';
+      case 'coolRetro':
+        return 'coolretro-scrollbar';
+      case 'hackingMode':
+        return 'hackingmode-scrollbar';
+      case 'default':
+        return 'default-scrollbar';
+      default:
+        return 'custom-scrollbar';
+    }
+  };
+
   const renderAvatar = (avatarUrl, username, size = 'w-8 h-8') => {
     // if is a preloaded avatar
     const preloadedAvatar = getAvatarById(avatarUrl);
@@ -52,7 +70,7 @@ export default function MessageArea({
 
   return (
     <div 
-      className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent"
+      className={`flex-1 overflow-y-auto p-4 space-y-3 ${getScrollbarClass()}`}
       style={{
         
         backgroundColor: currentTheme === 'matrix' || currentTheme === 'coolRetro' 
@@ -60,7 +78,7 @@ export default function MessageArea({
           : 'rgba(0, 0, 0, 0.3)',
         fontFamily: theme.font,
         color: theme.colors.text,
-        ...(currentTheme === 'msdos' && {
+        ...(currentTheme === 'windows95' && {
           borderLeft: '4px solid #c0c7c8'
         })
       }}

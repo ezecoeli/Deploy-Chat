@@ -93,8 +93,8 @@ const terminalThemes = {
         }
     },
 
-    msdos: {
-        name: 'MS-DOS Prompt',
+    windows95: {
+        name: 'Windows 95',
         prompt: 'C:\\WINDOWS>',
         font: '"Perfect DOS VGA 437", "Courier New", "Lucida Console", monospace',
         colors: {

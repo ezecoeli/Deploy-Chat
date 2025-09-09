@@ -104,7 +104,7 @@ export default function MessageInput({
   const getThemePlaceholder = (currentTheme, t) => {
     const placeholders = {
       default: t('typeMessage') || "Escribe un mensaje...",
-      msdos: "echo Hello World!",   
+      windows95: "echo Hello World!",   
       matrix: "echo 'Follow the white rabbit...'", 
       ubuntu: "echo 'Ubuntu means humanity'",        
       macOS: "echo 'Think Different'",               
@@ -128,7 +128,7 @@ export default function MessageInput({
       className="border-t p-4"
       style={{
         borderColor: theme.colors.border,
-        // Fondo transparente para matrix y coolRetro
+        
         backgroundColor: currentTheme === 'matrix' || currentTheme === 'coolRetro' 
           ? 'transparent' 
           : 'rgba(0, 0, 0, 0.3)',
@@ -147,23 +147,25 @@ export default function MessageInput({
             style={{ 
               color: theme.colors.accent,
               backgroundColor: `${theme.colors.accent}15`,
-              border: `1px solid ${theme.colors.accent}30`
+              border: `1px solid ${theme.colors.accent}30`,
+              fontSize: "0.8rem",
             }}
           >
-            {userProfile?.username || user?.email?.split('@')[0]}@deploy-chat:{theme.prompt}
+            {userProfile?.username || user?.email?.split('@')[0]}:{theme.prompt}
           </span>
           <input
             type="text"
             value={newMessage}
             onChange={handleInputChange}
             placeholder={getThemePlaceholder(currentTheme, t)}
-            className="flex-1 rounded-lg p-1 outline-none"
+            className="flex-1 rounded-lg pl-1 outline-none"
             style={{ 
               color: theme.colors.text,
-              background: currentTheme === 'coolRetro' ? '#000000' : '#111111',
+              background: currentTheme === 'coolRetro' ? '#000000' : '#171717',
               border: currentTheme === 'coolRetro' ? '1px solid #664400' : 'none',
               textShadow: currentTheme === 'coolRetro' ? '0 0 2px #e6a000' : 'none',
-              fontFamily: currentTheme === 'coolRetro' ? '"Courier New", monospace' : 'inherit'
+              fontFamily: currentTheme === 'coolRetro' ? '"Courier New", monospace' : 'inherit',
+              fontSize: currentTheme === 'coolRetro' ? '1rem' : '1rem',
             }}
             disabled={!currentChannel}
           />

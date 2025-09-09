@@ -11,7 +11,7 @@
   }
 }
 
-/**** login form effect ****/ 
+/************* LOGIN FORM EFFECT *************/
 .login-form {
   width: 340px;
   height: 540px;
@@ -93,7 +93,7 @@
   }
 }
 
-/*** Floating Labels ***/
+/************** FLOATING LABELS ***************/
 .input-group {
   position: relative;
 }
@@ -200,7 +200,7 @@
   border-color: #ef4444 !important;
 }
 
-/*** Cool Retro Theme ***/
+/************* CRT THEME ***************/
 body[data-theme="coolRetro"] {
   background: #000000 !important;
 }
@@ -215,6 +215,10 @@ body[data-theme="coolRetro"] .w-full.max-w-4xl {
   margin: 0 auto !important;
   padding: 16px !important;
   background: transparent !important;
+  animation: 
+    crt-flicker 4s infinite,
+    crt-micro-flicker 0.2s infinite alternate,
+    crt-intense-flicker 12s infinite;
 }
 
 body[data-theme="coolRetro"] .bg-gradient-to-br {
@@ -302,6 +306,12 @@ body[data-theme="coolRetro"] span[style*="#e6a000"] {
     0 0 3px #ffb000,
     0 0 6px rgba(255, 176, 0, 0.5) !important;
   letter-spacing: 0.5px !important;
+}
+body[data-theme="coolRetro"] .font-mono,
+body[data-theme="coolRetro"] h1 {
+  animation: 
+    crt-micro-flicker 0.3s infinite alternate,
+    crt-flicker 8s infinite;
 }
 
 body[data-theme="coolRetro"] .bg-gray-800:not(.absolute),
@@ -404,7 +414,6 @@ body[data-theme="coolRetro"] input::placeholder {
   opacity: 0.7 !important;
 }
 
-/* Estilos específicos para elementos del menú en modo CRT */
 body[data-theme="coolRetro"] .crt-menu-item,
 body[data-theme="coolRetro"] .crt-menu-item-danger {
   transition: all 0.2s ease !important;
@@ -422,4 +431,261 @@ body[data-theme="coolRetro"] .crt-menu-item-danger:hover {
   color: #ffffff !important;
   text-shadow: 0 0 6px #ff6666 !important;
   border-radius: 4px !important;
+}
+
+/************* CRT FLICKER ANIMATION *************/
+@keyframes crt-flicker {
+  0% { 
+    opacity: 1; 
+    filter: brightness(1.0) contrast(1.2);
+  }
+  1% { 
+    opacity: 0.92; 
+    filter: brightness(0.92) contrast(1.35);
+  }
+  2% { 
+    opacity: 1; 
+    filter: brightness(1.0) contrast(1.2);
+  }
+  8% { 
+    opacity: 0.96; 
+    filter: brightness(0.96) contrast(1.25);
+  }
+  9% { 
+    opacity: 1; 
+    filter: brightness(1.0) contrast(1.2);
+  }
+  87% { 
+    opacity: 1; 
+    filter: brightness(1.0) contrast(1.2);
+  }
+  88% { 
+    opacity: 0.94; 
+    filter: brightness(0.94) contrast(1.3);
+  }
+  89% { 
+    opacity: 0.89; 
+    filter: brightness(0.89) contrast(1.4);
+  }
+  90% { 
+    opacity: 1; 
+    filter: brightness(1.0) contrast(1.2);
+  }
+  97% { 
+    opacity: 0.93; 
+    filter: brightness(0.93) contrast(1.32);
+  }
+  98% { 
+    opacity: 0.87; 
+    filter: brightness(0.87) contrast(1.45);
+  }
+  99% { 
+    opacity: 0.95; 
+    filter: brightness(0.95) contrast(1.28);
+  }
+  100% { 
+    opacity: 1; 
+    filter: brightness(1.0) contrast(1.2);
+  }
+}
+
+@keyframes crt-micro-flicker {
+  0% { 
+    opacity: 1; 
+    filter: brightness(1.0);
+  }
+  25% { 
+    opacity: 0.988; 
+    filter: brightness(0.988);
+  }
+  50% { 
+    opacity: 0.985; 
+    filter: brightness(0.985);
+  }
+  75% { 
+    opacity: 0.992; 
+    filter: brightness(0.992);
+  }
+  100% { 
+    opacity: 1; 
+    filter: brightness(1.0);
+  }
+}
+
+
+@keyframes crt-intense-flicker {
+  0%, 90% { 
+    opacity: 1; 
+    filter: brightness(1.0) contrast(1.2);
+  }
+  91% { 
+    opacity: 0.7; 
+    filter: brightness(0.7) contrast(1.8);
+  }
+  92% { 
+    opacity: 0.85; 
+    filter: brightness(0.85) contrast(1.5);
+  }
+  93% { 
+    opacity: 0.75; 
+    filter: brightness(0.75) contrast(1.7);
+  }
+  94% { 
+    opacity: 1; 
+    filter: brightness(1.0) contrast(1.2);
+  }
+  100% { 
+    opacity: 1; 
+    filter: brightness(1.0) contrast(1.2);
+  }
+}
+
+/************* SCROLL BAR STYLES *************/
+/* Custom scrollbar styles */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #6b7280;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Matrix theme scrollbar */
+.matrix-scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.matrix-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
+}
+
+.matrix-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #00ff00, #004400);
+  border-radius: 4px;
+  box-shadow: 0 0 6px rgba(0, 255, 0, 0.5);
+}
+
+.matrix-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #00ff41, #006600);
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+}
+
+/* Windows95 theme scrollbar */
+.windows95-scrollbar::-webkit-scrollbar {
+  width: 16px;
+}
+
+.windows95-scrollbar::-webkit-scrollbar-track {
+  background: #c0c7c8;
+  border: 1px inset #c0c7c8;
+}
+
+.windows95-scrollbar::-webkit-scrollbar-thumb {
+  background: #c0c7c8; 
+  border: 1px solid #808080;
+  border-radius: 0px;
+}
+
+.windows95-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #d4d0c8;
+  border: 1px outset #d4d0c8;
+}
+
+.windows95-scrollbar::-webkit-scrollbar-thumb:active {
+  background: #a0a0a0;
+  border: 1px inset #a0a0a0;
+}
+
+/* scrollbar buttons */
+.windows95-scrollbar::-webkit-scrollbar-button {
+  background: #c0c7c8;
+  border: 1px outset #c0c7c8;
+  height: 16px;
+}
+
+.windows95-scrollbar::-webkit-scrollbar-button:hover {
+  background: #d4d0c8;
+  border: 1px outset #d4d0c8;
+}
+
+.windows95-scrollbar::-webkit-scrollbar-button:active {
+  border: 1px inset #c0c7c8;
+  background: #a0a0a0;
+}
+
+.windows95-scrollbar::-webkit-scrollbar-corner {
+  background: #c0c7c8;
+}
+
+/* Cool Retro theme scrollbar */
+.coolretro-scrollbar::-webkit-scrollbar {
+  width: 12px;
+}
+
+.coolretro-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 176, 0, 0.3);
+}
+
+.coolretro-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #c29c06, #cc8800);
+  border-radius: 6px;
+  box-shadow: 0 0 8px rgba(255, 204, 0, 0.6);
+  border: 1px solid rgba(255, 176, 0, 0.5);
+}
+
+.coolretro-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #ffdd00, #dd9900);
+  box-shadow: 0 0 12px rgba(255, 204, 0, 0.9);
+}
+
+/* Default theme scrollbar */
+.default-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.default-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.default-scrollbar::-webkit-scrollbar-thumb {
+  background: #3b82f6;
+  border-radius: 4px;
+}
+
+.default-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #2563eb;
+}
+
+/* Hacking Mode theme scrollbar */
+.hackingmode-scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.hackingmode-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 20, 0, 0.7);
+  border-radius: 4px;
+}
+
+.hackingmode-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #39ff14, #00aa00);
+  border-radius: 4px;
+  box-shadow: 0 0 5px rgba(57, 255, 20, 0.4);
+}
+
+.hackingmode-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #50ff30, #00cc00);
+  box-shadow: 0 0 8px rgba(57, 255, 20, 0.7);
 }
