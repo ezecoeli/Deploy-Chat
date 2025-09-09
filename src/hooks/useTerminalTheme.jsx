@@ -37,7 +37,7 @@ const terminalThemes = {
             accent: '#39ff14',
             border: '#004400',
             input: 'bg-black border-green-500',
-            button: 'bg-green-900 hover:bg-green-800 text-green-100',
+            button: 'bg-black hover:bg-[#001100] text-[#00ff00] border-2 border-[#00ff00] shadow-[0_0_10px_#00ff00] font-mono font-bold hover:shadow-[0_0_20px_#00ff00] transition-all duration-300',
             message: 'bg-gray-900 border-l-4 border-l-green-500',
             statusOnline: '#22c55e'
         },
@@ -106,7 +106,7 @@ const terminalThemes = {
             accent: '#ffffff',
             border: '#c0c7c8',
             input: 'bg-black border-[#c0c7c8] border-1',
-            button: 'bg-[#000080] hover:bg-[#0000ff] text-white border-1 border-[#c0c7c8] font-bold',
+            button: 'bg-gradient-to-b from-[#e5e7eb] to-[#9ca3af] hover:from-[#f3f4f6] hover:to-[#d1d5db] text-black border-t-2 border-l-2 border-white border-r-2 border-b-2 border-r-[#6b7280] border-b-[#6b7280] shadow-lg font-bold active:from-[#9ca3af] active:to-[#6b7280]',
             message: 'bg-black border-l-2 border-l-[#c0c7c8]',
             statusOnline: '#00ff00',
             headerBg: '#000080',

@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import { useTranslation } from '../hooks/useTranslation';
+import { useTerminalTheme } from '../hooks/useTerminalTheme';
 import { AVATAR_OPTIONS, getAvatarById } from '../config/avatars';
 import { FiUser, FiX, FiCheck, FiLoader } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdated }) {
   const { t } = useTranslation();
+  const { currentTheme, allThemes } = useTerminalTheme();
   const [formData, setFormData] = useState({
     username: '',
     selectedAvatar: '',
@@ -14,6 +16,16 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [errors, setErrors] = useState({});
+  // fallback and validation for themes
+  const theme = allThemes[currentTheme] || allThemes.default || {
+    colors: {
+      background: '#1e293b',
+      border: '#475569',
+      text: '#f1f5f9',
+      textSecondary: '#94a3b8',
+      accent: '#3b82f6'
+    }
+  };
 
   // Load user data when modal opens
   useEffect(() => {
@@ -171,24 +183,32 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
           transition={{ duration: 0.3 }}
         >
           <motion.div
-            className="bg-slate-800 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto"
+            className="rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto"
+            style={{ 
+              backgroundColor: theme.colors.background,
+              border: `1px solid ${theme.colors.border}`
+            }}
             initial={{ scale: 0.95, opacity: 0, y: 40 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 40 }}
             transition={{ duration: 0.3 }}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-slate-700">
+            <div 
+              className="flex items-center justify-between p-6 border-b"
+              style={{ borderColor: theme.colors.border }}
+            >
               <div className="flex items-center gap-3">
-                <FiUser className="w-6 h-6 text-blue-400" />
-                <h2 className="text-xl font-bold text-white">
+                <FiUser className="w-6 h-6" style={{ color: theme.colors.accent }} />
+                <h2 className="text-xl font-bold" style={{ color: theme.colors.text }}>
                   {t('editProfile')}
                 </h2>
               </div>
               <button
                 onClick={handleClose}
                 disabled={isLoading}
-                className="text-gray-400 hover:text-white transition-colors disabled:opacity-50"
+                className="hover:opacity-75 transition-opacity disabled:opacity-50"
+                style={{ color: theme.colors.textSecondary }}
               >
                 <FiX className="w-6 h-6" />
               </button>
@@ -199,7 +219,7 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
               
               {/* Username Field */}
               <div>
-                <label className="block text-sm font-medium text-gray-200 mb-2">
+                <label className="block text-sm font-medium mb-2" style={{ color: theme.colors.text }}>
                   {t('profile')}:
                 </label>
                 <input
@@ -210,11 +230,17 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
                     setErrors(prev => ({ ...prev, username: '' }));
                   }}
                   disabled={isLoading}
-                  className={`w-full px-3 py-2 bg-slate-700 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-colors ${
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 transition-colors ${
                     errors.username 
                       ? 'border-red-500 focus:ring-red-500' 
-                      : 'border-slate-600 focus:ring-blue-500'
+                      : 'focus:ring-2'
                   }`}
+                  style={{
+                    backgroundColor: theme.colors.background,
+                    borderColor: errors.username ? '#ef4444' : theme.colors.border,
+                    color: currentTheme === 'coolRetro' ? '#ffcc00' : '#000000', // Negro en todos excepto coolRetro
+                    focusRingColor: theme.colors.accent
+                  }}
                   placeholder={t('profile')}
                 />
                 {errors.username && (
@@ -224,7 +250,7 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
 
               {/* Avatar Selection */}
               <div>
-                <label className="block text-sm font-medium text-gray-200 mb-3">
+                <label className="block text-sm font-medium mb-3" style={{ color: theme.colors.text }}>
                   {t('chooseAvatar') || 'Elige tu avatar'}:
                 </label>
                 
@@ -236,11 +262,15 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
                       type="button"
                       onClick={() => handleAvatarSelect(avatar.id)}
                       disabled={isLoading}
-                      className={`aspect-square rounded-lg border-2 transition-all p-1 hover:scale-105 disabled:opacity-50 ${
-                        formData.selectedAvatar === avatar.id
-                          ? 'border-blue-500 bg-blue-500/20 scale-105'
-                          : 'border-slate-600 hover:border-slate-500'
-                      }`}
+                      className={`aspect-square rounded-lg border-2 transition-all p-1 hover:scale-105 disabled:opacity-50`}
+                      style={{
+                        borderColor: formData.selectedAvatar === avatar.id 
+                          ? theme.colors.accent 
+                          : theme.colors.border,
+                        backgroundColor: formData.selectedAvatar === avatar.id 
+                          ? `${theme.colors.accent}20` 
+                          : 'transparent'
+                      }}
                       title={avatar.name}
                     >
                       <img 
@@ -252,27 +282,34 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
                   ))}
                 </div>
 
-                
                 {errors.avatar && (
                   <p className="mt-1 text-sm text-red-400">{errors.avatar}</p>
                 )}
               </div>
 
               {/* Preview */}
-              <div className="bg-slate-700/50 rounded-lg p-4">
-                <p className="text-sm text-gray-300 mb-3">
+              <div 
+                className="rounded-lg p-4"
+                style={{ backgroundColor: `${theme.colors.border}50` }}
+              >
+                <p className="text-sm mb-3" style={{ color: theme.colors.textSecondary }}>
                   {t('preview') || 'Vista previa'}:
                 </p>
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-600 flex items-center justify-center">
+                  <div 
+                    className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center"
+                    style={{ backgroundColor: theme.colors.border }}
+                  >
                     {getPreviewAvatar()}
-                    <FiUser className="w-6 h-6 text-gray-400" />
+                    <FiUser className="w-6 h-6" style={{ color: theme.colors.textSecondary }} />
                   </div>
                   <div>
-                    <p className="font-medium text-white">
+                    <p className="font-medium" style={{ color: theme.colors.text }}>
                       {formData.username || t('profile')}
                     </p>
-                    <p className="text-sm text-gray-400">{user?.email}</p>
+                    <p className="text-sm" style={{ color: theme.colors.textSecondary }}>
+                      {user?.email}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -282,8 +319,13 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
                 <div className={`p-2 rounded-lg text-center text-sm ${
                   message.includes('Error') || message.includes('error')
                     ? 'bg-red-500/20 text-red-400 border border-red-500/30'
-                    : 'bg-green-500/20 text-green-400 border border-green-500/30'
-                }`}>
+                    : 'border'
+                }`}
+                style={{
+                  backgroundColor: message.includes('Error') ? undefined : `${theme.colors.accent}20`,
+                  color: message.includes('Error') ? undefined : theme.colors.accent,
+                  borderColor: message.includes('Error') ? undefined : theme.colors.accent
+                }}>
                   {message}
                 </div>
               )}
@@ -294,14 +336,22 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
                   type="button"
                   onClick={handleClose}
                   disabled={isLoading}
-                  className="flex-1 px-4 py-2 bg-slate-600 hover:bg-slate-500 text-white rounded-lg transition-colors disabled:opacity-50"
+                  className="flex-1 px-2 py-2 rounded-lg transition-colors disabled:opacity-50"
+                  style={{
+                    backgroundColor: theme.colors.border,
+                    color: currentTheme === 'coolRetro' ? '#ffffff' : theme.colors.text
+                  }}
                 >
                   {t('cancel') || 'Cancelar'}
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 px-2 py-2 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  style={{
+                    backgroundColor: theme.colors.accent,
+                    color: theme.colors.background
+                  }}
                 >
                   {isLoading ? (
                     <>

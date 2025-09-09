@@ -52,8 +52,6 @@ const translations = {
     lightMode: "Modo claro",
     language: "Idioma",
     settings: "Configuración",
-    profile: "Perfil",
-    editProfile: "Editar perfil",
     
     // Navigation
     home: "Inicio",

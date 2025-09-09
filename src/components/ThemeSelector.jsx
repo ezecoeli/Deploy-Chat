@@ -60,7 +60,7 @@ export default function ThemeSelector() {
 
   return (
     <div className="flex items-center gap-2">
-      {/* language selector */}
+      {/* Language selector with animations */}
       <button
         onClick={handleLanguageChange}
         className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${theme.colors.input} hover:opacity-80`}
@@ -70,15 +70,33 @@ export default function ThemeSelector() {
         }}
         title={language === 'es' ? 'Switch to English' : 'Cambiar a español'}
       >
-        <span className="text-sm">
-          {language === 'es' ? '🇬🇧' : '🇪🇸'}
-        </span>
-        <span className="text-sm font-medium hidden sm:inline">
-          {language === 'es' ? 'EN' : 'ES'}
-        </span>
+        <AnimatePresence mode="wait">
+          <motion.span
+            key={language}
+            initial={{ opacity: 0, y: -10, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.8 }}
+            transition={{ duration: 0.3 }}
+            className="text-sm"
+          >
+            {language === 'es' ? '🇬🇧' : '🇪🇸'}
+          </motion.span>
+        </AnimatePresence>
+        <AnimatePresence mode="wait">
+          <motion.span
+            key={language + '-text'}
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -10 }}
+            transition={{ duration: 0.3 }}
+            className="text-sm font-medium hidden sm:inline"
+          >
+            {language === 'es' ? 'EN' : 'ES'}
+          </motion.span>
+        </AnimatePresence>
       </button>
 
-      {/* theme selector */}
+      {/* Theme selector with animations */}
       <div className="relative" ref={dropdownRef}>
         <button
           onClick={() => setIsOpen(!isOpen)}
@@ -90,8 +108,24 @@ export default function ThemeSelector() {
           title="Cambiar tema de terminal"
         >
           <FiTerminal className="w-4 h-4" />
-          <span className="text-sm font-medium hidden sm:inline">DevShell</span>
-          <FiChevronDown className={`w-3 h-3 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+          <AnimatePresence mode="wait">
+            <motion.span
+              key={currentTheme + '-theme-name'}
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.3 }}
+              className="text-sm font-medium hidden sm:inline"
+            >
+              {theme.name}
+            </motion.span>
+          </AnimatePresence>
+          <motion.div
+            animate={{ rotate: isOpen ? 180 : 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <FiChevronDown className="w-3 h-3" />
+          </motion.div>
         </button>
 
         <AnimatePresence>

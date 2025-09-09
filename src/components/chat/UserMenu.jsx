@@ -121,9 +121,7 @@ export default function UserMenu({
           <p className="text-sm font-medium">
             {userProfile?.username || user?.email?.split('@')[0]}
           </p>
-          <p className="text-xs opacity-70">
-            {statusInfo.text}
-          </p>
+          
         </div>
         <FiChevronDown className={`w-3 h-3 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
       </button>
