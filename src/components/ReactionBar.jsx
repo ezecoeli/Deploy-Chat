@@ -1,18 +1,65 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useReactions, DEVELOPER_REACTIONS } from '../hooks/useReactions';
 
 export default function ReactionBar({ messageId, userId, currentTheme, isOwnMessage = false }) {
   const [showPicker, setShowPicker] = useState(false);
   const [activeCategory, setActiveCategory] = useState('classic');
+  const pickerRef = useRef(null);
+  const overlayRef = useRef(null);
   
   const {
     reactions,
     loading,
     toggleReaction,
     getTotalReactions,
-    getReactionCount,
     hasUserReacted
   } = useReactions(messageId, userId);
+
+  // Handle clicks outside the picker - special handling for coolRetro
+  useEffect(() => {
+    if (!showPicker) return;
+
+    const handleClickOutside = (event) => {
+      // Special handling for coolRetro theme
+      if (currentTheme === 'coolRetro') {
+        // Check if click is outside picker container
+        if (pickerRef.current && !pickerRef.current.contains(event.target)) {
+          event.preventDefault();
+          event.stopPropagation();
+          setShowPicker(false);
+        }
+      } else {
+        // Normal handling for other themes
+        if (pickerRef.current && !pickerRef.current.contains(event.target)) {
+          setShowPicker(false);
+        }
+      }
+    };
+
+    // Add event listener with capture for coolRetro
+    const useCapture = currentTheme === 'coolRetro';
+    document.addEventListener('mousedown', handleClickOutside, useCapture);
+    document.addEventListener('touchstart', handleClickOutside, useCapture);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside, useCapture);
+      document.removeEventListener('touchstart', handleClickOutside, useCapture);
+    };
+  }, [showPicker, currentTheme]);
+
+  // Close picker on Escape key
+  useEffect(() => {
+    if (!showPicker) return;
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        setShowPicker(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [showPicker]);
 
   const handleReactionClick = async (emoji) => {
     setShowPicker(false);
@@ -24,7 +71,7 @@ export default function ReactionBar({ messageId, userId, currentTheme, isOwnMess
 
   const getEmojisByCategory = (category) => {
     return Object.entries(DEVELOPER_REACTIONS).filter(
-      ([key, data]) => data.category === category
+      ([, data]) => data.category === category
     );
   };
 
@@ -67,10 +114,9 @@ export default function ReactionBar({ messageId, userId, currentTheme, isOwnMess
     return null;
   }
 
-  
   return (
     <div className="flex items-center gap-1 mt-1 relative">
-      {/* Always show existing reactions  */}
+      {/* Always show existing reactions */}
       {hasReactions && (
         <div className="flex flex-wrap gap-1">
           {Object.entries(reactions).map(([emoji, users]) => (
@@ -116,22 +162,69 @@ export default function ReactionBar({ messageId, userId, currentTheme, isOwnMess
           {/* Picker with categories */}
           {showPicker && (
             <>
+              {/* Background overlay */}
               <div 
-                className="fixed inset-0 z-10"
-                onClick={() => setShowPicker(false)}
+                ref={overlayRef}
+                className="fixed inset-0"
+                style={{ 
+                  zIndex: currentTheme === 'coolRetro' ? 9999 : 100,
+                  backgroundColor: 'transparent',
+                  cursor: 'default',
+                  pointerEvents: 'all'
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowPicker(false);
+                }}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowPicker(false);
+                }}
               />
               
-              <div className={`
-                absolute bottom-full left-0 mb-2 rounded-lg border z-20
-                ${themeStyles.picker}
-                shadow-lg backdrop-blur-sm w-64
-              `}>
+              <div 
+                ref={pickerRef}
+                className={`
+                  absolute bottom-full left-0 mb-2 rounded-lg border
+                  ${themeStyles.picker}
+                  shadow-lg backdrop-blur-sm w-64
+                `}
+                style={{
+                  zIndex: currentTheme === 'coolRetro' ? 10000 : 101,
+                  position: 'absolute',
+                  // Force specific styles for coolRetro theme
+                  ...(currentTheme === 'coolRetro' && {
+                    backgroundColor: 'rgba(0, 0, 0, 0.98)',
+                    border: '2px solid #e6a000',
+                    boxShadow: '0 0 20px rgba(230, 160, 0, 0.5), inset 0 0 20px rgba(230, 160, 0, 0.1)',
+                    transform: 'translateZ(0)',
+                  })
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+              >
                 {/* Category tabs */}
                 <div className="flex border-b border-gray-600/50">
                   {categories.map(category => (
                     <button
                       key={category.id}
-                      onClick={() => setActiveCategory(category.id)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setActiveCategory(category.id);
+                      }}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
                       className={`
                         flex-1 p-2 text-center text-xs border-b-2 transition-colors
                         ${activeCategory === category.id 
@@ -148,10 +241,18 @@ export default function ReactionBar({ messageId, userId, currentTheme, isOwnMess
                 {/* Grid of emojis */}
                 <div className="p-2">
                   <div className="grid grid-cols-6 gap-1">
-                    {getEmojisByCategory(activeCategory).map(([key, { emoji, label }]) => (
+                    {getEmojisByCategory(activeCategory).map(([emojiKey, { emoji, label }]) => (
                       <button
-                        key={key}
-                        onClick={() => handleReactionClick(emoji)}
+                        key={emojiKey}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleReactionClick(emoji);
+                        }}
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
                         disabled={loading}
                         className={`
                           p-2 rounded-lg transition-all duration-200 hover:scale-125
@@ -160,6 +261,15 @@ export default function ReactionBar({ messageId, userId, currentTheme, isOwnMess
                           ${loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                         `}
                         title={label}
+                        style={{
+                          // Force hover styles for coolRetro
+                          ...(currentTheme === 'coolRetro' && {
+                            backgroundColor: hasUserReacted(emoji) 
+                              ? 'rgba(230, 160, 0, 0.3)' 
+                              : 'rgba(230, 160, 0, 0.1)',
+                            border: `1px solid ${hasUserReacted(emoji) ? '#e6a000' : 'rgba(230, 160, 0, 0.3)'}`,
+                          })
+                        }}
                       >
                         <span className="text-lg">{emoji}</span>
                       </button>
