@@ -52,10 +52,17 @@ export default function MessageArea({
 
   return (
     <div 
-      className={`flex-1 rounded-lg p-4 mb-4 overflow-y-auto ${theme.colors.message}`}
+      className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent"
       style={{
-        background: currentTheme === 'coolRetro' ? '#000000' : undefined,
-        border: currentTheme === 'coolRetro' ? '1px solid #ffb000' : undefined
+        
+        backgroundColor: currentTheme === 'matrix' || currentTheme === 'coolRetro' 
+          ? 'transparent' 
+          : 'rgba(0, 0, 0, 0.3)',
+        fontFamily: theme.font,
+        color: theme.colors.text,
+        ...(currentTheme === 'msdos' && {
+          borderLeft: '4px solid #c0c7c8'
+        })
       }}
     >
       {messages.length === 0 ? (
@@ -108,13 +115,21 @@ export default function MessageArea({
                     <div 
                       className="px-3 py-2 rounded"
                       style={{ 
-                        backgroundColor: isOwnMessage 
+                        backgroundColor: currentTheme === 'matrix' 
+                          ? isOwnMessage 
+                            ? 'rgba(0, 255, 0, 0.15)'
+                            : 'rgba(0, 100, 0, 0.3)'
+                          : isOwnMessage 
                           ? 'rgba(230, 160, 0, 0.1)' 
                           : 'rgba(0,0,0,0.4)', 
-                        border: `1px solid ${currentTheme === 'coolRetro' ? '#664400' : theme.colors.border}`,
+                        border: currentTheme === 'matrix' 
+                          ? `1px solid ${isOwnMessage ? '#00ff00' : '#004400'}` 
+                          : `1px solid ${currentTheme === 'coolRetro' ? '#664400' : theme.colors.border}`,
                         color: theme.colors.text,
                         textShadow: currentTheme === 'coolRetro' 
                           ? '0 0 3px #e6a000'
+                          : currentTheme === 'matrix'
+                          ? '0 0 2px #00ff00'
                           : 'none'
                       }}
                     >

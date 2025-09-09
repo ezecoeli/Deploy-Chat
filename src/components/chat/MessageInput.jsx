@@ -124,49 +124,60 @@ export default function MessageInput({
   }, []);
 
   return (
-    <form onSubmit={sendMessage} className="flex gap-2 font-mono">
-      <div 
-        className="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg" 
-        style={{ 
-          backgroundColor: currentTheme === 'coolRetro' ? '#000000' : 'rgba(0,0,0,0.5)', 
-          border: `1px solid ${theme.colors.border}` 
-        }}
-      >
-        <span 
-          className="px-2 py-1 rounded-md font-medium"
+    <div 
+      className="border-t p-4"
+      style={{
+        borderColor: theme.colors.border,
+        // Fondo transparente para matrix y coolRetro
+        backgroundColor: currentTheme === 'matrix' || currentTheme === 'coolRetro' 
+          ? 'transparent' 
+          : 'rgba(0, 0, 0, 0.3)',
+      }}
+    >
+      <form onSubmit={sendMessage} className="flex gap-2 font-mono">
+        <div 
+          className="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg" 
           style={{ 
-            color: theme.colors.accent,
-            backgroundColor: `${theme.colors.accent}15`,
-            border: `1px solid ${theme.colors.accent}30`
+            backgroundColor: currentTheme === 'coolRetro' ? '#000000' : 'rgba(0,0,0,0.5)', 
+            border: `1px solid ${theme.colors.border}` 
           }}
         >
-          {userProfile?.username || user?.email?.split('@')[0]}@deploy-chat:{theme.prompt}
-        </span>
-        <input
-          type="text"
-          value={newMessage}
-          onChange={handleInputChange}
-          placeholder={getThemePlaceholder(currentTheme, t)}
-          className="flex-1 rounded-lg p-1 outline-none"
-          style={{ 
-            color: theme.colors.text,
-            background: currentTheme === 'coolRetro' ? '#000000' : '#111111',
-            border: currentTheme === 'coolRetro' ? '1px solid #664400' : 'none',
-            textShadow: currentTheme === 'coolRetro' ? '0 0 2px #e6a000' : 'none',
-            fontFamily: currentTheme === 'coolRetro' ? '"Courier New", monospace' : 'inherit'
-          }}
-          disabled={!currentChannel}
-        />
-      </div>
-      <button
-        type="submit"
-        disabled={!newMessage.trim() || !currentChannel}
-        className={`px-6 py-2 rounded-lg transition-colors duration-200 ${
-          currentTheme === 'default' ? 'font-medium' : 'font-mono'
-        } ${theme.colors.button}`}
-      >
-        {currentTheme === 'default' ? t('send') : t('execute')}
-      </button>
-    </form>
+          <span 
+            className="px-2 py-1 rounded-md font-medium"
+            style={{ 
+              color: theme.colors.accent,
+              backgroundColor: `${theme.colors.accent}15`,
+              border: `1px solid ${theme.colors.accent}30`
+            }}
+          >
+            {userProfile?.username || user?.email?.split('@')[0]}@deploy-chat:{theme.prompt}
+          </span>
+          <input
+            type="text"
+            value={newMessage}
+            onChange={handleInputChange}
+            placeholder={getThemePlaceholder(currentTheme, t)}
+            className="flex-1 rounded-lg p-1 outline-none"
+            style={{ 
+              color: theme.colors.text,
+              background: currentTheme === 'coolRetro' ? '#000000' : '#111111',
+              border: currentTheme === 'coolRetro' ? '1px solid #664400' : 'none',
+              textShadow: currentTheme === 'coolRetro' ? '0 0 2px #e6a000' : 'none',
+              fontFamily: currentTheme === 'coolRetro' ? '"Courier New", monospace' : 'inherit'
+            }}
+            disabled={!currentChannel}
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={!newMessage.trim() || !currentChannel}
+          className={`px-6 py-2 rounded-lg transition-colors duration-200 ${
+            currentTheme === 'default' ? 'font-medium' : 'font-mono'
+          } ${theme.colors.button}`}
+        >
+          {currentTheme === 'default' ? t('send') : t('execute')}
+        </button>
+      </form>
+    </div>
   );
 }

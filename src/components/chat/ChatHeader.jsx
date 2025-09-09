@@ -13,20 +13,27 @@ export default function ChatHeader({
   onLogout 
 }) {
   return (
-    <header 
-      className={`flex justify-between items-center mb-4 ${
-        currentTheme === 'msdos' ? 'p-2 border border-[c0c7c8]' : ''
-      }`}
+    <div 
+      className="border p-4 flex justify-between items-center"
       style={{
-        backgroundColor: currentTheme === 'msdos' ? theme.colors.headerBg : 'transparent',
-        fontFamily: theme.font
+        borderColor: currentTheme === 'matrix' 
+          ? 'rgba(0, 255, 0, 0.3)'
+          : currentTheme === 'msdos'
+          ? '#c0c7c8'
+          : theme.colors.border,
+        
+        backgroundColor: currentTheme === 'msdos' 
+          ? theme.colors.headerBg || '#000080' 
+          : currentTheme === 'matrix' || currentTheme === 'coolRetro' 
+          ? 'transparent' 
+          : 'rgba(0, 0, 0, 0.3)',
       }}
     >
       <div>
         <h1 
           className="text-2xl font-bold font-mono"
           style={{ 
-            color: currentTheme === 'msdos' ? theme.colors.headerText : theme.colors.primary,
+            color: currentTheme === 'msdos' ? theme.colors.headerText || '#ffffff' : theme.colors.primary,
             textShadow: currentTheme === 'msdos' ? 'none' : theme.effects.textShadow,
             fontFamily: theme.font
           }}
@@ -36,7 +43,7 @@ export default function ChatHeader({
         <p 
           className="text-sm font-mono"
           style={{ 
-            color: currentTheme === 'msdos' ? theme.colors.headerText : theme.colors.textSecondary,
+            color: currentTheme === 'msdos' ? theme.colors.headerText || '#ffffff' : theme.colors.textSecondary,
             fontFamily: theme.font
           }}
         >
@@ -59,6 +66,6 @@ export default function ChatHeader({
           onLogout={onLogout}
         />
       </div>
-    </header>
+    </div>
   );
 }

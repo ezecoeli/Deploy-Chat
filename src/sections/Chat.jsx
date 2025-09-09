@@ -8,6 +8,7 @@ import ChatHeader from '../components/chat/ChatHeader';
 import ConnectionStatus from '../components/chat/ConnectionStatus';
 import MessageArea from '../components/chat/MessageArea';
 import MessageInput from '../components/chat/MessageInput';
+import MatrixRain from '../components/MatrixRain';
 
 export default function Chat() {
   const { user, logout, loading } = useAuth();
@@ -71,7 +72,7 @@ export default function Chat() {
     }
 
     try {
-      // MEJORADO: Consulta más específica con campos explícitos del usuario
+      
       const { data, error } = await supabase
         .from('messages')
         .select(`
@@ -123,7 +124,7 @@ export default function Chat() {
     // Load messages only once
     const loadInitialMessages = async () => {
       try {
-        // MEJORADO: Misma consulta específica que en loadMessages
+        
         const { data, error } = await supabase
           .from('messages')
           .select(`
@@ -167,12 +168,12 @@ export default function Chat() {
           schema: 'public',
           table: 'messages',
           filter: `channel_id=eq.${currentChannel.id}`
-        }, async (payload) => { // CAMBIADO: Función ahora es async para consultar usuario
-          // SOLUCIONADO: Obtener información completa del usuario que envió el mensaje
+        }, async (payload) => { // async function to fetch user data
+          // Get complete user information who sent the message
           let messageWithUser = { ...payload.new };
           
           if (payload.new.user_id === user.id) {
-            // Si es nuestro mensaje, usar nuestra información actualizada
+            // If it's our message, use our updated information
             messageWithUser.users = {
               id: user.id,
               email: user.email,
@@ -180,7 +181,7 @@ export default function Chat() {
               avatar_url: userProfile?.avatar_url || 'avatar-01'
             };
           } else {
-            // NUEVO: Si es de otro usuario, consultar su información en la base de datos
+            // If it's from another user, fetch their information from the database
             try {
               const { data: userData, error } = await supabase
                 .from('users')
@@ -191,7 +192,7 @@ export default function Chat() {
               if (!error && userData) {
                 messageWithUser.users = userData;
               } else {
-                // Fallback si no se encuentra el usuario
+                // Fallback if user is not found
                 messageWithUser.users = {
                   id: payload.new.user_id,
                   email: 'unknown_user',
@@ -200,7 +201,7 @@ export default function Chat() {
                 };
               }
             } catch (err) {
-              // Fallback en caso de error de red o consulta
+              // Fallback in case of network or query error
               messageWithUser.users = {
                 id: payload.new.user_id,
                 email: 'unknown_user',
@@ -215,8 +216,7 @@ export default function Chat() {
             if (messageExists) {
               return current;
             }
-            
-            // MEJORADO: Ahora agrega el mensaje con información completa del usuario
+
             return [...current, messageWithUser];
           });
         })
@@ -270,7 +270,7 @@ export default function Chat() {
         subscription.unsubscribe();
       }
     };
-  }, [currentChannel?.id, user?.id, userProfile]); // AGREGADO: userProfile como dependencia
+  }, [currentChannel?.id, user?.id, userProfile]); 
 
   // Callback handlers for components
   const handleOpenProfile = () => {
@@ -297,10 +297,29 @@ export default function Chat() {
     <div 
       className={`relative min-h-screen w-full overflow-hidden bg-gradient-to-br ${theme.colors.bg}`}
       style={{
-        background: currentTheme === 'coolRetro' ? '#000000' : undefined
+        background: currentTheme === 'coolRetro' ? '#000000' : 
+                   currentTheme === 'matrix' ? '#000000' : undefined
       }}
     >
-      <div className="w-full max-w-4xl h-screen p-4 flex flex-col relative mx-auto">
+      {/* Matrix Rain Effect */}
+      {currentTheme === 'matrix' && (
+        <MatrixRain 
+          fps={30} 
+          density={0.8} 
+          opacity={0.8} 
+        />
+      )}
+      
+      <div 
+        className="w-full max-w-4xl h-screen p-4 flex flex-col relative mx-auto z-20"
+        style={{
+          ...(currentTheme === 'matrix' && {
+            border: '1px solid rgba(0, 255, 0, 0.3)',
+            borderRadius: '8px',
+            boxShadow: '0 0 20px rgba(0, 255, 0, 0.1)'
+          })
+        }}
+      >
         
         <ChatHeader
           currentChannel={currentChannel}
@@ -346,12 +365,15 @@ export default function Chat() {
         )}
       </div>
 
-      <UserProfileModal
-        isOpen={showProfileModal}
-        onClose={() => setShowProfileModal(false)}
-        user={user}
-        onProfileUpdated={handleProfileUpdated}
-      />
+      {/* Profile Modal with higher z-index */}
+      <div className="relative z-30">
+        <UserProfileModal
+          isOpen={showProfileModal}
+          onClose={() => setShowProfileModal(false)}
+          user={user}
+          onProfileUpdated={handleProfileUpdated}
+        />
+      </div>
     </div>
   );
 }
