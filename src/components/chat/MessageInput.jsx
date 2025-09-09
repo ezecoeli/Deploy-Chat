@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { supabase } from '../../utils/supabaseClient';
 
 export default function MessageInput({ 
@@ -13,18 +13,29 @@ export default function MessageInput({
 }) {
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth); 
   const typingTimeoutRef = useRef(null);
 
-  // Function to handle typing
+  // detect window resize for responsive prompt
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+  
   const handleInputChange = (e) => {
     const value = e.target.value;
     setNewMessage(value);
 
-    // Detect if user is typing
     if (value.trim() && !isTyping) {
       setIsTyping(true);
       
-      // Broadcast typing event
       if (currentChannel?.id) {
         supabase.channel(`messages:${currentChannel.id}`)
           .send({
@@ -37,21 +48,16 @@ export default function MessageInput({
             }
           });
       }
-
-      // Notify parent component about typing status
       onTypingChange?.(true);
     }
 
-    // Clear previous timeout
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
 
-    // Set new timeout to stop typing
     typingTimeoutRef.current = setTimeout(() => {
       setIsTyping(false);
       
-      // Broadcast stop typing event
       if (currentChannel?.id) {
         supabase.channel(`messages:${currentChannel.id}`)
           .send({
@@ -64,8 +70,6 @@ export default function MessageInput({
             }
           });
       }
-
-      // Notify parent component about typing status
       onTypingChange?.(false);
     }, 1000);
   };
@@ -74,7 +78,6 @@ export default function MessageInput({
     e.preventDefault();
     if (!newMessage.trim() || !currentChannel || !user) return;
 
-    // Stop typing indicator when sending message
     setIsTyping(false);
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
@@ -93,14 +96,12 @@ export default function MessageInput({
         ]);
 
       if (error) throw error;
-
       setNewMessage('');
     } catch (err) {
       onError?.('Error enviando mensaje: ' + err.message);
     }
   };
 
-  // template placeholders based on theme
   const getThemePlaceholder = (currentTheme, t) => {
     const placeholders = {
       default: t('typeMessage') || "Escribe un mensaje...",
@@ -114,7 +115,33 @@ export default function MessageInput({
     return placeholders[currentTheme] || "echo 'Hello World!'";
   };
 
-  // Clean up typing timeout on unmount
+  // Responsive prompt 
+  const getResponsivePrompt = () => {
+    const username = userProfile?.username || user?.email?.split('@')[0];
+    const isSmallScreen = windowWidth < 640;
+    
+    if (isSmallScreen) {
+      // Shortened prompts for mobile
+      switch (currentTheme) {
+        case 'matrix':
+          return 'Neo>';
+        case 'ubuntu':
+          return '~$';
+        case 'windows95':
+          return 'C:>';
+        case 'macOS':
+          return '%';
+        case 'coolRetro':
+          return 'C>';
+        default:
+          return '$';
+      }
+    }
+    
+    // Full prompts for desktop
+    return `${username}:${theme.prompt}`;
+  };
+
   React.useEffect(() => {
     return () => {
       if (typingTimeoutRef.current) {
@@ -125,47 +152,44 @@ export default function MessageInput({
 
   return (
     <div 
-      className="border-t p-4"
+      className="border-t px-2 py-3 sm:p-4"
       style={{
         borderColor: theme.colors.border,
-        
         backgroundColor: currentTheme === 'matrix' || currentTheme === 'coolRetro' 
           ? 'transparent' 
           : 'rgba(0, 0, 0, 0.3)',
       }}
     >
-      <form onSubmit={sendMessage} className="flex gap-2 font-mono">
+      <form onSubmit={sendMessage} className="flex gap-1 sm:gap-2 font-mono">
         <div 
-          className="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg" 
+          className="flex-1 flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 rounded-lg" 
           style={{ 
             backgroundColor: currentTheme === 'coolRetro' ? '#000000' : 'rgba(0,0,0,0.5)', 
             border: `1px solid ${theme.colors.border}` 
           }}
         >
           <span 
-            className="px-2 py-1 rounded-md font-medium"
+            className="px-1 sm:px-2 py-1 rounded-md font-medium flex-shrink-0 text-xs sm:text-sm"
             style={{ 
               color: theme.colors.accent,
               backgroundColor: `${theme.colors.accent}15`,
               border: `1px solid ${theme.colors.accent}30`,
-              fontSize: "0.8rem",
             }}
           >
-            {userProfile?.username || user?.email?.split('@')[0]}:{theme.prompt}
+            {getResponsivePrompt()}
           </span>
           <input
             type="text"
             value={newMessage}
             onChange={handleInputChange}
             placeholder={getThemePlaceholder(currentTheme, t)}
-            className="flex-1 rounded-lg pl-1 outline-none"
+            className="flex-1 rounded-lg pl-1 outline-none text-sm sm:text-base"
             style={{ 
               color: theme.colors.text,
               background: currentTheme === 'coolRetro' ? '#000000' : '#171717',
               border: currentTheme === 'coolRetro' ? '1px solid #664400' : 'none',
               textShadow: currentTheme === 'coolRetro' ? '0 0 2px #e6a000' : 'none',
               fontFamily: currentTheme === 'coolRetro' ? '"Courier New", monospace' : 'inherit',
-              fontSize: currentTheme === 'coolRetro' ? '1rem' : '1rem',
             }}
             disabled={!currentChannel}
           />
@@ -173,11 +197,17 @@ export default function MessageInput({
         <button
           type="submit"
           disabled={!newMessage.trim() || !currentChannel}
-          className={`px-6 py-2 rounded-lg transition-colors duration-200 ${
+          className={`px-3 sm:px-6 py-2 rounded-lg transition-colors duration-200 text-sm sm:text-base flex-shrink-0 ${
             currentTheme === 'default' ? 'font-medium' : 'font-mono'
           } ${theme.colors.button}`}
         >
-          {currentTheme === 'default' ? t('send') : t('execute')}
+          
+          <span className="hidden sm:inline">
+            {currentTheme === 'default' ? t('send') : t('execute')}
+          </span>
+          <span className="sm:hidden">
+            {currentTheme === 'default' ? '→' : '>'}
+          </span>
         </button>
       </form>
     </div>

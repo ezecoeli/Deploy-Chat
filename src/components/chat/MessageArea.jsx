@@ -13,12 +13,10 @@ export default function MessageArea({
 }) {
   const messagesEndRef = useRef(null);
 
-  // Auto-scroll to new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Function to get scrollbar class based on theme
   const getScrollbarClass = () => {
     switch (currentTheme) {
       case 'matrix':
@@ -38,8 +36,7 @@ export default function MessageArea({
     }
   };
 
-  const renderAvatar = (avatarUrl, username, size = 'w-8 h-8') => {
-    // if is a preloaded avatar
+  const renderAvatar = (avatarUrl, username, size = 'w-6 h-6 sm:w-8 sm:h-8') => {
     const preloadedAvatar = getAvatarById(avatarUrl);
     if (preloadedAvatar) {
       return (
@@ -51,7 +48,6 @@ export default function MessageArea({
       );
     }
 
-    // If it's a custom URL
     if (avatarUrl && !avatarUrl.startsWith('avatar-')) {
       return (
         <img 
@@ -66,29 +62,27 @@ export default function MessageArea({
       );
     }
     
-    // Fallback
     return <FiUser className={`${size.replace('w-', '').replace('h-', '')} text-gray-400`} />;
   };
 
   return (
     <div 
-      className={`flex-1 overflow-y-auto p-4 space-y-3 ${getScrollbarClass()}`}
+      className={`flex-1 overflow-y-auto px-2 py-3 sm:p-4 space-y-2 sm:space-y-3 ${getScrollbarClass()}`}
       style={{
-        
         backgroundColor: currentTheme === 'matrix' || currentTheme === 'coolRetro' 
           ? 'transparent' 
           : 'rgba(0, 0, 0, 0.3)',
         fontFamily: theme.font,
         color: theme.colors.text,
         ...(currentTheme === 'windows95' && {
-          borderLeft: '4px solid #c0c7c8'
+          borderLeft: '2px solid #c0c7c8 sm:4px solid #c0c7c8'
         })
       }}
     >
       {messages.length === 0 ? (
-        <div className="text-center mt-8">
+        <div className="text-center mt-4 sm:mt-8 px-4">
           <p 
-            className={currentTheme === 'default' ? 'text-gray-500' : 'font-mono'}
+            className={`${currentTheme === 'default' ? 'text-gray-500' : 'font-mono'} text-sm sm:text-base`}
             style={{ color: theme.colors.textSecondary }}
           >
             {currentTheme === 'default' 
@@ -98,7 +92,7 @@ export default function MessageArea({
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           {messages.map((message) => {
             const isOwnMessage = message.user_id === user?.id;
             const messageUser = message.users || { 
@@ -112,28 +106,34 @@ export default function MessageArea({
                 key={message.id}
                 className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
               >
-                <div className={`flex gap-3 max-w-xs lg:max-w-md ${
+                <div className={`flex gap-2 sm:gap-3 max-w-[85%] sm:max-w-xs lg:max-w-md xl:max-w-lg ${
                   isOwnMessage ? 'flex-row-reverse' : 'flex-row'
                 }`}>
                   {!isOwnMessage && (
-                    <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-600 flex items-center justify-center flex-shrink-0">
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full overflow-hidden bg-gray-600 flex items-center justify-center flex-shrink-0">
                       {renderAvatar(messageUser.avatar_url, messageUser.username)}
                     </div>
                   )}
                   
-                  <div className="font-mono">
+                  <div className="font-mono min-w-0 flex-1">
                     {!isOwnMessage && (
-                      <div className="flex items-center gap-1 mb-1">
-                        <span style={{ color: theme.colors.accent }}>
+                      <div className="flex items-center gap-1 mb-1 flex-wrap">
+                        <span 
+                          className="text-xs sm:text-sm font-semibold truncate"
+                          style={{ color: theme.colors.accent }}
+                        >
                           {messageUser.username || messageUser.email}
                         </span>
-                        <span style={{ color: theme.colors.textSecondary }}>
+                        <span 
+                          className="text-xs hidden sm:inline"
+                          style={{ color: theme.colors.textSecondary }}
+                        >
                           :{theme.prompt}
                         </span>
                       </div>
                     )}
                     <div 
-                      className="px-3 py-2 rounded"
+                      className="px-2 py-1 sm:px-3 sm:py-2 rounded text-sm sm:text-base"
                       style={{ 
                         backgroundColor: currentTheme === 'matrix' 
                           ? isOwnMessage 
@@ -150,7 +150,8 @@ export default function MessageArea({
                           ? '0 0 3px #e6a000'
                           : currentTheme === 'matrix'
                           ? '0 0 2px #00ff00'
-                          : 'none'
+                          : 'none',
+                        wordBreak: 'break-word'
                       }}
                     >
                       <MessageRenderer content={message.content} />
@@ -164,21 +165,21 @@ export default function MessageArea({
             );
           })}
 
-          {/* users typing indicator */}
+          {/* Typing indicator */}
           {typingUsers.length > 0 && (
-            <div className="flex items-center gap-2 px-3 py-2 opacity-70">
+            <div className="flex items-center gap-2 px-2 sm:px-3 py-2 opacity-70">
               <div className="flex space-x-1">
-                <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" />
-                <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0.1s' }} />
-                <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0.2s' }} />
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-gray-400 animate-bounce" />
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0.1s' }} />
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0.2s' }} />
               </div>
               <span 
                 className="text-xs font-mono"
                 style={{ color: theme.colors.textSecondary }}
               >
                 {typingUsers.length === 1 
-                  ? `${typingUsers[0].username} está escribiendo...`
-                  : `${typingUsers.length} usuarios están escribiendo...`
+                  ? `${typingUsers[0].username} ${window.innerWidth < 640 ? '...' : 'está escribiendo...'}`
+                  : `${typingUsers.length} usuarios escribiendo...`
                 }
               </span>
             </div>
