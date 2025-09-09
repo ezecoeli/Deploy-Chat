@@ -180,7 +180,7 @@ export default function MessageArea({
                 style={{ color: theme.colors.textSecondary }}
               >
                 {typingUsers.length === 1 
-                  ? `${typingUsers[0].username} ${window.innerWidth < 640 ? '...' : 'está escribiendo...'}`
+                  ? `${typingUsers[0].username} ${window.innerWidth < 640 ? '...' : t('isCoding')}`
                   : `${typingUsers.length} usuarios escribiendo...`
                 }
               </span>

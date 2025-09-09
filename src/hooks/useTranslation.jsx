@@ -34,6 +34,7 @@ const translations = {
     profile: "Perfil",
     editProfile: "Editar perfil",
     profileUpdated: "Perfil actualizado exitosamente",
+    isCoding: "está codificando...",
 
     // Members count
     oneMember: "1 miembro",
@@ -126,6 +127,7 @@ const translations = {
     profile: "Profile",
     editProfile: "Edit Profile",
     profileUpdated: "Profile updated successfully",
+    isCoding: "is coding...",
 
     // Members count  
     oneMember: "1 member",
