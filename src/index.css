@@ -767,89 +767,6 @@ body[data-theme="macOS"] .w-full.max-w-4xl {
   background: linear-gradient(45deg, rgba(94, 189, 62, 0.8), rgba(226, 56, 56, 0.8));
 }
 
-/* Rainbow title effect  */
-body[data-theme="macOS"] h1 {
-  background: linear-gradient(45deg, 
-    #5EBD3E 0%, 
-    #FFB900 20%,
-    #F78200 40%,
-    #E23838 60%,
-    #973999 80%,
-    #009CDF 100%
-  );
-  background-size: 300% 300%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: transparent;
-  animation: rainbow-flow 4s ease-in-out infinite;
-  text-shadow: none;
-  filter: drop-shadow(0 0 10px rgba(94, 189, 62, 0.5));
-}
-
-@keyframes rainbow-flow {
-  0%, 100% { 
-    background-position: 0% 50%; 
-    filter: drop-shadow(0 0 10px rgba(94, 189, 62, 0.5));
-  }
-  20% { 
-    background-position: 20% 25%; 
-    filter: drop-shadow(0 0 10px rgba(255, 185, 0, 0.5));
-  }
-  40% { 
-    background-position: 40% 50%; 
-    filter: drop-shadow(0 0 10px rgba(247, 130, 0, 0.5));
-  }
-  60% { 
-    background-position: 60% 75%; 
-    filter: drop-shadow(0 0 10px rgba(226, 56, 56, 0.5));
-  }
-  80% { 
-    background-position: 80% 25%; 
-    filter: drop-shadow(0 0 10px rgba(151, 57, 153, 0.5));
-  }
-}
-
-/* Rainbow text effects for messages */
-body[data-theme="macOS"] .font-mono {
-  text-shadow: 0 0 8px rgba(94, 189, 62, 0.6);
-}
-
-/* Apple-style rainbow buttons  */
-body[data-theme="macOS"] button {
-  background: linear-gradient(135deg, 
-    #5EBD3E 0%, 
-    #FFB900 20%, 
-    #F78200 40%, 
-    #E23838 60%, 
-    #973999 80%, 
-    #009CDF 100%
-  ) !important;
-  border: 2px solid rgba(94, 189, 62, 0.6) !important;
-  border-radius: 12px !important;
-  box-shadow: 
-    0 4px 15px rgba(94, 189, 62, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
-  transition: all 0.3s ease !important;
-  font-weight: bold !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
-}
-
-body[data-theme="macOS"] button:hover {
-  background: linear-gradient(135deg, 
-    rgba(94, 189, 62, 1) 0%, 
-    rgba(255, 185, 0, 1) 20%, 
-    rgba(247, 130, 0, 1) 40%, 
-    rgba(226, 56, 56, 1) 60%, 
-    rgba(151, 57, 153, 1) 80%, 
-    rgba(0, 156, 223, 1) 100%
-  ) !important;
-  box-shadow: 
-    0 6px 20px rgba(94, 189, 62, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
-  transform: translateY(-1px) !important;
-}
-
 body[data-theme="macOS"] button:active {
   transform: translateY(0px) !important;
   box-shadow: 
@@ -876,13 +793,6 @@ body[data-theme="macOS"] input:focus {
     0 0 15px rgba(94, 189, 62, 0.4) !important;
   outline: none !important;
 }
-
-/* Rainbow status indicators */
-body[data-theme="macOS"] .status-online {
-  color: #5EBD3E !important;
-  text-shadow: 0 0 8px rgba(94, 189, 62, 0.8) !important;
-}
-
 
 body[data-theme="macOS"] .w-full.max-w-4xl::before {
   content: '';
@@ -1072,4 +982,660 @@ body[data-theme="coolRetro"] textarea:hover::-webkit-scrollbar {
 body[data-theme="coolRetro"] textarea:hover::-webkit-scrollbar-thumb {
   background: rgba(255, 176, 0, 0.6) !important;
   border-radius: 3px !important;
+}
+
+/************* CLASSIC MAC THEME ***************/
+body[data-theme="macOS"] {
+  background: #c0c0c0 !important;
+  font-family: "Chicago", "Geneva", "Monaco", "Charcoal", system-ui, monospace !important;
+}
+
+/* Main container with classic Mac styling */
+body[data-theme="macOS"] .w-full.max-w-4xl {
+  background: #c0c0c0 !important;
+  border: 2px outset #c0c0c0 !important;
+  border-radius: 0px !important;
+  box-shadow: 
+    2px 2px 4px rgba(0, 0, 0, 0.3),
+    inset 1px 1px 0 #ffffff,
+    inset -1px -1px 0 #808080 !important;
+  margin: 20px auto !important;
+  padding: 0 !important;
+  position: relative;
+}
+
+/* Title bar */
+body[data-theme="macOS"] header {
+  background: linear-gradient(to bottom, #f0f0f0 0%, #c0c0c0 50%, #a0a0a0 100%) !important;
+  border-bottom: 1px solid #808080 !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  padding: 8px 12px !important;
+  position: relative !important;
+  z-index: 10 !important;
+  box-shadow: inset 0 1px 0 #ffffff, inset 0 -1px 0 #808080 !important;
+}
+
+body[data-theme="macOS"] h1 {
+  background: linear-gradient(90deg, 
+    #5EBD3E 0%,
+    #FFB900 16%,
+    #F78200 32%, 
+    #E23838 48%,
+    #973999 91%,
+    #009CDF 95% 
+  ) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  color: transparent !important;
+  font-weight: bold !important;
+  text-shadow: none !important;
+  filter: none !important;
+  animation: none !important;
+}
+
+body[data-theme="macOS"] header p {
+  color: #000000 !important;
+  font-family: "Monaco", "Geneva", monospace !important;
+  font-size: 12px !important;
+  text-shadow: none !important;
+}
+
+/* Classic Mac buttons */
+body[data-theme="macOS"] button {
+  background: linear-gradient(to bottom, #f0f0f0 0%, #c0c0c0 50%, #a0a0a0 100%) !important;
+  border: 2px outset #c0c0c0 !important;
+  border-radius: 4px !important;
+  color: #000000 !important;
+  font-family: "Chicago", "Geneva", system-ui, monospace !important;
+  font-size: 12px !important;
+  font-weight: bold !important;
+  text-shadow: none !important;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3) !important;
+  padding: 4px 12px !important;
+  min-height: 24px !important;
+}
+
+body[data-theme="macOS"] button:hover {
+  background: linear-gradient(to bottom, #ffffff 0%, #d0d0d0 50%, #b0b0b0 100%) !important;
+  border: 2px outset #d0d0d0 !important;
+  transform: none !important;
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4) !important;
+}
+
+body[data-theme="macOS"] button:active {
+  background: linear-gradient(to bottom, #a0a0a0 0%, #c0c0c0 50%, #e0e0e0 100%) !important;
+  border: 2px inset #c0c0c0 !important;
+  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.3) !important;
+  transform: none !important;
+}
+
+/* Message area */
+body[data-theme="macOS"] .flex-1.overflow-y-auto {
+  background: #ffffff !important;
+  border: 2px inset #c0c0c0 !important;
+  border-radius: 0 !important;
+  margin: 2px !important;
+  padding: 8px !important;
+}
+
+/* Message bubbles */
+body[data-theme="macOS"] .px-2.py-1 {
+  background: #ffffff !important;
+  border: 1px solid #808080 !important;
+  border-radius: 4px !important;
+  color: #000000 !important;
+  text-shadow: none !important;
+  font-family: "Monaco", "Geneva", monospace !important;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Input area */
+body[data-theme="macOS"] .border-t.px-2 {
+  background: #c0c0c0 !important;
+  border-top: 1px solid #808080 !important;
+  border-radius: 0 !important;
+  padding: 8px !important;
+}
+
+body[data-theme="macOS"] .flex-1.flex.items-start {
+  background: #ffffff !important;
+  border: 2px inset #c0c0c0 !important;
+  border-radius: 4px !important;
+  padding: 4px 8px !important;
+}
+
+body[data-theme="macOS"] textarea {
+  background: #ffffff !important;
+  border: none !important;
+  color: #000000 !important;
+  font-family: "Monaco", "Geneva", monospace !important;
+  font-size: 12px !important;
+  text-shadow: none !important;
+}
+
+body[data-theme="macOS"] textarea::placeholder {
+  color: #808080 !important;
+}
+
+/* Prompt styling */
+body[data-theme="macOS"] .px-1.sm\:px-2.py-1 {
+  background: linear-gradient(to bottom, #f0f0f0 0%, #d0d0d0 100%) !important;
+  border: 1px outset #c0c0c0 !important;
+  border-radius: 2px !important;
+  color: #000000 !important;
+  font-family: "Monaco", "Geneva", monospace !important;
+  font-size: 11px !important;
+  font-weight: bold !important;
+}
+
+/* Dropdown menus */
+body[data-theme="macOS"] .absolute.bg-gray-800,
+body[data-theme="macOS"] .absolute.bg-gray-700 {
+  background: #c0c0c0 !important;
+  border: 2px outset #c0c0c0 !important;
+  border-radius: 4px !important;
+  box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4) !important;
+}
+
+body[data-theme="macOS"] .absolute button,
+body[data-theme="macOS"] .absolute a {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  border-radius: 2px !important;
+  color: #000000 !important;
+  font-family: "Chicago", "Geneva", system-ui, monospace !important;
+  font-size: 12px !important;
+  font-weight: normal !important;
+  text-shadow: none !important;
+  padding: 4px 8px !important;
+  text-align: left !important;
+  width: 100% !important;
+}
+
+body[data-theme="macOS"] .absolute button:hover,
+body[data-theme="macOS"] .absolute a:hover {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #000000 !important;
+}
+
+/* Reaction Bar classic styling */
+body[data-theme="macOS"] .flex.items-center.gap-1 button {
+  background: linear-gradient(to bottom, #f0f0f0 0%, #c0c0c0 50%, #a0a0a0 100%) !important;
+  border: 1px outset #c0c0c0 !important;
+  border-radius: 3px !important;
+  font-size: 11px !important;
+  min-height: 20px !important;
+  padding: 2px 6px !important;
+}
+
+/* Classic Mac scrollbar */
+.mac-scrollbar::-webkit-scrollbar {
+  width: 16px !important;
+  background: #c0c0c0 !important;
+}
+
+.mac-scrollbar::-webkit-scrollbar-track {
+  background: #c0c0c0 !important;
+  border: 1px inset #c0c0c0 !important;
+}
+
+.mac-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #f0f0f0 0%, #c0c0c0 50%, #a0a0a0 100%) !important;
+  border: 1px outset #c0c0c0 !important;
+  border-radius: 0 !important;
+}
+
+.mac-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #ffffff 0%, #d0d0d0 50%, #b0b0b0 100%) !important;
+}
+
+.mac-scrollbar::-webkit-scrollbar-button {
+  background: linear-gradient(to bottom, #f0f0f0 0%, #c0c0c0 50%, #a0a0a0 100%) !important;
+  border: 1px outset #c0c0c0 !important;
+  height: 16px !important;
+}
+
+.mac-scrollbar::-webkit-scrollbar-button:hover {
+  background: linear-gradient(to bottom, #ffffff 0%, #d0d0d0 50%, #b0b0b0 100%) !important;
+}
+
+.mac-scrollbar::-webkit-scrollbar-button:active {
+  border: 1px inset #c0c0c0 !important;
+  background: linear-gradient(to bottom, #a0a0a0 0%, #c0c0c0 50%, #e0e0e0 100%) !important;
+}
+
+/* Status indicators */
+body[data-theme="macOS"] .text-gray-300,
+body[data-theme="macOS"] .text-gray-400,
+body[data-theme="macOS"] .text-white {
+  color: #000000 !important;
+  text-shadow: none !important;
+  font-weight: normal !important;
+}
+
+/* Connection status */
+body[data-theme="macOS"] .mt-2.p-3 {
+  background: #ffffff !important;
+  border: 1px solid #808080 !important;
+  border-radius: 4px !important;
+  color: #000000 !important;
+  font-family: "Monaco", "Geneva", monospace !important;
+  text-shadow: none !important;
+}
+
+body[data-theme="macOS"] h1::before,
+body[data-theme="macOS"] .w-full.max-w-4xl::before {
+  display: none !important;
+}
+
+/* Remove CRT effects for classic Mac */
+body[data-theme="macOS"]::before,
+body[data-theme="macOS"]::after {
+  display: none !important;
+}
+
+/* Classic Mac window controls */
+body[data-theme="macOS"] header::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  width: 12px;
+  height: 12px;
+  background: linear-gradient(to bottom, #f0f0f0 0%, #a0a0a0 100%);
+  border: 1px outset #c0c0c0;
+  border-radius: 2px;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+/************* WINDOWS 95 THEME ***************/
+body[data-theme="windows95"] {
+  background: #c0c7c8 !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+}
+
+/* Main container Windows 95 styling */
+body[data-theme="windows95"] .w-full.max-w-4xl {
+  background: #c0c7c8 !important;
+  border: 2px outset #c0c7c8 !important;
+  border-radius: 0px !important;
+  box-shadow: 
+    2px 2px 4px rgba(0, 0, 0, 0.3),
+    inset 1px 1px 0 #ffffff,
+    inset -1px -1px 0 #808080 !important;
+  margin: 20px auto !important;
+  padding: 0 !important;
+  position: relative;
+}
+
+/* Windows 95 title bar */
+body[data-theme="windows95"] header {
+  background: linear-gradient(to right, #000080 0%, #0000ff 100%) !important;
+  border-bottom: 1px solid #c0c7c8 !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  padding: 4px 8px !important;
+  position: relative !important;
+  z-index: 10 !important;
+  box-shadow: inset 0 1px 0 #4040ff, inset 0 -1px 0 #000040 !important;
+}
+
+body[data-theme="windows95"] header h1 {
+  background: none !important;
+  color: #ffffff !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
+  text-shadow: 1px 1px 0 #000040 !important;
+  filter: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: unset !important;
+  animation: none !important;
+}
+
+body[data-theme="windows95"] header p {
+  color: #ffffff !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 11px !important;
+  text-shadow: 1px 1px 0 #000040 !important;
+}
+
+/* Windows 95 buttons */
+body[data-theme="windows95"] button {
+  background: linear-gradient(to bottom, #ffffff 0%, #c0c7c8 50%, #808080 100%) !important;
+  border: 2px outset #c0c7c8 !important;
+  border-radius: 0px !important;
+  color: #000000 !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 11px !important;
+  font-weight: normal !important;
+  text-shadow: none !important;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3) !important;
+  padding: 3px 8px !important;
+  min-height: 21px !important;
+}
+
+body[data-theme="windows95"] button:hover {
+  background: linear-gradient(to bottom, #ffffff 0%, #d0d7d8 50%, #909090 100%) !important;
+  border: 2px outset #d0d7d8 !important;
+  transform: none !important;
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4) !important;
+}
+
+body[data-theme="windows95"] button:active {
+  background: linear-gradient(to bottom, #808080 0%, #c0c7c8 50%, #ffffff 100%) !important;
+  border: 2px inset #c0c7c8 !important;
+  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.3) !important;
+  transform: none !important;
+}
+
+/* Message area Windows 95 */
+body[data-theme="windows95"] .flex-1.overflow-y-auto {
+  background: #ffffff !important;
+  border: 2px inset #c0c7c8 !important;
+  border-radius: 0 !important;
+  margin: 2px !important;
+  padding: 8px !important;
+  border-left: 4px solid #c0c7c8 !important;
+}
+
+/* Message bubbles Windows 95 */
+body[data-theme="windows95"] .px-2.py-1,
+body[data-theme="windows95"] .px-3.py-2 {
+  background: #ffffff !important;
+  border: 1px solid #808080 !important;
+  border-radius: 0px !important;
+  color: #000000 !important;
+  text-shadow: none !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 11px !important;
+  box-shadow: 
+    1px 1px 1px rgba(0, 0, 0, 0.2),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Input area Windows 95 */
+body[data-theme="windows95"] .border-t.px-2 {
+  background: #c0c7c8 !important;
+  border-top: 2px solid #808080 !important;
+  border-radius: 0 !important;
+  padding: 8px !important;
+  box-shadow: inset 0 1px 0 #404040 !important;
+}
+
+/* Input container Windows 95 */
+body[data-theme="windows95"] .flex-1.flex.items-start {
+  background: #ffffff !important;
+  border: 2px inset #c0c7c8 !important;
+  border-radius: 0px !important;
+  padding: 4px 6px !important;
+  box-shadow: 
+    inset 1px 1px 1px rgba(0, 0, 0, 0.2),
+    inset -1px -1px 0 rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Textarea Windows 95 */
+body[data-theme="windows95"] textarea {
+  background: #ffffff !important;
+  border: none !important;
+  color: #000000 !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 11px !important;
+  text-shadow: none !important;
+  resize: none !important;
+}
+
+body[data-theme="windows95"] textarea::placeholder {
+  color: #808080 !important;
+  font-style: normal !important;
+}
+
+/* Prompt styling Windows 95 */
+body[data-theme="windows95"] .px-1.sm\:px-2.py-1 {
+  background: linear-gradient(to bottom, #ffffff 0%, #c0c7c8 100%) !important;
+  border: 1px outset #c0c7c8 !important;
+  border-radius: 0px !important;
+  color: #000000 !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 10px !important;
+  font-weight: normal !important;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Dropdown menus Windows 95 */
+body[data-theme="windows95"] .absolute.bg-gray-800,
+body[data-theme="windows95"] .absolute.bg-gray-700 {
+  background: #c0c7c8 !important;
+  border: 2px outset #c0c7c8 !important;
+  border-radius: 0px !important;
+  box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Dropdown items Windows 95 */
+body[data-theme="windows95"] .absolute button,
+body[data-theme="windows95"] .absolute a,
+body[data-theme="windows95"] .absolute div[role="button"] {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  border-radius: 0px !important;
+  color: #000000 !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 11px !important;
+  font-weight: normal !important;
+  text-shadow: none !important;
+  padding: 3px 6px !important;
+  text-align: left !important;
+  width: 100% !important;
+  margin: 0px !important;
+}
+
+body[data-theme="windows95"] .absolute button:hover,
+body[data-theme="windows95"] .absolute a:hover,
+body[data-theme="windows95"] .absolute div[role="button"]:hover {
+  background: #000080 !important;
+  color: #ffffff !important;
+  border: 1px solid #000080 !important;
+  text-shadow: 1px 1px 0 #000040 !important;
+}
+
+/* Status online Windows 95 */
+body[data-theme="windows95"] .text-green-500,
+body[data-theme="windows95"] .status-online,
+body[data-theme="windows95"] span[style*="color: rgb(34, 197, 94)"],
+body[data-theme="windows95"] span[style*="#22c55e"] {
+  color: #008000 !important;
+  font-weight: bold !important;
+  text-shadow: none !important;
+}
+
+/* Reaction Bar Windows 95 styling */
+body[data-theme="windows95"] .flex.items-center.gap-1 button {
+  background: linear-gradient(to bottom, #ffffff 0%, #c0c7c8 50%, #808080 100%) !important;
+  border: 1px outset #c0c7c8 !important;
+  border-radius: 0px !important;
+  font-size: 10px !important;
+  min-height: 18px !important;
+  padding: 2px 4px !important;
+}
+
+/* Text colors Windows 95 */
+body[data-theme="windows95"] .text-gray-300,
+body[data-theme="windows95"] .text-gray-400,
+body[data-theme="windows95"] .text-white {
+  color: #000000 !important;
+  text-shadow: none !important;
+  font-weight: normal !important;
+}
+
+/* Connection status Windows 95 */
+body[data-theme="windows95"] .mt-2.p-3 {
+  background: #ffffff !important;
+  border: 1px solid #808080 !important;
+  border-radius: 0px !important;
+  color: #000000 !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  text-shadow: none !important;
+  box-shadow: 
+    inset 1px 1px 0 rgba(255, 255, 255, 0.8),
+    1px 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Windows 95 window controls decoration */
+body[data-theme="windows95"] header::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 16px;
+  height: 12px;
+  background: linear-gradient(to bottom, #c0c7c8 0%, #808080 100%);
+  border: 1px outset #c0c7c8;
+  border-radius: 0px;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+/* Remove effects for Windows 95 */
+body[data-theme="windows95"]::before,
+body[data-theme="windows95"]::after {
+  display: none !important;
+}
+
+/* ConnectionStatus Windows 95 - Contraste mejorado */
+body[data-theme="windows95"] .ml-2.mb-1.mt-1.flex.items-center.justify-between {
+  background: transparent !important;
+  padding: 4px 8px !important;
+  border-radius: 0px !important;
+}
+
+/* Ícono de usuarios Windows 95 */
+body[data-theme="windows95"] .ml-2.mb-1.mt-1.flex svg {
+  color: #000000 !important;
+}
+
+/* Texto de miembros Windows 95 */
+body[data-theme="windows95"] .ml-2.mb-1.mt-1.flex p,
+body[data-theme="windows95"] .ml-2.mb-1.mt-1.flex span {
+  color: #000000 !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 11px !important;
+  font-weight: bold !important;
+  text-shadow: none !important;
+}
+
+/* Status específicos Windows 95 */
+body[data-theme="windows95"] .text-green-600 {
+  color: #008000 !important;
+  font-weight: bold !important;
+}
+
+body[data-theme="windows95"] .text-red-400 {
+  color: #cc0000 !important;
+  font-weight: bold !important;
+}
+
+body[data-theme="windows95"] .text-yellow-400 {
+  color: #cccc00 !important;
+  font-weight: bold !important;
+}
+
+body[data-theme="windows95"] .text-gray-400 {
+  color: #666666 !important;
+  font-weight: bold !important;
+}
+
+/* Punto de estado Windows 95 */
+body[data-theme="windows95"] .w-2.h-2.rounded-full {
+  border: 1px solid #000000 !important;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3) !important;
+}
+
+body[data-theme="windows95"] .flex.items-center.gap-2 * {
+  color: #000000 !important;
+}
+
+/* Nombres de usuarios Windows 95 */
+body[data-theme="windows95"] .text-blue-400,
+body[data-theme="windows95"] .text-blue-300,
+body[data-theme="windows95"] .text-purple-400,
+body[data-theme="windows95"] .text-green-400,
+body[data-theme="windows95"] .text-orange-400,
+body[data-theme="windows95"] .text-pink-400,
+body[data-theme="windows95"] .text-indigo-400,
+body[data-theme="windows95"] .text-teal-400,
+body[data-theme="windows95"] .text-red-400 {
+  color: #000080 !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 11px !important;
+  font-weight: bold !important;
+  text-shadow: none !important;
+}
+
+/* Avatar y área de mensaje Windows 95 */
+body[data-theme="windows95"] .flex.items-start.gap-2,
+body[data-theme="windows95"] .flex.items-start.gap-3 {
+  background: transparent !important;
+  padding: 4px !important;
+  margin: 2px 0 !important;
+}
+
+/* Contenedor de mensaje Windows 95 */
+body[data-theme="windows95"] .flex.flex-col.flex-1 {
+  background: transparent !important;
+}
+
+/* Header del mensaje (nombre + hora) Windows 95 */
+body[data-theme="windows95"] .flex.items-center.gap-2.mb-1 {
+  background: transparent !important;
+  border-bottom: 1px solid #c0c7c8 !important;
+  padding-bottom: 2px !important;
+  margin-bottom: 4px !important;
+}
+
+/* Timestamp Windows 95 */
+body[data-theme="windows95"] .text-xs.text-gray-500 {
+  color: #666666 !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 9px !important;
+  font-weight: normal !important;
+}
+
+/* Contenido del mensaje Windows 95 */
+body[data-theme="windows95"] .px-3.py-2.rounded-lg {
+  background: #f0f0f0 !important;
+  border: 1px inset #c0c7c8 !important;
+  border-radius: 0px !important;
+  color: #000000 !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 11px !important;
+  padding: 6px 8px !important;
+  box-shadow: 
+    inset 1px 1px 1px rgba(128, 128, 128, 0.5),
+    1px 1px 1px rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Avatar Windows 95 */
+body[data-theme="windows95"] .w-8.h-8.rounded-full,
+body[data-theme="windows95"] .w-6.h-6.rounded-full {
+  border: 2px outset #c0c7c8 !important;
+  border-radius: 0px !important;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+body[data-theme="windows95"] .message-container * {
+  color: inherit !important;
+}
+
+body[data-theme="windows95"] .flex-1.overflow-y-auto * {
+  color: #000000 !important;
+}
+
+body[data-theme="windows95"] .flex-1.overflow-y-auto .text-blue-400,
+body[data-theme="windows95"] .flex-1.overflow-y-auto .text-blue-300,
+body[data-theme="windows95"] .flex-1.overflow-y-auto .text-purple-400,
+body[data-theme="windows95"] .flex-1.overflow-y-auto .text-green-400,
+body[data-theme="windows95"] .flex-1.overflow-y-auto .text-orange-400 {
+  color: #000080 !important;
 }

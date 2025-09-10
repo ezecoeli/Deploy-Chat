@@ -76,34 +76,33 @@ const terminalThemes = {
     },
 
     macOS: {
-        name: 'macOS',
-        prompt: '%',
-        font: '"Monaco", "Menlo", "SF Mono", monospace',
+        name: 'Macintosh',
+        prompt: '⌘',
+        font: '"Chicago", "Geneva", "Monaco", "Charcoal", monospace',
         colors: {
-            bg: 'from-black via-[#1a1a2e] to-[#16213e]',
-            primary: '#ffffff',
-            secondary: '#ff6b6b',
-            text: '#ffffff',
-            textSecondary: '#a8a8a8',
-            accent: '#4ecdc4',
-            border: '#ff6b6b',
-            input: 'bg-[#1a1a2e] border-[#4ecdc4]',
-            button: 'bg-gradient-to-r from-[#ff6b6b] via-[#4ecdc4] to-[#45b7d1] hover:from-[#ff5252] hover:via-[#26d0ce] hover:to-[#1e88e5] text-white font-bold',
-            message: 'bg-[#1a1a2e] border-l-4 border-l-[#4ecdc4]',
-            statusOnline: '#4ecdc4',
-            // rainbow colors
-            rainbow1: '#5EBD3E',
-            rainbow2: '#FFB900',
-            rainbow3: '#F78200',
-            rainbow4: '#E23838',
-            rainbow5: '#973999',
-            rainbow6: '#009CDF'
+            bg: 'from-[#c0c0c0] to-[#e0e0e0]',
+            primary: '#000000',
+            secondary: '#000000',
+            text: '#000000',
+            textSecondary: '#666666',
+            accent: '#000000',
+            border: '#808080',
+            input: 'bg-white border-[#808080]',
+            button: 'bg-[#c0c0c0] hover:bg-[#d0d0d0] text-black font-bold border-2 border-t-white border-l-white border-r-[#808080] border-b-[#808080]',
+            message: 'bg-white border-2 border-[#808080]',
+            statusOnline: '#000000',
+            windowBg: '#c0c0c0',
+            titleBar: '#c0c0c0',
+            titleText: '#000000',
+            menuBar: '#c0c0c0',
+            scrollBar: '#c0c0c0'
         },
         effects: {
-            textShadow: '0 0 8px rgba(78, 205, 196, 0.6)',
-            glow: 'shadow-cyan-400/30',
-            rainbow: true,
-            retroMac: true
+            textShadow: 'none',
+            glow: 'none',
+            classicMac: true,
+            insetBorder: true,
+            systemFont: true
         }
     },
 

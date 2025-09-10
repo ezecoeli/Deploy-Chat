@@ -87,9 +87,9 @@ export default function ConnectionStatus({
     switch (connectionStatus) {
       case 'online':
         return {
-          color: 'bg-green-500',
+          color: 'bg-green-600',
           text: t('online') || 'En línea',
-          textColor: 'text-green-400'
+          textColor: 'text-green-600'
         };
       case 'offline':
         return {
@@ -115,7 +115,7 @@ export default function ConnectionStatus({
   const statusInfo = getStatusInfo();
 
   return (
-    <div className="mb-2 flex items-center justify-between font-mono">
+    <div className="ml-2 mb-1 mt-1 flex items-center justify-between font-mono">
       <div className="flex items-center gap-2">
         <FiUsers className="w-4 h-4" style={{ color: theme.colors.accent }} />
         <p className="text-sm" style={{ color: theme.colors.textSecondary }}>
@@ -127,7 +127,7 @@ export default function ConnectionStatus({
       </div>
       
       {/* Status info */}
-      <div className="flex items-center gap-2">
+      <div className="mr-2 flex items-center gap-2">
         <div 
           className={`w-2 h-2 rounded-full ${statusInfo.color} ${
             connectionStatus === 'online' ? 'animate-pulse' : ''
