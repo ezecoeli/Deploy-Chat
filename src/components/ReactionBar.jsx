@@ -132,7 +132,7 @@ export default function ReactionBar({ messageId, userId, currentTheme, isOwnMess
                   ? `${themeStyles.active} ${themeStyles.text}` 
                   : `${themeStyles.button} ${themeStyles.text}`
                 }
-                ${loading || isOwnMessage ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                ${loading || isOwnMessage ? 'cursor-not-allowed' : 'cursor-pointer'}
               `}
               title={`${users.length} reaction${users.length !== 1 ? 's' : ''}`}
             >

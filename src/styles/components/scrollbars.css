@@ -1,0 +1,205 @@
+/************* SCROLL BAR STYLES *************/
+/* Custom scrollbar styles */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #6b7280;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Matrix theme scrollbar */
+.matrix-scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.matrix-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
+}
+
+.matrix-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #00ff00, #004400);
+  border-radius: 4px;
+  box-shadow: 0 0 6px rgba(0, 255, 0, 0.5);
+}
+
+.matrix-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #00ff41, #006600);
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+}
+
+/* Windows95 theme scrollbar */
+.windows95-scrollbar::-webkit-scrollbar {
+  width: 16px;
+}
+
+.windows95-scrollbar::-webkit-scrollbar-track {
+  background: #c0c7c8;
+  border: 1px inset #c0c7c8;
+}
+
+.windows95-scrollbar::-webkit-scrollbar-thumb {
+  background: #c0c7c8; 
+  border: 1px solid #808080;
+  border-radius: 0px;
+}
+
+.windows95-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #d4d0c8;
+  border: 1px outset #d4d0c8;
+}
+
+.windows95-scrollbar::-webkit-scrollbar-thumb:active {
+  background: #a0a0a0;
+  border: 1px inset #a0a0a0;
+}
+
+/* scrollbar buttons */
+.windows95-scrollbar::-webkit-scrollbar-button {
+  background: #c0c7c8;
+  border: 1px outset #c0c7c8;
+  height: 16px;
+}
+
+.windows95-scrollbar::-webkit-scrollbar-button:hover {
+  background: #d4d0c8;
+  border: 1px outset #d4d0c8;
+}
+
+.windows95-scrollbar::-webkit-scrollbar-button:active {
+  border: 1px inset #c0c7c8;
+  background: #a0a0a0;
+}
+
+.windows95-scrollbar::-webkit-scrollbar-corner {
+  background: #c0c7c8;
+}
+
+/* Cool Retro theme scrollbar */
+.coolretro-scrollbar::-webkit-scrollbar {
+  width: 12px;
+}
+
+.coolretro-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 176, 0, 0.3);
+}
+
+.coolretro-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #c29c06, #cc8800);
+  border-radius: 6px;
+  box-shadow: 0 0 8px rgba(255, 204, 0, 0.6);
+  border: 1px solid rgba(255, 176, 0, 0.5);
+}
+
+.coolretro-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #ffdd00, #dd9900);
+  box-shadow: 0 0 12px rgba(255, 204, 0, 0.9);
+}
+
+/* Default theme scrollbar */
+.default-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.default-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.default-scrollbar::-webkit-scrollbar-thumb {
+  background: #3b82f6;
+  border-radius: 4px;
+}
+
+.default-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #2563eb;
+}
+
+/* Hacking Mode theme scrollbar */
+.hackingmode-scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.hackingmode-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 20, 0, 0.7);
+  border-radius: 4px;
+}
+
+.hackingmode-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #39ff14, #00aa00);
+  border-radius: 4px;
+  box-shadow: 0 0 5px rgba(57, 255, 20, 0.4);
+}
+
+.hackingmode-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #50ff30, #00cc00);
+  box-shadow: 0 0 8px rgba(57, 255, 20, 0.7);
+}
+
+/* Ubuntu theme scrollbar */
+.ubuntu-scrollbar::-webkit-scrollbar {
+  width: 12px;
+}
+
+.ubuntu-scrollbar::-webkit-scrollbar-track {
+  background: #300a24;
+  border-radius: 6px;
+}
+
+.ubuntu-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #e95420, #bf3f00);
+  border-radius: 6px;
+  border: 1px solid #772953;
+}
+
+.ubuntu-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #ff6b2d, #e95420);
+}
+
+/* Classic Mac scrollbar */
+.mac-scrollbar::-webkit-scrollbar {
+  width: 16px !important;
+  background: #c0c0c0 !important;
+}
+
+.mac-scrollbar::-webkit-scrollbar-track {
+  background: #c0c0c0 !important;
+  border: 1px inset #c0c0c0 !important;
+}
+
+.mac-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #f0f0f0 0%, #c0c0c0 50%, #a0a0a0 100%) !important;
+  border: 1px outset #c0c0c0 !important;
+  border-radius: 0 !important;
+}
+
+.mac-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #ffffff 0%, #d0d0d0 50%, #b0b0b0 100%) !important;
+}
+
+.mac-scrollbar::-webkit-scrollbar-button {
+  background: linear-gradient(to bottom, #f0f0f0 0%, #c0c0c0 50%, #a0a0a0 100%) !important;
+  border: 1px outset #c0c0c0 !important;
+  height: 16px !important;
+}
+
+.mac-scrollbar::-webkit-scrollbar-button:hover {
+  background: linear-gradient(to bottom, #ffffff 0%, #d0d0d0 50%, #b0b0b0 100%) !important;
+}
+
+.mac-scrollbar::-webkit-scrollbar-button:active {
+  border: 1px inset #c0c0c0 !important;
+  background: linear-gradient(to bottom, #a0a0a0 0%, #c0c0c0 50%, #e0e0e0 100%) !important;
+}

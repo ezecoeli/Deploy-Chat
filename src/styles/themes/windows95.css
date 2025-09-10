@@ -1,0 +1,414 @@
+/************* WINDOWS 95 THEME ***************/
+body[data-theme="windows95"] {
+  background: #c0c7c8 !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+}
+
+/* Main container Windows 95 styling */
+body[data-theme="windows95"] .w-full.max-w-4xl {
+  background: #c0c7c8 !important;
+  border: 2px outset #c0c7c8 !important;
+  border-radius: 0px !important;
+  box-shadow: 
+    2px 2px 4px rgba(0, 0, 0, 0.3),
+    inset 1px 1px 0 #ffffff,
+    inset -1px -1px 0 #808080 !important;
+  margin: 20px auto !important;
+  padding: 0 !important;
+  position: relative;
+}
+
+/* Windows 95 title bar */
+body[data-theme="windows95"] header {
+  background: linear-gradient(to right, #000080 0%, #0000ff 100%) !important;
+  border-bottom: 1px solid #c0c7c8 !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  padding: 4px 8px !important;
+  position: relative !important;
+  z-index: 10 !important;
+  box-shadow: inset 0 1px 0 #4040ff, inset 0 -1px 0 #000040 !important;
+}
+
+body[data-theme="windows95"] header h1 {
+  background: none !important;
+  color: #ffffff !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
+  text-shadow: 1px 1px 0 #000040 !important;
+  filter: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  -webkit-text-fill-color: unset !important;
+  animation: none !important;
+}
+
+body[data-theme="windows95"] header p {
+  color: #ffffff !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 11px !important;
+  text-shadow: 1px 1px 0 #000040 !important;
+}
+
+/* Windows 95 buttons */
+body[data-theme="windows95"] button,
+body[data-theme="windows95"] form button,
+body[data-theme="windows95"] .px-3.py-2.rounded-lg,
+body[data-theme="windows95"] button[type="submit"] {
+  background: linear-gradient(to bottom, #ffffff 0%, #c0c7c8 50%, #808080 100%) !important;
+  border: 2px outset #c0c7c8 !important;
+  border-radius: 0px !important;
+  color: #000000 !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 11px !important;
+  font-weight: normal !important;
+  text-shadow: none !important;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3) !important;
+  padding: 3px 8px !important;
+  min-height: 21px !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+body[data-theme="windows95"] button:hover,
+body[data-theme="windows95"] form button:hover,
+body[data-theme="windows95"] .px-3.py-2.rounded-lg:hover,
+body[data-theme="windows95"] button[type="submit"]:hover,
+body[data-theme="windows95"] .windows95-button:hover {
+  background: linear-gradient(to bottom, #ffffff 0%, #d0d7d8 50%, #909090 100%) !important;
+  border: 2px outset #d0d7d8 !important;
+  transform: none !important;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+body[data-theme="windows95"] button:active,
+body[data-theme="windows95"] form button:active,
+body[data-theme="windows95"] .px-3.py-2.rounded-lg:active,
+body[data-theme="windows95"] button[type="submit"]:active,
+body[data-theme="windows95"] .windows95-button:active {
+  background: linear-gradient(to bottom, #808080 0%, #c0c7c8 50%, #ffffff 100%) !important;
+  border: 2px inset #c0c7c8 !important;
+  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.3) !important;
+  transform: none !important;
+}
+
+/* Message area Windows 95 */
+body[data-theme="windows95"] .flex-1.overflow-y-auto {
+  background: #ffffff !important;
+  border: 2px inset #c0c7c8 !important;
+  border-radius: 0 !important;
+  margin: 2px !important;
+  padding: 8px !important;
+  border-left: 4px solid #c0c7c8 !important;
+}
+
+/* Message bubbles Windows 95 */
+body[data-theme="windows95"] .px-2.py-1,
+body[data-theme="windows95"] .px-3.py-2 {
+  background: #ffffff !important;
+  border: 1px solid #808080 !important;
+  border-radius: 0px !important;
+  color: #000000 !important;
+  text-shadow: none !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 11px !important;
+  box-shadow: 
+    1px 1px 1px rgba(0, 0, 0, 0.2),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Input area Windows 95 */
+body[data-theme="windows95"] .border-t.px-2 {
+  background: #c0c7c8 !important;
+  border-top: 2px solid #808080 !important;
+  border-radius: 0 !important;
+  padding: 8px !important;
+  box-shadow: inset 0 1px 0 #404040 !important;
+}
+
+/* Input container Windows 95 */
+body[data-theme="windows95"] .flex-1.flex.items-start {
+  background: #ffffff !important;
+  border: 2px inset #c0c7c8 !important;
+  border-radius: 0px !important;
+  padding: 4px 6px !important;
+  box-shadow: 
+    inset 1px 1px 1px rgba(0, 0, 0, 0.2),
+    inset -1px -1px 0 rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Textarea Windows 95 */
+body[data-theme="windows95"] textarea {
+  background: #ffffff !important;
+  border: none !important;
+  color: #000000 !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 11px !important;
+  text-shadow: none !important;
+  resize: none !important;
+}
+
+body[data-theme="windows95"] textarea::placeholder {
+  color: #808080 !important;
+  font-style: normal !important;
+}
+
+/* Prompt Windows 95 - PLANO */
+body[data-theme="windows95"] span.px-1,
+body[data-theme="windows95"] .flex-1.flex.items-start span.px-1,
+body[data-theme="windows95"] form span.px-1,
+body[data-theme="windows95"] .windows95-prompt {
+  background: #c0c7c8 !important;
+  border: 1px solid #808080 !important;
+  border-radius: 0 !important;
+  color: #000000 !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 10px !important;
+  font-weight: normal !important;
+  box-shadow: none !important;
+  padding: 2px 6px !important;
+}
+
+body[data-theme="windows95"] span.px-1:hover,
+body[data-theme="windows95"] .windows95-prompt:hover {
+  background: #c0c7c8 !important;
+  border: 1px solid #808080 !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Dropdown menus Windows 95 */
+body[data-theme="windows95"] .absolute.bg-gray-800,
+body[data-theme="windows95"] .absolute.bg-gray-700 {
+  background: #c0c7c8 !important;
+  border: 2px outset #c0c7c8 !important;
+  border-radius: 0px !important;
+  box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Dropdown items Windows 95 */
+body[data-theme="windows95"] .absolute button,
+body[data-theme="windows95"] .absolute a,
+body[data-theme="windows95"] .absolute div[role="button"] {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  border-radius: 0px !important;
+  color: #000000 !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 11px !important;
+  font-weight: normal !important;
+  text-shadow: none !important;
+  padding: 3px 6px !important;
+  text-align: left !important;
+  width: 100% !important;
+  margin: 0px !important;
+}
+
+body[data-theme="windows95"] .absolute button:hover,
+body[data-theme="windows95"] .absolute a:hover,
+body[data-theme="windows95"] .absolute div[role="button"]:hover {
+  background: #000080 !important;
+  color: #ffffff !important;
+  border: 1px solid #000080 !important;
+  text-shadow: 1px 1px 0 #000040 !important;
+}
+
+/* Status online Windows 95 */
+body[data-theme="windows95"] .text-green-500,
+body[data-theme="windows95"] .status-online,
+body[data-theme="windows95"] span[style*="color: rgb(34, 197, 94)"],
+body[data-theme="windows95"] span[style*="#22c55e"] {
+  color: #008000 !important;
+  font-weight: bold !important;
+  text-shadow: none !important;
+}
+
+/* Reaction Bar Windows 95 styling */
+body[data-theme="windows95"] .flex.items-center.gap-1 button {
+  background: linear-gradient(to bottom, #ffffff 0%, #c0c7c8 50%, #808080 100%) !important;
+  border: 1px outset #c0c7c8 !important;
+  border-radius: 0px !important;
+  font-size: 10px !important;
+  min-height: 18px !important;
+  padding: 2px 4px !important;
+}
+
+/* Text colors Windows 95 */
+body[data-theme="windows95"] .text-gray-300,
+body[data-theme="windows95"] .text-gray-400,
+body[data-theme="windows95"] .text-white {
+  color: #000000 !important;
+  text-shadow: none !important;
+  font-weight: normal !important;
+}
+
+/* Connection status Windows 95 */
+body[data-theme="windows95"] .mt-2.p-3 {
+  background: #ffffff !important;
+  border: 1px solid #808080 !important;
+  border-radius: 0px !important;
+  color: #000000 !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  text-shadow: none !important;
+  box-shadow: 
+    inset 1px 1px 0 rgba(255, 255, 255, 0.8),
+    1px 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Windows 95 window controls decoration */
+body[data-theme="windows95"] header::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 16px;
+  height: 12px;
+  background: linear-gradient(to bottom, #c0c7c8 0%, #808080 100%);
+  border: 1px outset #c0c7c8;
+  border-radius: 0px;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+/* Remove effects for Windows 95 */
+body[data-theme="windows95"]::before,
+body[data-theme="windows95"]::after {
+  display: none !important;
+}
+
+/* ConnectionStatus Windows 95 - Contraste mejorado */
+body[data-theme="windows95"] .ml-2.mb-1.mt-1.flex.items-center.justify-between {
+  background: transparent !important;
+  padding: 4px 8px !important;
+  border-radius: 0px !important;
+}
+
+/* Ícono de usuarios Windows 95 */
+body[data-theme="windows95"] .ml-2.mb-1.mt-1.flex svg {
+  color: #000000 !important;
+}
+
+/* Texto de miembros Windows 95 */
+body[data-theme="windows95"] .ml-2.mb-1.mt-1.flex p,
+body[data-theme="windows95"] .ml-2.mb-1.mt-1.flex span {
+  color: #000000 !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 11px !important;
+  font-weight: bold !important;
+  text-shadow: none !important;
+}
+
+/* Status específicos Windows 95 */
+body[data-theme="windows95"] .text-green-600 {
+  color: #008000 !important;
+  font-weight: bold !important;
+}
+
+body[data-theme="windows95"] .text-red-400 {
+  color: #cc0000 !important;
+  font-weight: bold !important;
+}
+
+body[data-theme="windows95"] .text-yellow-400 {
+  color: #cccc00 !important;
+  font-weight: bold !important;
+}
+
+body[data-theme="windows95"] .text-gray-400 {
+  color: #666666 !important;
+  font-weight: bold !important;
+}
+
+/* Punto de estado Windows 95 */
+body[data-theme="windows95"] .w-2.h-2.rounded-full {
+  border: 1px solid #000000 !important;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3) !important;
+}
+
+body[data-theme="windows95"] .flex.items-center.gap-2 * {
+  color: #000000 !important;
+}
+
+/* Nombres de usuarios Windows 95 */
+body[data-theme="windows95"] .text-blue-400,
+body[data-theme="windows95"] .text-blue-300,
+body[data-theme="windows95"] .text-purple-400,
+body[data-theme="windows95"] .text-green-400,
+body[data-theme="windows95"] .text-orange-400,
+body[data-theme="windows95"] .text-pink-400,
+body[data-theme="windows95"] .text-indigo-400,
+body[data-theme="windows95"] .text-teal-400,
+body[data-theme="windows95"] .text-red-400 {
+  color: #000080 !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 11px !important;
+  font-weight: bold !important;
+  text-shadow: none !important;
+}
+
+/* Avatar y área de mensaje Windows 95 */
+body[data-theme="windows95"] .flex.items-start.gap-2,
+body[data-theme="windows95"] .flex.items-start.gap-3 {
+  background: transparent !important;
+  padding: 4px !important;
+  margin: 2px 0 !important;
+}
+
+/* Contenedor de mensaje Windows 95 */
+body[data-theme="windows95"] .flex.flex-col.flex-1 {
+  background: transparent !important;
+}
+
+/* Header del mensaje (nombre + hora) Windows 95 */
+body[data-theme="windows95"] .flex.items-center.gap-2.mb-1 {
+  background: transparent !important;
+  border-bottom: 1px solid #c0c7c8 !important;
+  padding-bottom: 2px !important;
+  margin-bottom: 4px !important;
+}
+
+/* Timestamp Windows 95 */
+body[data-theme="windows95"] .text-xs.text-gray-500 {
+  color: #666666 !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 9px !important;
+  font-weight: normal !important;
+}
+
+/* Contenido del mensaje Windows 95 */
+body[data-theme="windows95"] .px-3.py-2.rounded-lg {
+  background: #f0f0f0 !important;
+  border: 1px inset #c0c7c8 !important;
+  border-radius: 0px !important;
+  color: #000000 !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 11px !important;
+  padding: 6px 8px !important;
+  box-shadow: 
+    inset 1px 1px 1px rgba(128, 128, 128, 0.5),
+    1px 1px 1px rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Avatar Windows 95 */
+body[data-theme="windows95"] .w-8.h-8.rounded-full,
+body[data-theme="windows95"] .w-6.h-6.rounded-full {
+  border: 2px outset #c0c7c8 !important;
+  border-radius: 0px !important;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+body[data-theme="windows95"] .message-container * {
+  color: inherit !important;
+}
+
+body[data-theme="windows95"] .flex-1.overflow-y-auto * {
+  color: #000000 !important;
+}
+
+body[data-theme="windows95"] .flex-1.overflow-y-auto .text-blue-400,
+body[data-theme="windows95"] .flex-1.overflow-y-auto .text-blue-300,
+body[data-theme="windows95"] .flex-1.overflow-y-auto .text-purple-400,
+body[data-theme="windows95"] .flex-1.overflow-y-auto .text-green-400,
+body[data-theme="windows95"] .flex-1.overflow-y-auto .text-orange-400 {
+  color: #000080 !important;
+}
