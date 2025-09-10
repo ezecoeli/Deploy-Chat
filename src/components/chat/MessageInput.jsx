@@ -195,11 +195,13 @@ export default function MessageInput({
           }}
         >
           <span 
-            className="px-1 sm:px-2 py-1 rounded-md font-medium flex-shrink-0 text-xs sm:text-sm"
+            className={`px-1 sm:px-2 py-1 rounded-md font-medium flex-shrink-0 text-xs sm:text-sm ${
+              currentTheme === 'windows95' ? 'windows95-prompt' : ''
+            }`}
             style={{ 
               color: theme.colors.accent,
-              backgroundColor: `${theme.colors.accent}15`,
-              border: `1px solid ${theme.colors.accent}30`,
+              backgroundColor: currentTheme === 'windows95' ? '#c0c7c8' : `${theme.colors.accent}15`,
+              border: currentTheme === 'windows95' ? '1px solid #808080' : `1px solid ${theme.colors.accent}30`,
               alignSelf: 'flex-start',
               marginTop: '2px',
             }}
@@ -250,9 +252,10 @@ export default function MessageInput({
           disabled={!newMessage.trim() || !currentChannel}
           className={`px-3 sm:px-6 py-2 rounded-lg transition-colors duration-200 text-sm sm:text-base flex-shrink-0 self-start ${ 
             currentTheme === 'default' ? 'font-medium' : 'font-mono'
-          } ${theme.colors.button}`}
+          } ${currentTheme === 'windows95' ? 'windows95-button' : ''} ${theme.colors.button}`}
           style={{
             marginTop: '2px',
+            transition: 'none'
           }}
         >
           <span className="hidden sm:inline">

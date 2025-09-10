@@ -1292,6 +1292,7 @@ body[data-theme="windows95"] header h1 {
   text-shadow: 1px 1px 0 #000040 !important;
   filter: none !important;
   -webkit-background-clip: unset !important;
+  background-clip: unset !important;
   -webkit-text-fill-color: unset !important;
   animation: none !important;
 }
@@ -1304,7 +1305,10 @@ body[data-theme="windows95"] header p {
 }
 
 /* Windows 95 buttons */
-body[data-theme="windows95"] button {
+body[data-theme="windows95"] button,
+body[data-theme="windows95"] form button,
+body[data-theme="windows95"] .px-3.py-2.rounded-lg,
+body[data-theme="windows95"] button[type="submit"] {
   background: linear-gradient(to bottom, #ffffff 0%, #c0c7c8 50%, #808080 100%) !important;
   border: 2px outset #c0c7c8 !important;
   border-radius: 0px !important;
@@ -1316,16 +1320,26 @@ body[data-theme="windows95"] button {
   box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3) !important;
   padding: 3px 8px !important;
   min-height: 21px !important;
+  transform: none !important;
+  transition: none !important;
 }
 
-body[data-theme="windows95"] button:hover {
+body[data-theme="windows95"] button:hover,
+body[data-theme="windows95"] form button:hover,
+body[data-theme="windows95"] .px-3.py-2.rounded-lg:hover,
+body[data-theme="windows95"] button[type="submit"]:hover,
+body[data-theme="windows95"] .windows95-button:hover {
   background: linear-gradient(to bottom, #ffffff 0%, #d0d7d8 50%, #909090 100%) !important;
   border: 2px outset #d0d7d8 !important;
   transform: none !important;
-  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4) !important;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3) !important;
 }
 
-body[data-theme="windows95"] button:active {
+body[data-theme="windows95"] button:active,
+body[data-theme="windows95"] form button:active,
+body[data-theme="windows95"] .px-3.py-2.rounded-lg:active,
+body[data-theme="windows95"] button[type="submit"]:active,
+body[data-theme="windows95"] .windows95-button:active {
   background: linear-gradient(to bottom, #808080 0%, #c0c7c8 50%, #ffffff 100%) !important;
   border: 2px inset #c0c7c8 !important;
   box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.3) !important;
@@ -1393,16 +1407,28 @@ body[data-theme="windows95"] textarea::placeholder {
   font-style: normal !important;
 }
 
-/* Prompt styling Windows 95 */
-body[data-theme="windows95"] .px-1.sm\:px-2.py-1 {
-  background: linear-gradient(to bottom, #ffffff 0%, #c0c7c8 100%) !important;
-  border: 1px outset #c0c7c8 !important;
-  border-radius: 0px !important;
+/* Prompt  Windows 95 - PLANO */
+body[data-theme="windows95"] span.px-1,
+body[data-theme="windows95"] .flex-1.flex.items-start span.px-1,
+body[data-theme="windows95"] form span.px-1,
+body[data-theme="windows95"] .windows95-prompt {
+  background: #c0c7c8 !important;
+  border: 1px solid #808080 !important;
+  border-radius: 0 !important;
   color: #000000 !important;
   font-family: "MS Sans Serif", sans-serif !important;
   font-size: 10px !important;
   font-weight: normal !important;
-  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2) !important;
+  box-shadow: none !important;
+  padding: 2px 6px !important;
+}
+
+body[data-theme="windows95"] span.px-1:hover,
+body[data-theme="windows95"] .windows95-prompt:hover {
+  background: #c0c7c8 !important;
+  border: 1px solid #808080 !important;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 /* Dropdown menus Windows 95 */

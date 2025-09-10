@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useReactions, DEVELOPER_REACTIONS } from '../hooks/useReactions';
+import { BsEmojiSmile } from "react-icons/bs";
 
 export default function ReactionBar({ messageId, userId, currentTheme, isOwnMessage = false }) {
   const [showPicker, setShowPicker] = useState(false);
@@ -156,7 +157,7 @@ export default function ReactionBar({ messageId, userId, currentTheme, isOwnMess
             `}
             title="Add reaction"
           >
-            ➕
+            <BsEmojiSmile className='text-lg' />
           </button>
 
           {/* Picker with categories */}
