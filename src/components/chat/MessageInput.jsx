@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { supabase } from '../../utils/supabaseClient';
+import TerminalInput from '../ui/TerminalInput';
 
 export default function MessageInput({ 
   currentChannel, 
@@ -14,10 +15,9 @@ export default function MessageInput({
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const textareaRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
-  // detect window resize for responsive prompt
+  // Detect window resize for responsive prompt
   useEffect(() => {
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
@@ -29,22 +29,53 @@ export default function MessageInput({
       window.removeEventListener('resize', handleResize);
     };
   }, []);
-
-  // Auto-resize textarea based on content
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      const scrollHeight = textareaRef.current.scrollHeight;
-      const maxHeight = 120; // 6 lines approximately
-      textareaRef.current.style.height = `${Math.min(scrollHeight, maxHeight)}px`;
-    }
-  }, [newMessage]);
   
-  const handleInputChange = (e) => {
-    const value = e.target.value;
-    setNewMessage(value);
+  // Get terminal prompt based on theme and user
+  const getTerminalPrompt = () => {
+    const username = userProfile?.username || user?.email?.split('@')[0] || 'user';
+    const isSmallScreen = windowWidth < 640;
+    
+    if (isSmallScreen) {
+      // Shortened prompts for mobile
+      switch (currentTheme) {
+        case 'matrix':
+          return 'neo$ ';
+        case 'coolRetro':
+          return 'A> ';
+        case 'ubuntu':
+          return '~$ ';
+        case 'windows95':
+          return 'C:\> ';
+        case 'macOS':
+          return '$ ';
+        default:
+          return '$ ';
+      }
+    }
 
-    if (value.trim() && !isTyping) {
+    // Full prompts for desktop
+    switch (currentTheme) {
+      case 'matrix':
+        return `neo>: `;
+      case 'coolRetro':
+        return `${username}: A>`;
+      case 'ubuntu':
+        return `${username}:~$ `;
+      case 'windows95':
+        return `${username}: C:\> `;
+      case 'macOS':
+        return `${username}: ⌘ `;
+      default:
+        return `${username}@deploy-chat:~$ `;
+    }
+  };
+
+  const handleInputChange = (value) => {
+    // Ensure value is always a string
+    const stringValue = value || '';
+    setNewMessage(stringValue);
+
+    if (stringValue.trim() && !isTyping) {
       setIsTyping(true);
       
       if (currentChannel?.id) {
@@ -85,23 +116,10 @@ export default function MessageInput({
     }, 1000);
   };
 
-  // Handle key combinations
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      if (e.shiftKey) {
-        // Shift + Enter = new line 
-        return;
-      } else {
-        // Enter = send message
-        e.preventDefault();
-        sendMessage(e);
-      }
-    }
-  };
-
   const sendMessage = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim() || !currentChannel || !user) return;
+    const messageText = newMessage || '';
+    if (!messageText.trim() || !currentChannel || !user) return;
 
     setIsTyping(false);
     if (typingTimeoutRef.current) {
@@ -114,7 +132,7 @@ export default function MessageInput({
         .from('messages')
         .insert([
           {
-            content: newMessage.trim(),
+            content: messageText.trim(),
             user_id: user.id,
             channel_id: currentChannel.id,
           },
@@ -141,33 +159,7 @@ export default function MessageInput({
     return basePlaceholder;
   };
 
-  // Responsive prompt 
-  const getResponsivePrompt = () => {
-    const username = userProfile?.username || user?.email?.split('@')[0];
-    const isSmallScreen = windowWidth < 640;
-    
-    if (isSmallScreen) {
-      // Shortened prompts for mobile
-      switch (currentTheme) {
-        case 'matrix':
-          return 'Neo>';
-        case 'ubuntu':
-          return '~$';
-        case 'windows95':
-          return 'C:>';
-        case 'macOS':
-          return '%';
-        case 'coolRetro':
-          return 'C>';
-        default:
-          return '$';
-      }
-    }
-    
-    // Full prompts for desktop
-    return `${username}:${theme.prompt}`;
-  };
-
+  // Cleanup effect for typing timeout
   React.useEffect(() => {
     return () => {
       if (typingTimeoutRef.current) {
@@ -186,70 +178,39 @@ export default function MessageInput({
           : 'rgba(0, 0, 0, 0.3)',
       }}
     >
-      <form onSubmit={sendMessage} className="flex gap-1 sm:gap-2 font-mono items-start"> 
+      <form onSubmit={sendMessage} className="flex gap-1 sm:gap-2 font-mono items-center"> 
+        {/* Terminal Input Container */}
         <div 
-          className="flex-1 flex items-start gap-1 sm:gap-2 px-2 sm:px-3 py-2 rounded-lg relative"
+          className="flex-1 px-2 sm:px-3 py-2 rounded-lg relative"
           style={{ 
             backgroundColor: currentTheme === 'coolRetro' ? '#000000' : 'rgba(0,0,0,0.5)', 
             border: `1px solid ${theme.colors.border}` 
           }}
         >
-          <span 
-            className={`px-1 sm:px-2 py-1 rounded-md font-medium flex-shrink-0 text-xs sm:text-sm ${
-              currentTheme === 'windows95' ? 'windows95-prompt' : ''
-            }`}
-            style={{ 
-              color: theme.colors.accent,
-              backgroundColor: currentTheme === 'windows95' ? '#c0c7c8' : `${theme.colors.accent}15`,
-              border: currentTheme === 'windows95' ? '1px solid #808080' : `1px solid ${theme.colors.accent}30`,
-              alignSelf: 'flex-start',
-              marginTop: '2px',
-            }}
-          >
-            {getResponsivePrompt()}
-          </span>
-          
-          <textarea
-            ref={textareaRef}
+          <TerminalInput
             value={newMessage}
             onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
+            currentTheme={currentTheme}
+            prompt={getTerminalPrompt()}
             placeholder={getThemePlaceholder(currentTheme, t)}
-            className="flex-1 rounded-lg pl-1 outline-none text-sm sm:text-base resize-none"
-            style={{ 
-              color: theme.colors.text,
-              background: currentTheme === 'coolRetro' ? '#324345' : '#171717',
-              border: currentTheme === 'coolRetro' ? '1px solid #664400' : 'none',
-              textShadow: currentTheme === 'coolRetro' ? '0 0 2px #e6a000' : 'none',
-              fontFamily: currentTheme === 'coolRetro' ? '"Courier New", monospace' : 'inherit',
-              minHeight: '28px',
-              maxHeight: '120px',
-              lineHeight: '1.4',
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-word',
-              paddingTop: '4px',
-              paddingBottom: '4px',
-              overflow: 'hidden',
-              overflowY: 'auto', 
-            }}
             disabled={!currentChannel}
-            rows={1} 
+            className="w-full"
           />
 
           {/* Character counter for long messages */}
-          {newMessage.length > 500 && (
+          {(newMessage?.length || 0) > 500 && (
             <div 
               className="absolute -top-6 right-0 text-xs"
               style={{ color: theme.colors.accent }}
             >
-              {newMessage.length}/2000
+              {newMessage?.length || 0}/2000
             </div>
           )}
         </div>
         
         <button
           type="submit"
-          disabled={!newMessage.trim() || !currentChannel}
+          disabled={!newMessage?.trim() || !currentChannel}
           className={`px-3 sm:px-6 py-2 rounded-lg transition-colors duration-200 text-sm sm:text-base flex-shrink-0 self-start ${ 
             currentTheme === 'default' ? 'font-medium' : 'font-mono'
           } ${currentTheme === 'windows95' ? 'windows95-button' : ''} ${theme.colors.button}`}
