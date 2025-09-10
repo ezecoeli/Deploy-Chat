@@ -8,7 +8,6 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-.env
 dist
 .vite
 dist-ssr
@@ -25,5 +24,160 @@ dist-ssr
 *.sln
 *.sw?
 
+# SECURITY: Environment variables - TODAS las variantes
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.development.local
+.env.test.local
+.env.production.local
+.env.staging
+.env.*.local
 
+# SECURITY: API keys y credenciales
+config/keys.js
+config/secrets.js
+src/config/keys.js
+src/config/secrets.js
+*.key
+*.pem
+*.p12
+*.pfx
+credentials.json
+service-account.json
+
+# SECURITY: Database files
+database.db
+*.sqlite
+*.sqlite3
+*.db
+auth.json
+
+# SECURITY: Archivos temporales y cache
+.cache/
+.temp/
+temp/
+tmp/
+*.tmp
+*.temp
+.next/
+.nuxt/
+.output/
+
+# SECURITY: Archivos de backup
+*.backup
+*.bak
+*.swp
+*.swo
+*~
+*.orig
+
+# SECURITY: OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# SECURITY: IDE y editor files sensibles
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+.vscode/c_cpp_properties.json
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+
+# SECURITY: Package manager sensitive files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-debug.log*
+.yarn/
+.pnp.*
+.npm/
+
+# SECURITY: Coverage y testing
+coverage/
+.coverage
+.nyc_output
+.jest/
+test-results/
+playwright-report/
+
+# SECURITY: Build artifacts sensibles
+build/
+dist/
+out/
+*.tgz
+*.tar.gz
+
+# SECURITY: Docker sensitive files
+docker-compose.override.yml
+.dockerignore
+Dockerfile.local
+
+# SECURITY: Certificados y llaves
+*.crt
+*.cer
+*.ca-bundle
+*.p7b
+*.p7s
+*.pfx
+*.p12
+*.key
+*.pem
+
+# SECURITY: Archivos de configuración sensibles
+.htaccess
+.htpasswd
+web.config
+robots.txt.local
+
+# SECURITY: Logs específicos de aplicación
+error.log
+access.log
+debug.log
+*.log.*
+
+# SECURITY: Archivos de sesión
+sessions/
+.sessions
+session.json
+
+# SECURITY: Archivos de desarrollo local
+.local
+.development
+local.json
+dev.json
+
+# SECURITY: Archivos que pueden contener info sensible
 ROADMAP.md
+NOTES.md
+TODO.md
+SECRETS.md
+PRIVATE.md
+.private/
+
+# SECURITY: Archivos de análisis y profiling
+.prof
+*.prof
+.clinic/
+flamegraph.html
+
+# SECURITY: Variables de entorno específicas de plataforma
+.vercel
+.netlify
+.railway
+
+# SECURITY: Archivos de monitoreo
+.sentry
+sentry.properties
+newrelic.js.env
