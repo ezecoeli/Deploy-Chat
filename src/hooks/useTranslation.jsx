@@ -35,6 +35,9 @@ const translations = {
     editProfile: "Editar perfil",
     profileUpdated: "Perfil actualizado exitosamente",
     isCoding: "está codificando...",
+    privateChat: "Chat privado encriptado",
+    publicChannel: "CANAL PÚBLICO",
+    backGeneralChat: "Volver al chat general",
 
     // Members count
     oneMember: "1 miembro",
@@ -128,6 +131,9 @@ const translations = {
     editProfile: "Edit Profile",
     profileUpdated: "Profile updated successfully",
     isCoding: "is coding...",
+    privateChat: "Encrypted Private Chat",
+    publicChannel: "PUBLIC CHANNEL",
+    backGeneralChat: "Back to General Chat",
 
     // Members count  
     oneMember: "1 member",

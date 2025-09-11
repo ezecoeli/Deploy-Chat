@@ -9,6 +9,11 @@ import ConnectionStatus from '../components/chat/ConnectionStatus';
 import MessageArea from '../components/chat/MessageArea';
 import MessageInput from '../components/chat/MessageInput';
 import MatrixRain from '../components/MatrixRain';
+import PrivateChat from '../components/chat/PrivateChat';
+import DirectMessagesList from '../components/chat/DirectMessagesList';
+import { useEncryption } from '../hooks/useEncryption';
+import { ImEarth } from "react-icons/im";
+import { BsArrowLeft } from "react-icons/bs";
 
 export default function Chat() {
   const { user, logout, loading } = useAuth();
@@ -17,10 +22,13 @@ export default function Chat() {
   
   const [messages, setMessages] = useState([]);
   const [currentChannel, setCurrentChannel] = useState(null);
+  const { userKeyPair, isKeysReady } = useEncryption(user);
   const [error, setError] = useState('');
   const [typingUsers, setTypingUsers] = useState([]);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
+  const [isPrivateMode, setIsPrivateMode] = useState(false);
+  const [selectedConversation, setSelectedConversation] = useState(null);
  
   // Load user profile on user change
   useEffect(() => {
@@ -293,6 +301,166 @@ export default function Chat() {
     // Handle typing status changes if needed
   };
 
+  // handle select conversation for private chat
+  const handleSelectConversation = (conversation) => {
+    setSelectedConversation(conversation);
+    setCurrentChannel(conversation);
+    setIsPrivateMode(conversation.type === 'direct');
+    setMessages([]); // clear public chat messages
+  };
+
+  // handle back to public chat
+  const handleBackToPublic = () => {
+    setIsPrivateMode(false);
+    setSelectedConversation(null);
+    
+    // back to hardcoded public channel
+    const hardcodedChannel = {
+      id: '95cd8c81-bd3f-4cf2-a9d1-ce8f0c53486c',
+      name: 'general',
+    };
+    
+    setCurrentChannel(hardcodedChannel);
+    loadMessages(hardcodedChannel.id);
+  };
+
+  // Get sidebar styles based on current theme
+  const getSidebarBackgroundColor = () => {
+    switch (currentTheme) {
+      case 'matrix':
+        return 'rgba(0, 0, 0, 0.95)'; // Almost solid black
+      case 'coolRetro':
+        return 'rgba(0, 0, 0, 0.95)'; // Almost solid black
+      case 'windows95':
+        return '#c0c0c0'; // Classic Windows 95 gray
+      case 'ubuntu':
+        return 'rgba(45, 45, 45, 0.95)'; // Dark gray
+      case 'macOS':
+        return '#c0c0c0'; // Gray
+      default:
+        return 'rgba(30, 30, 30, 0.95)'; // Dark gray
+    }
+  };
+
+  const getSidebarTextColor = () => {
+    switch (currentTheme) {
+      case 'matrix':
+        return '#00ff00'; // Bright green
+      case 'coolRetro':
+        return '#00ffff'; // Cyan
+      case 'windows95':
+        return '#000000'; // Black text
+      case 'ubuntu':
+        return '#ff6600'; // Orange
+      case 'macOS':
+        return '#000000'; // Black
+      default:
+        return '#ffffff'; // White
+    }
+  };
+
+  const getSidebarHeaderColor = () => {
+    switch (currentTheme) {
+      case 'matrix':
+        return '#00ff00'; // Bright green
+      case 'coolRetro':
+        return '#00ffff'; // Cyan  
+      case 'windows95':
+        return '#000080'; // Navy blue
+      case 'ubuntu':
+        return '#ff6600'; // Orange
+      case 'macOS':
+        return '#000000'; // Black
+      default:
+        return '#ffffff'; // White
+    }
+  };
+
+  const getSidebarBorderColor = () => {
+    switch (currentTheme) {
+      case 'matrix':
+        return 'rgba(0, 255, 0, 0.3)'; // Green border
+      case 'coolRetro':
+        return 'rgba(0, 255, 255, 0.3)'; // Cyan border
+      case 'windows95':
+        return '#808080'; // Gray border
+      case 'ubuntu':
+        return 'rgba(255, 102, 0, 0.3)'; // Orange border
+      case 'macOS':
+        return '#000000'; // Black border
+      default:
+        return 'rgba(255, 255, 255, 0.2)'; // Light border
+    }
+  };
+
+  const getButtonBackgroundColor = () => {
+    switch (currentTheme) {
+      case 'matrix':
+        return 'rgba(0, 255, 0, 0.1)'; // Green background
+      case 'coolRetro':
+        return 'rgba(0, 255, 255, 0.1)'; // Cyan background
+      case 'windows95':
+        return '#ffffff'; // White background
+      case 'ubuntu':
+        return 'rgba(255, 102, 0, 0.1)'; // Orange background
+      case 'macOS':
+        return '#ffffff'; // White background
+      default:
+        return 'rgba(255, 255, 255, 0.1)'; // Light background
+    }
+  };
+
+  const getButtonTextColor = () => {
+    switch (currentTheme) {
+      case 'matrix':
+        return '#00ff00'; // Green text
+      case 'coolRetro':
+        return '#00ffff'; // Cyan text
+      case 'windows95':
+        return '#000000'; // Black text
+      case 'ubuntu':
+        return '#ff6600'; // Orange text
+      case 'macOS':
+        return '#000000'; // Black text
+      default:
+        return '#ffffff'; // White text
+    }
+  };
+
+  const getActiveChannelBackgroundColor = () => {
+    switch (currentTheme) {
+      case 'matrix':
+        return 'rgba(0, 255, 0, 0.2)'; // Green highlight
+      case 'coolRetro':
+        return 'rgba(0, 255, 255, 0.2)'; // Cyan highlight
+      case 'windows95':
+        return '#c0c0c0'; // Gray highlight
+      case 'ubuntu':
+        return 'rgba(255, 102, 0, 0.2)'; // Orange highlight
+      case 'macOS':
+        return '#000000'; // Black highlight
+      default:
+        return 'rgba(255, 255, 255, 0.2)'; // Light highlight
+    }
+  };
+
+  const getActiveChannelTextColor = () => {
+    switch (currentTheme) {
+      case 'matrix':
+        return '#00ff00'; // Green text
+      case 'coolRetro':
+        return '#00ffff'; // Cyan text
+      case 'windows95':
+        return '#ffffff'; // White text on blue
+      case 'ubuntu':
+        return '#ff6600'; // Orange text
+      case 'macOS':
+        return '#ffffff'; // White text
+      default:
+        return '#ffffff'; // White text
+    }
+  };
+
   return (
     <div 
       className={`relative min-h-screen w-full overflow-hidden bg-gradient-to-br ${theme.colors.bg}`}
@@ -310,62 +478,129 @@ export default function Chat() {
         />
       )}
       
-      <div 
-        className="w-full max-w-4xl h-screen p-4 flex flex-col relative mx-auto z-20"
-        style={{
-          ...(currentTheme === 'matrix' && {
-            border: '1px solid rgba(0, 255, 0, 0.3)',
-            borderRadius: '8px',
-            boxShadow: '0 0 20px rgba(0, 255, 0, 0.1)'
-          })
-        }}
-      >
+      <div className="w-full max-w-6xl h-screen p-4 flex relative mx-auto z-20">
         
-        <ChatHeader
-          currentChannel={currentChannel}
-          theme={theme}
-          currentTheme={currentTheme}
-          user={user}
-          userProfile={userProfile}
-          t={t}
-          onOpenProfile={handleOpenProfile}
-          onLogout={handleLogout}
-        />
+        {/* Sidebar  */}
+        <div 
+          className="w-64 flex-shrink-0 border-r overflow-y-auto border"
+          style={{ 
+            borderColor: getSidebarBorderColor(),
+            backgroundColor: getSidebarBackgroundColor(),
+            color: getSidebarTextColor()
+          }}
+        >
+          {/* Button to go back to public chat */}
+          {isPrivateMode && (
+            <div className="p-4 border-b" style={{ borderColor: getSidebarBorderColor() }}>
+              <button
+                onClick={handleBackToPublic}
+                className="w-full text-left px-3 py-2 rounded hover:opacity-80 transition-opacity font-medium"
+                style={{ 
+                  backgroundColor: getButtonBackgroundColor(),
+                  color: getButtonTextColor(),
+                  border: `1px solid ${getSidebarBorderColor()}`
+                }}
+              >
+                <BsArrowLeft className='inline-block mr-1' />{t('backGeneralChat')}
+              </button>
+            </div>
+          )}
 
-        <ConnectionStatus
-          user={user}
-          theme={theme}
-          t={t}
-        />
+          {/* Public Channel Section */}
+          {!isPrivateMode && (
+            <div className="p-4 border-b" style={{ borderColor: getSidebarBorderColor() }}>
+              <h3 
+                className="text-sm font-bold uppercase tracking-wide mb-2"
+                style={{ color: getSidebarHeaderColor() }}
+              >
+                {t('publicChannel')}<ImEarth className='w-4 h-4 inline-block ml-2' />
+              </h3>
+              <div 
+                className="flex items-center gap-2 px-2 py-2 rounded"
+                style={{ 
+                  backgroundColor: getActiveChannelBackgroundColor(),
+                  color: getActiveChannelTextColor()
+                }}
+              >
+                <span className="text-xs opacity-70">#</span>
+                <span>general</span>
+              </div>
+            </div>
+          )}
 
-        <MessageArea
-          messages={messages}
-          user={user}
-          theme={theme}
-          currentTheme={currentTheme}
-          typingUsers={typingUsers}
-          t={t}
-        />
+          {/* Direct Messages List */}
+          <DirectMessagesList 
+            user={user}
+            onSelectConversation={handleSelectConversation}
+            currentChannel={currentChannel}
+            theme={theme}
+            currentTheme={currentTheme}
+          />
+        </div>
 
-        <MessageInput
-          currentChannel={currentChannel}
-          user={user}
-          userProfile={userProfile}
-          theme={theme}
-          currentTheme={currentTheme}
-          t={t}
-          onError={handleError}
-          onTypingChange={handleTypingChange}
-        />
+        {/* main area */}
+        <div className="flex-1 flex flex-col min-w-0">
+          
+          <ChatHeader
+            currentChannel={currentChannel}
+            theme={theme}
+            currentTheme={currentTheme}
+            user={user}
+            userProfile={userProfile}
+            t={t}
+            onOpenProfile={handleOpenProfile}
+            onLogout={handleLogout}
+            isPrivateMode={isPrivateMode}
+          />
 
-        {error && (
-          <div className="mt-2 p-3 bg-red-900 border border-red-600 text-red-100 rounded-lg text-sm font-mono">
-            Error: {error}
-          </div>
-        )}
+          <ConnectionStatus
+            user={user}
+            theme={theme}
+            t={t}
+          />
+
+          {/* Optional: Private Chat */}
+          {isPrivateMode && selectedConversation ? (
+            <PrivateChat
+              user={user}
+              conversation={selectedConversation}
+              theme={theme}
+              currentTheme={currentTheme}
+              onError={handleError}
+            />
+          ) : (
+            <>
+              <MessageArea
+                messages={messages}
+                user={user}
+                theme={theme}
+                currentTheme={currentTheme}
+                typingUsers={typingUsers}
+                t={t}
+              />
+
+              <MessageInput
+                currentChannel={currentChannel}
+                user={user}
+                userProfile={userProfile}
+                theme={theme}
+                currentTheme={currentTheme}
+                t={t}
+                onError={handleError}
+                onTypingChange={handleTypingChange}
+              />
+            </>
+          )}
+
+          {error && (
+            <div className="mt-2 p-3 bg-red-900 border border-red-600 text-red-100 rounded-lg text-sm font-mono">
+              Error: {error}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Profile Modal with higher z-index */}
+      {/* Profile Modal */}
       <div className="relative z-30">
         <UserProfileModal
           isOpen={showProfileModal}

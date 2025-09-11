@@ -10,7 +10,8 @@ export default function ChatHeader({
   userProfile, 
   t,
   onOpenProfile,
-  onLogout 
+  onLogout,
+  isPrivateMode 
 }) {
   return (
     <div 
@@ -49,6 +50,16 @@ export default function ChatHeader({
         >
           {currentChannel ? `${theme.prompt} cd #${currentChannel.name}` : 'Connecting...'}
         </p>
+
+        {/* private mode indicator */}
+        {isPrivateMode && (
+          <div className="flex items-center gap-1 text-xs">
+            <span>🔒</span>
+            <span style={{ color: theme.colors.textSecondary }}>
+              Encrypted
+            </span>
+          </div>
+        )}
       </div>
       
       {/* User Profile Section */}

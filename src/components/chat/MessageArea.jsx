@@ -9,14 +9,17 @@ export default function MessageArea({
   user, 
   theme, 
   currentTheme, 
-  typingUsers,
+  typingUsers = [],  // Agregar default
   t 
 }) {
   const messagesEndRef = useRef(null);
 
+  const safeMessages = Array.isArray(messages) ? messages : [];
+  const safeTypingUsers = Array.isArray(typingUsers) ? typingUsers : [];
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [safeMessages]);
 
   const getScrollbarClass = () => {
     switch (currentTheme) {
@@ -68,6 +71,17 @@ export default function MessageArea({
     return <FiUser className={`${size.replace('w-', '').replace('h-', '')} text-gray-400`} />;
   };
 
+  
+  if (!theme || !user) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="text-center text-gray-500">
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div 
       className={`flex-1 overflow-y-auto px-2 py-3 sm:p-4 space-y-2 sm:space-y-3 ${getScrollbarClass()}`}
@@ -82,7 +96,7 @@ export default function MessageArea({
         })
       }}
     >
-      {messages.length === 0 ? (
+      {safeMessages.length === 0 ? ( 
         <div className="text-center mt-4 sm:mt-8 px-4">
           <p 
             className={`${currentTheme === 'default' ? 'text-gray-500' : 'font-mono'} text-sm sm:text-base`}
@@ -96,7 +110,7 @@ export default function MessageArea({
         </div>
       ) : (
         <div className="space-y-2 sm:space-y-3">
-          {messages.map((message) => {
+          {safeMessages.map((message) => {
             const isOwnMessage = message.user_id === user?.id;
             const messageUser = message.users || { 
               email: 'unknown_user',
@@ -181,7 +195,7 @@ export default function MessageArea({
           })}
 
           {/* Typing indicator */}
-          {typingUsers.length > 0 && (
+          {safeTypingUsers.length > 0 && ( 
             <div className="flex items-center gap-2 px-2 sm:px-3 py-2 opacity-70">
               <div className="flex space-x-1">
                 <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-gray-400 animate-bounce" />
@@ -192,9 +206,9 @@ export default function MessageArea({
                 className="text-xs font-mono"
                 style={{ color: theme.colors.textSecondary }}
               >
-                {typingUsers.length === 1 
-                  ? `${typingUsers[0].username} ${window.innerWidth < 640 ? '...' : t('isCoding')}`
-                  : `${typingUsers.length} usuarios escribiendo...`
+                {safeTypingUsers.length === 1 
+                  ? `${safeTypingUsers[0].username} ${window.innerWidth < 640 ? '...' : (t?.('isCoding') || 'is typing...')}`
+                  : `${safeTypingUsers.length} usuarios escribiendo...`
                 }
               </span>
             </div>
