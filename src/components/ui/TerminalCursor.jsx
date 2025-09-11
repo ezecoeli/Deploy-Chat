@@ -101,8 +101,7 @@ export default function TerminalCursor({ currentTheme, visible = true }) {
         verticalAlign: 'text-bottom'
       }}
     >
-      {/* Windows 95 uses block character instead of styled div */}
-      {currentTheme === 'windows95' ? (show ? '█' : ' ') : ''}
+      
     </span>
   );
 }

@@ -84,29 +84,40 @@ export default function ConnectionStatus({
 
   // Function to get the visual connection status
   const getStatusInfo = () => {
+    // Safe function to handle translations
+    const translate = (key, fallback) => {
+      if (typeof t === 'function') {
+        return t(key) || fallback;
+      }
+      if (t && typeof t === 'object' && t[key]) {
+        return t[key];
+      }
+      return fallback;
+    };
+
     switch (connectionStatus) {
       case 'online':
         return {
           color: 'bg-green-600',
-          text: t('online') || 'En línea',
+          text: translate('online', 'En línea'),
           textColor: 'text-green-600'
         };
       case 'offline':
         return {
           color: 'bg-red-500',
-          text: t('offline') || 'Desconectado',
+          text: translate('offline', 'Desconectado'),
           textColor: 'text-red-400'
         };
       case 'away':
         return {
           color: 'bg-yellow-500',
-          text: 'Ausente',
+          text: translate('away', 'Ausente'),
           textColor: 'text-yellow-400'
         };
       default:
         return {
           color: 'bg-gray-500',
-          text: 'Desconocido',
+          text: translate('unknown', 'Desconocido'),
           textColor: 'text-gray-400'
         };
     }

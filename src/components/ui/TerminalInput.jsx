@@ -83,7 +83,7 @@ export default function TerminalInput({
       case 'ubuntu':
         return `${baseStyles} text-orange-100 caret-transparent`;
       case 'windows95':
-        return `${baseStyles} text-black font-sans text-sm caret-transparent`;
+        return `${baseStyles} text-black caret-transparent`;
       case 'macOS':
         return `${baseStyles} text-white caret-transparent`;
       default:
