@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../utils/supabaseClient';
 import { BsFileLock, BsPlus, BsChatSquareText } from "react-icons/bs";
+import { useTranslation } from '../../hooks/useTranslation';
 
 export default function DirectMessagesList({ 
   user, 
@@ -15,6 +16,7 @@ export default function DirectMessagesList({
   const [showUserSelector, setShowUserSelector] = useState(false);
   const isMountedRef = useRef(true);
   const loadingTimeoutRef = useRef(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!user?.id) return;
@@ -315,10 +317,10 @@ export default function DirectMessagesList({
 
   return (
     <div className="p-4">
-      {/* Header with button for new DM */}
+      {/* Header with button for DM */}
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-bold uppercase tracking-wide opacity-70">
-          Direct Messages
+          {t('directMessages')}
         </h3>
         <button 
           onClick={() => setShowUserSelector(!showUserSelector)}
@@ -332,7 +334,7 @@ export default function DirectMessagesList({
       {/* User selector */}
       {showUserSelector && (
         <div className="mb-4 p-2 rounded border" style={{ borderColor: theme.colors.border }}>
-          <p className="text-xs opacity-70 mb-2">Select user to message:</p>
+          <p className="text-xs opacity-70 mb-2">{t('selectUserToChat')}:</p>
           <div className="max-h-32 overflow-y-auto space-y-1">
             {users.map(targetUser => (
               <button
@@ -351,7 +353,7 @@ export default function DirectMessagesList({
       <div className="space-y-1">
         {conversations.length === 0 ? (
           <p className="text-sm opacity-50 text-center py-4">
-            No direct messages yet
+            {t('noDirectMessages')}
           </p>
         ) : (
           conversations.map(conversation => (

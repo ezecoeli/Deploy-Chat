@@ -38,6 +38,7 @@ const translations = {
     privateChat: "Chat privado encriptado",
     publicChannel: "CANAL PÚBLICO",
     backGeneralChat: "Volver al chat general",
+    selectUserToChat: "Selecciona un usuario para chatear",
 
     // Members count
     oneMember: "1 miembro",
@@ -61,6 +62,7 @@ const translations = {
     home: "Inicio",
     channels: "Canales",
     directMessages: "Mensajes directos",
+    noDirectMessages: "No hay mensajes directos aún",
     
     // Messages
     pinnedMessages: "Mensajes fijados",
@@ -134,6 +136,7 @@ const translations = {
     privateChat: "Encrypted Private Chat",
     publicChannel: "PUBLIC CHANNEL",
     backGeneralChat: "Back to General Chat",
+    selectUserToChat: "Select a user to chat",
 
     // Members count  
     oneMember: "1 member",
@@ -157,6 +160,7 @@ const translations = {
     home: "Home",
     channels: "Channels",
     directMessages: "Direct Messages",
+    noDirectMessages: "No direct messages yet",
     
     // Messages
     pinnedMessages: "Pinned messages",
