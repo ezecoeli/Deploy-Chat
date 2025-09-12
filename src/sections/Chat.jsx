@@ -10,7 +10,7 @@ import MessageArea from '../components/chat/MessageArea';
 import MessageInput from '../components/chat/MessageInput';
 import MatrixRain from '../components/MatrixRain';
 import PrivateChat from '../components/chat/PrivateChat';
-import DirectMessagesList from '../components/chat/DirectMessagesList';
+import Sidebar from '../components/chat/Sidebar';
 import { useEncryption } from '../hooks/useEncryption';
 import { ImEarth } from "react-icons/im";
 import { BsArrowLeft } from "react-icons/bs";
@@ -529,7 +529,7 @@ export default function Chat() {
           )}
 
           {/* Direct Messages List */}
-          <DirectMessagesList 
+          <Sidebar
             user={user}
             onSelectConversation={handleSelectConversation}
             currentChannel={currentChannel}

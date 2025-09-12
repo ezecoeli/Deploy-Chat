@@ -39,6 +39,7 @@ const translations = {
     publicChannel: "CANAL PÚBLICO",
     backGeneralChat: "Volver al chat general",
     selectUserToChat: "Selecciona un usuario para chatear",
+    encrypted: "Encriptado",
 
     // Members count
     oneMember: "1 miembro",
@@ -138,6 +139,7 @@ const translations = {
     publicChannel: "PUBLIC CHANNEL",
     backGeneralChat: "Back to General Chat",
     selectUserToChat: "Select a user to chat",
+    encrypted: "Encrypted",
 
     // Members count  
     oneMember: "1 member",

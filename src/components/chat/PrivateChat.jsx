@@ -4,7 +4,6 @@ import { useEncryption } from '../../hooks/useEncryption';
 import MessageArea from './MessageArea';
 import MessageInput from './MessageInput';
 import { useTranslation } from '../../hooks/useTranslation';
-import { BsShieldLock } from "react-icons/bs";
 
 export default function PrivateChat({
     conversation,
@@ -481,7 +480,7 @@ export default function PrivateChat({
                             opacity: 0.8
                         }}
                     >
-                        {t('privateChat')} <BsShieldLock className='w-5 h-5' />
+                        {t('privateChat')} 
                     </p>
                 </div>
             </div>

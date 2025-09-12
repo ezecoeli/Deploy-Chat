@@ -1,6 +1,6 @@
 import React from 'react';
-import ThemeSelector from '../ThemeSelector';
 import UserMenu from './UserMenu';
+import { BsShieldLock } from "react-icons/bs";
 
 export default function ChatHeader({ 
   currentChannel, 
@@ -54,9 +54,11 @@ export default function ChatHeader({
         {/* private mode indicator */}
         {isPrivateMode && (
           <div className="flex items-center gap-1 text-xs">
-            <span>🔒</span>
             <span style={{ color: theme.colors.textSecondary }}>
-              Encrypted
+              <BsShieldLock className='w-5 h-5' />
+            </span>
+            <span style={{ color: theme.colors.textSecondary }}>
+              {t('encrypted')}
             </span>
           </div>
         )}
