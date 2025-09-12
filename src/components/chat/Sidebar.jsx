@@ -59,7 +59,6 @@ export default function Sidebar({
     
     try {
       setLoading(true);
-      console.log('Loading direct conversations for user:', user.id);
       
       // Step 1: Get direct channels where user participates
       const { data: channels, error: channelsError } = await supabase
@@ -71,12 +70,10 @@ export default function Sidebar({
         .order('updated_at', { ascending: false });
 
       if (channelsError) throw channelsError;
-      console.log('Found channels:', channels);
-
+      
       if (!isMountedRef.current) return;
 
       if (!channels || channels.length === 0) {
-        console.log('No direct channels found');
         setConversations([]);
         setLoading(false);
         return;
@@ -120,11 +117,9 @@ export default function Sidebar({
         };
       });
 
-      console.log('Final conversations:', conversationsWithUsers);
       setConversations(conversationsWithUsers);
 
     } catch (error) {
-      console.error('Error loading direct conversations:', error);
       if (isMountedRef.current) {
         setConversations([]);
       }
@@ -151,7 +146,6 @@ export default function Sidebar({
         setUsers(data || []);
       }
     } catch (err) {
-      console.error('Error loading users:', err);
     }
   };
 

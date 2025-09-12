@@ -32,7 +32,6 @@ export default function PrivateChat({
         decryptKeyFromUser
     } = useEncryption(user);
 
-    // function to load messages for the conversation
     const loadMessages = async () => {
         if (!conversation?.id) return;
 
@@ -60,14 +59,12 @@ export default function PrivateChat({
         }
     };
 
-    // Load messages when the conversation is ready
     useEffect(() => {
         if (conversationKey && conversation?.id) {
             loadMessages();
         }
     }, [conversationKey, conversation?.id]);
 
-    // Subscribe to new messages in real-time
     useEffect(() => {
         if (!conversation?.id || !conversationKey) return;
 
@@ -79,7 +76,6 @@ export default function PrivateChat({
                 table: 'messages',
                 filter: `channel_id=eq.${conversation.id}`
             }, async (payload) => {
-                // Get complete user information who sent the message
                 let messageWithUser = { ...payload.new };
 
                 try {
@@ -121,7 +117,6 @@ export default function PrivateChat({
         };
     }, [conversation?.id, conversationKey]);
 
-    // Initialize encrypted conversation
     useEffect(() => {
         isMountedRef.current = true;
 
@@ -140,7 +135,6 @@ export default function PrivateChat({
                 setLoading(true);
                 setError(null);
 
-                // Check for existing conversation key
                 const { data: existingKey, error: fetchError } = await supabase
                     .from('conversation_keys')
                     .select('encrypted_conversation_key')
@@ -150,60 +144,44 @@ export default function PrivateChat({
 
                 if (!isMounted) return;
 
-                // Handle fetch errors (406 might be expected if no keys exist)
                 if (fetchError && fetchError.code !== 'PGRST116') {
-                    console.warn('Error fetching conversation key:', fetchError);
                     // Continue to create new key instead of throwing
                 }
 
                 let aesKey = null;
 
-                // Try to decrypt existing key
                 if (existingKey?.encrypted_conversation_key && !fetchError) {
                     try {
-                        console.log(' Decrypting existing conversation key...');
                         aesKey = await decryptKeyFromUser(
                             existingKey.encrypted_conversation_key,
                             userKeyPair.privateKey
                         );
-                        console.log(' Successfully decrypted existing conversation key');
                     } catch (decryptError) {
-                        console.warn(' Failed to decrypt existing key, will create new one:', decryptError);
-
-                        // Remove corrupted key
                         try {
                             await supabase
                                 .from('conversation_keys')
                                 .delete()
                                 .eq('channel_id', conversation.id)
                                 .eq('user_id', user.id);
-                            console.log(' Removed corrupted key');
                         } catch (deleteError) {
-                            console.warn('Could not delete corrupted key:', deleteError);
+                            // Silent error handling
                         }
                     }
                 }
 
-                // Create new conversation key if none exists or decryption failed
                 if (!aesKey && isMounted) {
-                    console.log('Creating new conversation key...');
-
                     try {
-                        // Generate new symmetric key for conversation
                         aesKey = await generateConversationKey();
 
                         const otherUserId = conversation.participant_1 === user.id
                             ? conversation.participant_2
                             : conversation.participant_1;
 
-                        // Get other user's public key
                         const otherUserPublicKey = await getUserPublicKey(otherUserId);
 
-                        // Encrypt key for both users
                         const encryptedKeyForMe = await encryptKeyForUser(aesKey, userKeyPair.publicKey);
                         const encryptedKeyForOther = await encryptKeyForUser(aesKey, otherUserPublicKey);
 
-                        // Insert keys for both users with conflict handling
                         const insertOperations = [
                             {
                                 channel_id: conversation.id,
@@ -231,21 +209,16 @@ export default function PrivateChat({
                                     throw insertError;
                                 }
                             } catch (insertError) {
-                                if (insertError.code === '23505') {
-                                    console.log(` Key already exists for user ${keyData.user_id}, skipping...`);
-                                } else {
+                                if (insertError.code !== '23505') {
                                     console.error('Error inserting conversation key:', insertError);
                                     throw insertError;
                                 }
                             }
                         }
 
-                        console.log(' Created conversation keys for both users');
-
                     } catch (keyCreationError) {
                         console.error('Error creating conversation key:', keyCreationError);
 
-                        // Fallback: try to get existing key one more time
                         try {
                             const { data: fallbackKey } = await supabase
                                 .from('conversation_keys')
@@ -259,10 +232,8 @@ export default function PrivateChat({
                                     fallbackKey.encrypted_conversation_key,
                                     userKeyPair.privateKey
                                 );
-                                console.log('Retrieved conversation key from fallback');
                             }
                         } catch (fallbackError) {
-                            console.error('Fallback key retrieval failed:', fallbackError);
                             throw keyCreationError;
                         }
                     }
@@ -270,7 +241,6 @@ export default function PrivateChat({
 
                 if (isMounted && aesKey) {
                     setConversationKey(aesKey);
-                    console.log('Encrypted conversation ready');
                 }
 
             } catch (error) {
@@ -286,7 +256,6 @@ export default function PrivateChat({
             }
         };
 
-        // Debounce initialization to prevent multiple calls
         initTimeout = setTimeout(() => {
             if (isMounted) {
                 initializeEncryptedConversation();
@@ -301,14 +270,12 @@ export default function PrivateChat({
         };
     }, [conversation?.id, userKeyPair, isKeysReady, user?.id, getUserPublicKey, onError]);
 
-    // Cleanup on unmount
     useEffect(() => {
         return () => {
             isMountedRef.current = false;
         };
     }, []);
 
-    // Load user profile
     useEffect(() => {
         const loadUserProfile = async () => {
             if (!user?.id) return;
@@ -321,8 +288,6 @@ export default function PrivateChat({
                     .single();
 
                 if (error) {
-                    console.warn('Error loading user profile:', error);
-                    // Fallback 
                     setUserProfile({
                         id: user.id,
                         username: user.email?.split('@')[0] || 'Unknown',
@@ -338,8 +303,6 @@ export default function PrivateChat({
                     });
                 }
             } catch (err) {
-                console.error('Error loading user profile:', err);
-                // Fallback 
                 setUserProfile({
                     id: user.id,
                     username: user.email?.split('@')[0] || 'Unknown',
@@ -381,7 +344,6 @@ export default function PrivateChat({
 
     const handleDecryptMessage = async (encryptedMessage) => {
         if (!conversationKey) {
-            console.warn('No conversation key available for decryption');
             return '[Encrypted message - key not available]';
         }
 
@@ -402,7 +364,6 @@ export default function PrivateChat({
 
         return 'Private Chat';
     };
-
 
     const handleTypingChange = (isTyping) => {
         // implement if needed
@@ -464,7 +425,6 @@ export default function PrivateChat({
 
     return (
         <div className="flex-1 flex flex-col">
-            {/* Header */}
             <div className="p-4 border-b border-gray-600 flex items-center gap-3">
                 <div>
                     <h2 
@@ -485,7 +445,6 @@ export default function PrivateChat({
                 </div>
             </div>
 
-            {/* Message Area */}
             <MessageArea
                 messages={messages}
                 user={user}
@@ -496,7 +455,6 @@ export default function PrivateChat({
                 onDecryptMessage={handleDecryptMessage}
             />
 
-            {/* Message Input */}
             <MessageInput
                 currentChannel={conversation}
                 user={user}
