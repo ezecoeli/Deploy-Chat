@@ -87,7 +87,7 @@ export function useEncryption(user) {
     }
 
     try {
-      console.log('🔑 Generating new keys for existing user...');
+      console.log(' Generating new keys for existing user...');
       
       // Check if user already has keys in the database
       const { data: existingKeys, error: fetchError } = await supabase
@@ -114,7 +114,7 @@ export function useEncryption(user) {
             const publicKey = await importPublicKey(existingKeys.public_key);
             
             keyPair = { privateKey, publicKey };
-            console.log('✅ Restored existing keys from localStorage');
+            console.log('Restored existing keys from localStorage');
           } catch (importError) {
             console.warn('Failed to restore keys from localStorage:', importError);
             keyPair = null;
@@ -124,7 +124,7 @@ export function useEncryption(user) {
 
       if (!keyPair) {
         // Generate new RSA key pair
-        console.log('🔑 Generating RSA key pair...');
+        console.log(' Generating RSA key pair...');
         keyPair = await crypto.subtle.generateKey(
           {
             name: 'RSA-OAEP',
@@ -158,7 +158,7 @@ export function useEncryption(user) {
             console.warn('Could not store public key in database:', upsertError);
             // Continue anyway, we have local keys
           } else {
-            console.log('✅ Generated and stored new keys');
+            console.log(' Generated and stored new keys');
           }
         } catch (dbError) {
           console.warn('Database error storing keys:', dbError);
@@ -170,7 +170,7 @@ export function useEncryption(user) {
       setIsKeysReady(true);
       setEncryptionReady(true);
       
-      console.log('✅ Encryption keys ready');
+      console.log(' Encryption keys ready');
 
     } catch (error) {
       console.error('Error initializing user keys:', error);

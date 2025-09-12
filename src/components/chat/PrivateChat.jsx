@@ -122,7 +122,7 @@ export default function PrivateChat({
         };
     }, [conversation?.id, conversationKey]);
 
-    // Initialize encrypted conversation (código existente...)
+    // Initialize encrypted conversation
     useEffect(() => {
         isMountedRef.current = true;
 
@@ -162,14 +162,14 @@ export default function PrivateChat({
                 // Try to decrypt existing key
                 if (existingKey?.encrypted_conversation_key && !fetchError) {
                     try {
-                        console.log('🔓 Decrypting existing conversation key...');
+                        console.log(' Decrypting existing conversation key...');
                         aesKey = await decryptKeyFromUser(
                             existingKey.encrypted_conversation_key,
                             userKeyPair.privateKey
                         );
-                        console.log('✅ Successfully decrypted existing conversation key');
+                        console.log(' Successfully decrypted existing conversation key');
                     } catch (decryptError) {
-                        console.warn('⚠️ Failed to decrypt existing key, will create new one:', decryptError);
+                        console.warn(' Failed to decrypt existing key, will create new one:', decryptError);
 
                         // Remove corrupted key
                         try {
@@ -178,7 +178,7 @@ export default function PrivateChat({
                                 .delete()
                                 .eq('channel_id', conversation.id)
                                 .eq('user_id', user.id);
-                            console.log('🗑️ Removed corrupted key');
+                            console.log(' Removed corrupted key');
                         } catch (deleteError) {
                             console.warn('Could not delete corrupted key:', deleteError);
                         }
@@ -187,7 +187,7 @@ export default function PrivateChat({
 
                 // Create new conversation key if none exists or decryption failed
                 if (!aesKey && isMounted) {
-                    console.log('🔑 Creating new conversation key...');
+                    console.log('Creating new conversation key...');
 
                     try {
                         // Generate new symmetric key for conversation
@@ -233,7 +233,7 @@ export default function PrivateChat({
                                 }
                             } catch (insertError) {
                                 if (insertError.code === '23505') {
-                                    console.log(`🔍 Key already exists for user ${keyData.user_id}, skipping...`);
+                                    console.log(` Key already exists for user ${keyData.user_id}, skipping...`);
                                 } else {
                                     console.error('Error inserting conversation key:', insertError);
                                     throw insertError;
@@ -241,7 +241,7 @@ export default function PrivateChat({
                             }
                         }
 
-                        console.log('✅ Created conversation keys for both users');
+                        console.log(' Created conversation keys for both users');
 
                     } catch (keyCreationError) {
                         console.error('Error creating conversation key:', keyCreationError);
@@ -260,7 +260,7 @@ export default function PrivateChat({
                                     fallbackKey.encrypted_conversation_key,
                                     userKeyPair.privateKey
                                 );
-                                console.log('✅ Retrieved conversation key from fallback');
+                                console.log('Retrieved conversation key from fallback');
                             }
                         } catch (fallbackError) {
                             console.error('Fallback key retrieval failed:', fallbackError);
@@ -271,7 +271,7 @@ export default function PrivateChat({
 
                 if (isMounted && aesKey) {
                     setConversationKey(aesKey);
-                    console.log('✅ Encrypted conversation ready');
+                    console.log('Encrypted conversation ready');
                 }
 
             } catch (error) {

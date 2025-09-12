@@ -69,7 +69,7 @@ const translations = {
     deleteMessage: "Eliminar mensaje",
     editMessage: "Editar mensaje",
     
-    // Errors y validaciones
+    // Errors y validations
     errorLogin: "Error al iniciar sesión",
     errorRegister: "Error al registrarse",
     errorSendMessage: "Error al enviar mensaje",
@@ -86,7 +86,7 @@ const translations = {
     hoursAgo: "hace {count} horas",
     daysAgo: "hace {count} días",
 
-    // Recuperar contraseña
+    // Password recovery
     forgotPassword: "¿Olvidaste tu contraseña?",
     resetPassword: "Restablecer contraseña",
     newPassword: "Nueva contraseña",
