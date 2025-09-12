@@ -9,6 +9,12 @@ import avatar07 from '../assets/avatars/avatar-07.png';
 import avatar08 from '../assets/avatars/avatar-08.png';
 import avatar09 from '../assets/avatars/avatar-09.png';
 import avatar10 from '../assets/avatars/avatar-10.png';
+import avatar11 from '../assets/avatars/avatar-11.png';
+import avatar12 from '../assets/avatars/avatar-12.png';
+import avatar13 from '../assets/avatars/avatar-13.png';
+import avatar14 from '../assets/avatars/avatar-14.png';
+import avatar15 from '../assets/avatars/avatar-15.png';
+
 
 export const AVATAR_OPTIONS = [
   { id: 'avatar-01', src: avatar01, name: 'Avatar 1' },
@@ -20,7 +26,12 @@ export const AVATAR_OPTIONS = [
   { id: 'avatar-07', src: avatar07, name: 'Avatar 7' },
   { id: 'avatar-08', src: avatar08, name: 'Avatar 8' },
   { id: 'avatar-09', src: avatar09, name: 'Avatar 9' },
-  { id: 'avatar-10', src: avatar10, name: 'Avatar 10' }
+  { id: 'avatar-10', src: avatar10, name: 'Avatar 10' },
+  { id: 'avatar-11', src: avatar11, name: 'Avatar 11' },
+  { id: 'avatar-12', src: avatar12, name: 'Avatar 12' },
+  { id: 'avatar-13', src: avatar13, name: 'Avatar 13' },
+  { id: 'avatar-14', src: avatar14, name: 'Avatar 14' },
+  { id: 'avatar-15', src: avatar15, name: 'Avatar 15' },
 ];
 
 // helper function to get avatar by id
