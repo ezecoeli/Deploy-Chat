@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 const terminalThemes = {
     default: {
-        name: 'Deploy Classic',
+        name: 'Deploy',
         prompt: '$',
         font: '"Inter", "SF Pro Display", system-ui, sans-serif',
         colors: {
@@ -25,7 +25,7 @@ const terminalThemes = {
     },
 
     matrix: {
-        name: 'Matrix Terminal',
+        name: 'Matrix',
         prompt: 'Neo>',
         font: '"JetBrains Mono", "Fira Code", "Consolas", monospace',
         colors: {
@@ -48,7 +48,7 @@ const terminalThemes = {
     },
 
     ubuntu: {
-        name: 'Ubuntu Terminal',
+        name: 'Ubuntu',
         prompt: '~$',
         font: '"Ubuntu Mono", "Liberation Mono", "Consolas", monospace',
         colors: {

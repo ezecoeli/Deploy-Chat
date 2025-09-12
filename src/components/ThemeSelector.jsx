@@ -147,20 +147,7 @@ export default function ThemeSelector() {
               }}
             >
               <div className="p-3">
-                {/* dropdown header */}
-                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-600">
-                  <FiTerminal className="w-4 h-4 text-blue-400" />
-                  <span 
-                    className="text-sm font-medium font-mono"
-                    style={{ 
-                      color: currentTheme === 'coolRetro' ? '#ffcc00' : '#ffffff',
-                      textShadow: currentTheme === 'coolRetro' ? '0 0 3px #ffb000' : 'none'
-                    }}
-                  >
-                    Terminal Themes
-                  </span>
-                </div>
-
+                
                 {/* theme list */}
                 <div className="space-y-1">
                   {themes.map((themeOption) => {

@@ -63,6 +63,7 @@ const translations = {
     channels: "Canales",
     directMessages: "Mensajes directos",
     noDirectMessages: "No hay mensajes directos aún",
+    theme: "Tema",
     
     // Messages
     pinnedMessages: "Mensajes fijados",
@@ -161,6 +162,7 @@ const translations = {
     channels: "Channels",
     directMessages: "Direct Messages",
     noDirectMessages: "No direct messages yet",
+    theme: "Theme",
     
     // Messages
     pinnedMessages: "Pinned messages",

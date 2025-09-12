@@ -12,7 +12,7 @@ export default function LanguageToggle() {
   return (
     <button
       onClick={toggleLanguage}
-      className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-white hover:text-gray-300 transition-colors duration-200"
+      className="flex items-center gap-3 px-3 py-2 text-xs font-medium text-white hover:text-gray-300 transition-colors duration-200"
       title={language === 'es' ? 'Switch to English' : 'Cambiar a español'}
     >
       <AnimatePresence mode="wait">

@@ -39,7 +39,7 @@ export default function ChatHeader({
             fontFamily: theme.font
           }}
         >
-          Deploy Chat
+          Deploy-Chat
         </h1>
         <p 
           className="text-sm font-mono"
@@ -64,7 +64,6 @@ export default function ChatHeader({
       
       {/* User Profile Section */}
       <div className="flex items-center gap-4">
-        <ThemeSelector />
         
         {/* User menu component */}
         <UserMenu
