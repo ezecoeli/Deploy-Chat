@@ -3,16 +3,17 @@ import { getAvatarById } from '../../config/avatars';
 import { FiUser } from 'react-icons/fi';
 import MessageRenderer from './MessageRenderer';
 import ReactionBar from '../ReactionBar';
+import { useTranslation } from '../../hooks/useTranslation';
 
 export default function MessageArea({ 
   messages, 
   user, 
   theme, 
   currentTheme, 
-  typingUsers = [],  // Agregar default
-  t 
+  typingUsers = [], 
 }) {
   const messagesEndRef = useRef(null);
+  const {t} = useTranslation();
 
   const safeMessages = Array.isArray(messages) ? messages : [];
   const safeTypingUsers = Array.isArray(typingUsers) ? typingUsers : [];
@@ -104,7 +105,7 @@ export default function MessageArea({
           >
             {currentTheme === 'default' 
               ? "No hay mensajes aún. ¡Sé el primero en escribir!"
-              : `${theme.prompt} echo "No messages yet. Start the conversation!"`
+              : `${theme.prompt} echo ${t('noMessagesYet')}`
             }
           </p>
         </div>

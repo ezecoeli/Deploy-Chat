@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from '../hooks/useTranslation';
@@ -29,6 +29,8 @@ export default function Chat() {
   const [userProfile, setUserProfile] = useState(null);
   const [isPrivateMode, setIsPrivateMode] = useState(false);
   const [selectedConversation, setSelectedConversation] = useState(null);
+  const [messagesLoading, setMessagesLoading] = useState(false);
+  const isInitializedRef = useRef(false);
  
   // Load user profile on user change
   useEffect(() => {
@@ -73,13 +75,15 @@ export default function Chat() {
     }
   };
 
-  // Load messages function
+  // Load messages function - OPTIMIZED
   const loadMessages = useCallback(async (channelId) => {
-    if (!channelId) {
+    if (!channelId || messagesLoading) {
       return;
     }
 
     try {
+      setMessagesLoading(true);
+      console.log('Loading messages for channel:', channelId);
       
       const { data, error } = await supabase
         .from('messages')
@@ -98,85 +102,98 @@ export default function Chat() {
 
       if (error) throw error;
 
+      console.log('Messages loaded:', data?.length || 0);
       setMessages(data || []);
+      setError(''); // Clear any previous errors
     } catch (err) {
+      console.error('Error loading messages:', err);
       setError('Error cargando mensajes: ' + err.message);
+      setMessages([]); // Clear messages on error
+    } finally {
+      setMessagesLoading(false);
     }
-  }, []);
+  }, [messagesLoading]);
 
-  // Setup initial channel and load messages
+  // Setup initial channel - FIXED
   useEffect(() => {
-    if (loading) {
+    if (loading || !user) {
       return;
     }
 
-    if (!user) {
-      setCurrentChannel(null);
-      setMessages([]);
+    // Only initialize once
+    if (isInitializedRef.current) {
       return;
     }
 
-    // Prevent multiple initializations
-    if (currentChannel) {
-      return;
-    }
+    isInitializedRef.current = true;
 
-    // Only set channel once on initialization
-    const hardcodedChannel = {
-      id: '95cd8c81-bd3f-4cf2-a9d1-ce8f0c53486c',
-      name: 'general',
-    };
-
-    setCurrentChannel(hardcodedChannel);
-
-    // Load messages only once
-    const loadInitialMessages = async () => {
+    const initializeDefaultChannel = async () => {
       try {
-        
-        const { data, error } = await supabase
-          .from('messages')
-          .select(`
-            *,
-            users:user_id (
-              id,
-              email,
-              username,
-              avatar_url
-            )
-          `)
-          .eq('channel_id', hardcodedChannel.id)
-          .order('created_at', { ascending: true })
-          .limit(100);
+        // Get the actual general channel from database
+        const { data: generalChannel, error } = await supabase
+          .from('channels')
+          .select('id, name, description, type')
+          .eq('name', 'general')
+          .eq('type', 'public')
+          .eq('is_active', true)
+          .eq('is_archived', false)
+          .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error loading general channel:', error);
+          // Fallback to hardcoded if database query fails
+          const fallbackChannel = {
+            id: '95cd8c81-bd3f-4cf2-a9d1-ce8f0c53486c',
+            name: 'general',
+            type: 'public'
+          };
+          setCurrentChannel(fallbackChannel);
+          await loadMessages(fallbackChannel.id);
+          return;
+        }
 
-        setMessages(data || []);
+        console.log('Setting initial channel to general:', generalChannel);
+        setCurrentChannel(generalChannel);
+        await loadMessages(generalChannel.id);
+
       } catch (err) {
-        setError('Error cargando mensajes: ' + err.message);
+        console.error('Error initializing default channel:', err);
+        setError('Error inicializando canal general');
       }
     };
 
-    loadInitialMessages();
-  }, [user, loading, currentChannel]);
+    initializeDefaultChannel();
+  }, [user, loading, loadMessages]);
 
-  // Subscribe to new messages and typing events
+  // Reset initialization when user changes
+  useEffect(() => {
+    if (user) {
+      isInitializedRef.current = false;
+    }
+  }, [user?.id]);
+
+  // Subscribe to new messages and typing events - OPTIMIZED
   useEffect(() => {
     if (!currentChannel?.id || !user) {
       return;
     }
+    
+    console.log('Setting up subscription for channel:', currentChannel.id);
     
     let retryCount = 0;
     const maxRetries = 3;
 
     const createSubscription = () => {
       const subscription = supabase
-        .channel(`messages:${currentChannel.id}`)
+        .channel(`messages_${currentChannel.id}_${user.id}`)
         .on('postgres_changes', {
           event: 'INSERT',
           schema: 'public',
           table: 'messages',
           filter: `channel_id=eq.${currentChannel.id}`
-        }, async (payload) => { // async function to fetch user data
+        }, async (payload) => {
+          console.log('New message received:', payload.new);
+          
           // Get complete user information who sent the message
           let messageWithUser = { ...payload.new };
           
@@ -258,9 +275,11 @@ export default function Chat() {
           }
         })
         .subscribe((status) => {
+          console.log('Subscription status:', status);
           // Retry on error
           if (status === 'CHANNEL_ERROR' && retryCount < maxRetries) {
             retryCount++;
+            console.log(`Retrying subscription (${retryCount}/${maxRetries})`);
             setTimeout(() => {
               subscription.unsubscribe();
               createSubscription();
@@ -274,6 +293,7 @@ export default function Chat() {
     const subscription = createSubscription();
 
     return () => {
+      console.log('Cleaning up subscription for channel:', currentChannel.id);
       if (subscription) {
         subscription.unsubscribe();
       }
@@ -301,163 +321,213 @@ export default function Chat() {
     // Handle typing status changes if needed
   };
 
-  // handle select conversation for private chat
-  const handleSelectConversation = (conversation) => {
-    setSelectedConversation(conversation);
-    setCurrentChannel(conversation);
-    setIsPrivateMode(conversation.type === 'direct');
-    setMessages([]); // clear public chat messages
-  };
+  // FIXED: handle select conversation for both public and private chats
+  const handleSelectConversation = useCallback(async (conversation) => {
+    console.log('Selecting conversation:', conversation);
+    
+    try {
+      // Clear previous state
+      setMessages([]);
+      setTypingUsers([]);
+      setError('');
+      
+      // Update current channel
+      setCurrentChannel(conversation);
+      setSelectedConversation(conversation);
+      
+      // Determine if it's private mode
+      const isPrivate = conversation.type === 'direct';
+      setIsPrivateMode(isPrivate);
+      
+      // Load messages for the selected channel
+      if (!isPrivate) {
+        // For public channels, load messages immediately
+        await loadMessages(conversation.id);
+      }
+      // For private channels, PrivateChat component handles message loading
+      
+    } catch (error) {
+      console.error('Error selecting conversation:', error);
+      setError('Error al cambiar de canal');
+    }
+  }, [loadMessages]);
 
-  // handle back to public chat
-  const handleBackToPublic = () => {
-    setIsPrivateMode(false);
-    setSelectedConversation(null);
-    
-    // back to hardcoded public channel
-    const hardcodedChannel = {
-      id: '95cd8c81-bd3f-4cf2-a9d1-ce8f0c53486c',
-      name: 'general',
-    };
-    
-    setCurrentChannel(hardcodedChannel);
-    loadMessages(hardcodedChannel.id);
-  };
+  // FIXED: handle back to public chat
+  const handleBackToPublic = useCallback(async () => {
+    try {
+      setIsPrivateMode(false);
+      setSelectedConversation(null);
+      setMessages([]);
+      setTypingUsers([]);
+      setError('');
+      
+      // Get the actual general channel from database
+      const { data: generalChannel, error } = await supabase
+        .from('channels')
+        .select('id, name, description, type')
+        .eq('name', 'general')
+        .eq('type', 'public')
+        .eq('is_active', true)
+        .eq('is_archived', false)
+        .single();
+
+      if (error) {
+        console.error('Error loading general channel:', error);
+        // Fallback to hardcoded
+        const fallbackChannel = {
+          id: '95cd8c81-bd3f-4cf2-a9d1-ce8f0c53486c',
+          name: 'general',
+          type: 'public'
+        };
+        setCurrentChannel(fallbackChannel);
+        await loadMessages(fallbackChannel.id);
+        return;
+      }
+
+      console.log('Returning to general channel:', generalChannel);
+      setCurrentChannel(generalChannel);
+      await loadMessages(generalChannel.id);
+      
+    } catch (error) {
+      console.error('Error returning to public chat:', error);
+      setError('Error al volver al chat general');
+    }
+  }, [loadMessages]);
 
   // Get sidebar styles based on current theme
   const getSidebarBackgroundColor = () => {
     switch (currentTheme) {
       case 'matrix':
-        return 'rgba(0, 0, 0, 0.95)'; // Almost solid black
+        return 'rgba(0, 0, 0, 0.95)';
       case 'coolRetro':
-        return 'rgba(0, 0, 0, 0.95)'; // Almost solid black
+        return 'rgba(0, 0, 0, 0.95)';
       case 'windows95':
-        return '#c0c0c0'; // Classic Windows 95 gray
+        return '#c0c0c0';
       case 'ubuntu':
-        return 'rgba(45, 45, 45, 0.95)'; // Dark gray
+        return 'rgba(45, 45, 45, 0.95)';
       case 'macOS':
-        return '#c0c0c0'; // Gray
+        return '#c0c0c0';
       default:
-        return 'rgba(30, 30, 30, 0.95)'; // Dark gray
+        return 'rgba(30, 30, 30, 0.95)';
     }
   };
 
   const getSidebarTextColor = () => {
     switch (currentTheme) {
       case 'matrix':
-        return '#00ff00'; // Bright green
+        return '#00ff00';
       case 'coolRetro':
-        return '#00ffff'; // Cyan
+        return '#00ffff';
       case 'windows95':
-        return '#000000'; // Black text
+        return '#000000';
       case 'ubuntu':
-        return '#ff6600'; // Orange
+        return '#ff6600';
       case 'macOS':
-        return '#000000'; // Black
+        return '#000000';
       default:
-        return '#ffffff'; // White
+        return '#ffffff';
     }
   };
 
   const getSidebarHeaderColor = () => {
     switch (currentTheme) {
       case 'matrix':
-        return '#00ff00'; // Bright green
+        return '#00ff00';
       case 'coolRetro':
-        return '#00ffff'; // Cyan  
+        return '#00ffff';
       case 'windows95':
-        return '#000080'; // Navy blue
+        return '#000080';
       case 'ubuntu':
-        return '#ff6600'; // Orange
+        return '#ff6600';
       case 'macOS':
-        return '#000000'; // Black
+        return '#000000';
       default:
-        return '#ffffff'; // White
+        return '#ffffff';
     }
   };
 
   const getSidebarBorderColor = () => {
     switch (currentTheme) {
       case 'matrix':
-        return 'rgba(0, 255, 0, 0.3)'; // Green border
+        return 'rgba(0, 255, 0, 0.3)';
       case 'coolRetro':
-        return 'rgba(0, 255, 255, 0.3)'; // Cyan border
+        return 'rgba(0, 255, 255, 0.3)';
       case 'windows95':
-        return '#808080'; // Gray border
+        return '#808080';
       case 'ubuntu':
-        return 'rgba(255, 102, 0, 0.3)'; // Orange border
+        return 'rgba(255, 102, 0, 0.3)';
       case 'macOS':
-        return '#000000'; // Black border
+        return '#000000';
       default:
-        return 'rgba(255, 255, 255, 0.2)'; // Light border
+        return 'rgba(255, 255, 255, 0.2)';
     }
   };
 
   const getButtonBackgroundColor = () => {
     switch (currentTheme) {
       case 'matrix':
-        return 'rgba(0, 255, 0, 0.1)'; // Green background
+        return 'rgba(0, 255, 0, 0.1)';
       case 'coolRetro':
-        return 'rgba(0, 255, 255, 0.1)'; // Cyan background
+        return 'rgba(0, 255, 255, 0.1)';
       case 'windows95':
-        return '#ffffff'; // White background
+        return '#ffffff';
       case 'ubuntu':
-        return 'rgba(255, 102, 0, 0.1)'; // Orange background
+        return 'rgba(255, 102, 0, 0.1)';
       case 'macOS':
-        return '#ffffff'; // White background
+        return '#ffffff';
       default:
-        return 'rgba(255, 255, 255, 0.1)'; // Light background
+        return 'rgba(255, 255, 255, 0.1)';
     }
   };
 
   const getButtonTextColor = () => {
     switch (currentTheme) {
       case 'matrix':
-        return '#00ff00'; // Green text
+        return '#00ff00';
       case 'coolRetro':
-        return '#00ffff'; // Cyan text
+        return '#00ffff';
       case 'windows95':
-        return '#000000'; // Black text
+        return '#000000';
       case 'ubuntu':
-        return '#ff6600'; // Orange text
+        return '#ff6600';
       case 'macOS':
-        return '#000000'; // Black text
+        return '#000000';
       default:
-        return '#ffffff'; // White text
+        return '#ffffff';
     }
   };
 
   const getActiveChannelBackgroundColor = () => {
     switch (currentTheme) {
       case 'matrix':
-        return 'rgba(0, 255, 0, 0.2)'; // Green highlight
+        return 'rgba(0, 255, 0, 0.2)';
       case 'coolRetro':
-        return 'rgba(0, 255, 255, 0.2)'; // Cyan highlight
+        return 'rgba(0, 255, 255, 0.2)';
       case 'windows95':
-        return '#c0c0c0'; // Gray highlight
+        return '#c0c0c0';
       case 'ubuntu':
-        return 'rgba(255, 102, 0, 0.2)'; // Orange highlight
+        return 'rgba(255, 102, 0, 0.2)';
       case 'macOS':
-        return '#000000'; // Black highlight
+        return '#000000';
       default:
-        return 'rgba(255, 255, 255, 0.2)'; // Light highlight
+        return 'rgba(255, 255, 255, 0.2)';
     }
   };
 
   const getActiveChannelTextColor = () => {
     switch (currentTheme) {
       case 'matrix':
-        return '#00ff00'; // Green text
+        return '#00ff00';
       case 'coolRetro':
-        return '#00ffff'; // Cyan text
+        return '#00ffff';
       case 'windows95':
-        return '#ffffff'; // White text on blue
+        return '#ffffff';
       case 'ubuntu':
-        return '#ff6600'; // Orange text
+        return '#ff6600';
       case 'macOS':
-        return '#ffffff'; // White text
+        return '#ffffff';
       default:
-        return '#ffffff'; // White text
+        return '#ffffff';
     }
   };
 
@@ -480,7 +550,7 @@ export default function Chat() {
       
       <div className="w-full max-w-6xl h-screen p-4 flex relative mx-auto z-20">
         
-        {/* Sidebar  */}
+        {/* Sidebar */}
         <div 
           className="w-64 flex-shrink-0 border-r overflow-y-auto border"
           style={{ 
@@ -506,29 +576,7 @@ export default function Chat() {
             </div>
           )}
 
-          {/* Public Channel Section */}
-          {!isPrivateMode && (
-            <div className="p-4 border-b" style={{ borderColor: getSidebarBorderColor() }}>
-              <h3 
-                className="text-sm font-bold uppercase tracking-wide mb-2"
-                style={{ color: getSidebarHeaderColor() }}
-              >
-                {t('publicChannel')}<ImEarth className='w-4 h-4 inline-block ml-2' />
-              </h3>
-              <div 
-                className="flex items-center gap-2 px-2 py-2 rounded"
-                style={{ 
-                  backgroundColor: getActiveChannelBackgroundColor(),
-                  color: getActiveChannelTextColor()
-                }}
-              >
-                <span className="text-xs opacity-70">#</span>
-                <span>general</span>
-              </div>
-            </div>
-          )}
-
-          {/* Direct Messages List */}
+          {/* Sidebar Component */}
           <Sidebar
             user={user}
             onSelectConversation={handleSelectConversation}
@@ -559,8 +607,17 @@ export default function Chat() {
             t={t}
           />
 
+          {/* Show loading state */}
+          {messagesLoading && (
+            <div className="flex-1 flex items-center justify-center">
+              <div className="animate-pulse text-center">
+                <div className="text-lg opacity-70">Cargando mensajes...</div>
+              </div>
+            </div>
+          )}
+
           {/* Optional: Private Chat */}
-          {isPrivateMode && selectedConversation ? (
+          {isPrivateMode && selectedConversation && !messagesLoading ? (
             <PrivateChat
               user={user}
               conversation={selectedConversation}
@@ -568,7 +625,7 @@ export default function Chat() {
               currentTheme={currentTheme}
               onError={handleError}
             />
-          ) : (
+          ) : !messagesLoading ? (
             <>
               <MessageArea
                 messages={messages}
@@ -590,7 +647,7 @@ export default function Chat() {
                 onTypingChange={handleTypingChange}
               />
             </>
-          )}
+          ) : null}
 
           {error && (
             <div className="mt-2 p-3 bg-red-900 border border-red-600 text-red-100 rounded-lg text-sm font-mono">

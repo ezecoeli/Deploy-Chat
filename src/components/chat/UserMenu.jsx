@@ -218,9 +218,14 @@ export default function UserMenu({
               >
                 <FiGlobe className="w-4 h-4 flex-shrink-0" />
                 <span className="flex-1">{t('language')}</span>
-
                 <div className="flex justify-end">
-                   <LanguageToggle className="text-xs" />
+                  <span className="text-xs px-2 py-1 rounded border" 
+                        style={{ 
+                          borderColor: menuStyles.color,
+                          backgroundColor: 'transparent'
+                        }}>
+                    {language === 'es' ? 'ES 🇪🇸' : 'EN 🇬🇧'} 
+                  </span>
                 </div>
               </button>
 

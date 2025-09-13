@@ -1,7 +1,7 @@
 import { createContext, useContext, useState } from 'react';
 
-// traducciones
 const translations = {
+  // ESPAÑOL
   es: {
     // Auth
     login: "Iniciar sesión",
@@ -40,18 +40,26 @@ const translations = {
     backGeneralChat: "Volver al chat general",
     selectUserToChat: "Selecciona un usuario para chatear",
     encrypted: "Encriptado",
+    noMessagesYet: "No hay mensajes aún. Empieza una conversación.",
 
     // Members count
     oneMember: "1 miembro",
     membersCount: "{count} miembros",
     
-    // Channels
+    // Channels 
     general: "General",
     random: "Random",
     tech: "Tecnología",
     createChannel: "Crear canal",
     joinChannel: "Unirse al canal",
     leaveChannel: "Salir del canal",
+    channelName: "Nombre del canal", 
+    channelDescription: "Descripción (opcional)",
+    archiveChannel: "Archivar canal",
+    cannotArchiveGeneral: "No se puede archivar el canal general",
+    confirmArchive: "¿Estás seguro de que quieres archivar este canal?",
+    channelCreated: "Canal creado exitosamente",
+    channelArchived: "Canal archivado exitosamente",
     
     // UI
     darkMode: "Modo oscuro",
@@ -101,7 +109,11 @@ const translations = {
     passwordUpdated: "Contraseña actualizada exitosamente",
     backToLogin: "Volver al inicio",
     enterEmailToReset: "Ingresa el email asociado a tu cuenta para recibir el enlace de restablecimiento.",
+    publicChannels: "Canales Públicos",
+
+
   },
+  // INGLES
   en: {
     // Auth
     login: "Sign In",
@@ -140,6 +152,7 @@ const translations = {
     backGeneralChat: "Back to General Chat",
     selectUserToChat: "Select a user to chat",
     encrypted: "Encrypted",
+    noMessagesYet: "No messages yet. Start a conversation.",
 
     // Members count  
     oneMember: "1 member",
@@ -152,6 +165,13 @@ const translations = {
     createChannel: "Create channel",
     joinChannel: "Join channel",
     leaveChannel: "Leave channel",
+    channelName: "Channel Name",
+    channelDescription: "Description (optional)",
+    archiveChannel: "Archive Channel",
+    cannotArchiveGeneral: "Cannot archive the general channel",
+    confirmArchive: "Are you sure you want to archive this channel?",
+    channelCreated: "Channel created successfully",
+    channelArchived: "Channel archived successfully",
     
     // UI
     darkMode: "Dark mode",
@@ -190,7 +210,7 @@ const translations = {
     hoursAgo: "{count} hours ago",
     daysAgo: "{count} days ago",
   
-  // Forgot Password
+    // Forgot Password
     forgotPassword: "Forgot your password?",
     resetPassword: "Reset password",
     newPassword: "New password",
@@ -201,6 +221,7 @@ const translations = {
     passwordUpdated: "Password updated successfully",
     backToLogin: "Back to home",
     enterEmailToReset: "Enter the email associated with your account to receive the reset link.",
+    publicChannels: 'Public Channels',
   }
 };
 

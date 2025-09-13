@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { supabase } from '../../utils/supabaseClient';
-import { BsFileLock, BsPlus, BsChatSquareText } from "react-icons/bs";
+import { BsLock, BsPlus, BsChatSquareText, BsArchive} from "react-icons/bs";
 import { useTranslation } from '../../hooks/useTranslation';
+import { usePermissions } from '../../hooks/usePermissions';
+import { FaHashtag } from "react-icons/fa";
 
 export default function Sidebar({ 
   user, 
@@ -11,95 +13,86 @@ export default function Sidebar({
   currentTheme 
 }) {
   const [conversations, setConversations] = useState([]);
+  const [publicChannels, setPublicChannels] = useState([]);
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [channelsLoading, setChannelsLoading] = useState(true);
+  const [conversationsLoading, setConversationsLoading] = useState(true);
   const [showUserSelector, setShowUserSelector] = useState(false);
-  const isMountedRef = useRef(true);
-  const loadingTimeoutRef = useRef(null);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [newChannelName, setNewChannelName] = useState('');
+  const [newChannelDescription, setNewChannelDescription] = useState('');
+  const [loading, setLoading] = useState(false);
+  const loadingRef = useRef(false);
+  const isInitializedRef = useRef(false);
   const { t } = useTranslation();
+  const { isAdmin, loading: permissionsLoading } = usePermissions(user);
 
-  useEffect(() => {
-    if (!user?.id) return;
+  // Memoize user ID to prevent unnecessary re-renders
+  const userId = useMemo(() => user?.id, [user?.id]);
 
-    // avoid reloading if conversations already loaded
-    if (conversations.length > 0) return;
-
-    const loadDataOnce = async () => {
-      try {
-        await Promise.all([
-          loadDirectConversations(),
-          loadAllUsers()
-        ]);
-      } catch (error) {
-        console.error('Error loading DirectMessages data:', error);
-      }
-    };
-
-    loadDataOnce();
-  }, [user?.id]); 
-
-  const loadData = async () => {
-    if (!isMountedRef.current) return;
+  // Optimized data loading with useCallback
+  const loadPublicChannels = useCallback(async () => {
+    if (loadingRef.current || !userId) return;
     
     try {
-      await Promise.all([
-        loadDirectConversations(),
-        loadAllUsers()
-      ]);
-    } catch (error) {
-      if (isMountedRef.current) {
-        console.error('Error loading DirectMessages data:', error);
-      }
-    }
-  };
-
-  // Load user's direct conversations
-  const loadDirectConversations = async () => {
-    if (!isMountedRef.current) return;
-    
-    try {
-      setLoading(true);
+      setChannelsLoading(true);
+      loadingRef.current = true;
       
-      // Step 1: Get direct channels where user participates
+      const { data, error } = await supabase
+        .from('channels')
+        .select('id, name, description, created_by, created_at, type, is_active, is_archived')
+        .eq('type', 'public')
+        .eq('is_active', true)
+        .eq('is_archived', false)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      
+      setPublicChannels(data || []);
+      
+    } catch (error) {
+      console.error('Failed to load public channels:', error);
+      setPublicChannels([]);
+    } finally {
+      setChannelsLoading(false);
+      loadingRef.current = false;
+    }
+  }, [userId]);
+
+  const loadDirectConversations = useCallback(async () => {
+    if (!userId) return;
+    
+    try {
+      setConversationsLoading(true);
+      
       const { data: channels, error: channelsError } = await supabase
         .from('channels')
         .select('id, name, type, participant_1, participant_2, created_at, updated_at')
         .eq('type', 'direct')
-        .or(`participant_1.eq.${user.id},participant_2.eq.${user.id}`)
+        .or(`participant_1.eq.${userId},participant_2.eq.${userId}`)
         .eq('is_active', true)
         .order('updated_at', { ascending: false });
 
       if (channelsError) throw channelsError;
-      
-      if (!isMountedRef.current) return;
 
       if (!channels || channels.length === 0) {
         setConversations([]);
-        setLoading(false);
         return;
       }
 
-      // Step 2: Get user data for all participants
       const userIds = new Set();
       channels.forEach(channel => {
         if (channel.participant_1) userIds.add(channel.participant_1);
         if (channel.participant_2) userIds.add(channel.participant_2);
       });
 
-      const { data: userData, error: usersError } = await supabase
+      const { data: userData } = await supabase
         .from('users')
         .select('id, email, username, avatar_url')
         .in('id', Array.from(userIds));
 
-      if (usersError) {
-        console.warn('Could not load user data:', usersError);
-      }
-
-      if (!isMountedRef.current) return;
-
-      // Step 3: Combine channel and user data with better fallback
       const conversationsWithUsers = channels.map(channel => {
-        const otherUserId = channel.participant_1 === user.id 
+        const otherUserId = channel.participant_1 === userId 
           ? channel.participant_2 
           : channel.participant_1;
         
@@ -118,43 +111,56 @@ export default function Sidebar({
       });
 
       setConversations(conversationsWithUsers);
-
     } catch (error) {
-      if (isMountedRef.current) {
-        setConversations([]);
-      }
+      console.error('Error loading direct conversations:', error);
+      setConversations([]);
     } finally {
-      if (isMountedRef.current) {
-        setLoading(false);
-      }
+      setConversationsLoading(false);
     }
-  };
+  }, [userId]);
 
-  const loadAllUsers = async () => {
-    if (!isMountedRef.current) return;
+  const loadAllUsers = useCallback(async () => {
+    if (!userId) return;
     
     try {
       const { data, error } = await supabase
         .from('users')
         .select('id, email, username, avatar_url')
-        .neq('id', user.id)
+        .neq('id', userId)
         .order('email');
 
       if (error) throw error;
-      
-      if (isMountedRef.current) {
-        setUsers(data || []);
-      }
+      setUsers(data || []);
     } catch (err) {
+      console.error('Error loading users:', err);
     }
-  };
+  }, [userId]);
 
-  // Start new direct conversation
-  const startDirectMessage = async (otherUser) => {
+  // Load data only once when user changes
+  useEffect(() => {
+    if (!userId || isInitializedRef.current) return;
+    
+    console.log('Sidebar: Initial load for user:', userId);
+    isInitializedRef.current = true;
+    
+    const loadData = async () => {
+      await loadPublicChannels();
+      await loadDirectConversations();
+      await loadAllUsers();
+    };
+    
+    loadData();
+  }, [userId]); // Remove dependencies causing re-renders
+
+  // Reset initialization when user changes
+  useEffect(() => {
+    if (userId) {
+      isInitializedRef.current = false;
+    }
+  }, [userId]);
+
+  const startDirectMessage = useCallback(async (otherUser) => {
     try {
-      setLoading(true);
-      
-      // Use RPC function to get or create direct channel
       const { data: channelId, error: rpcError } = await supabase
         .rpc('get_or_create_direct_channel', { 
           other_user_id: otherUser.id 
@@ -162,7 +168,6 @@ export default function Sidebar({
 
       if (rpcError) throw rpcError;
 
-      // Get the complete channel data
       const { data: channelData, error: channelError } = await supabase
         .from('channels')
         .select('*')
@@ -171,133 +176,198 @@ export default function Sidebar({
 
       if (channelError) throw channelError;
 
-      // Create conversation object with user data
       const conversation = {
         ...channelData,
         otherUser: otherUser,
         name: otherUser.username || otherUser.email?.split('@')[0] || 'Unknown User'
       };
 
-      // Select this conversation
       onSelectConversation(conversation);
       setShowUserSelector(false);
       
-      // Reload conversations with delay to ensure creation is complete
-      setTimeout(() => {
-        if (isMountedRef.current) {
-          loadDirectConversations();
-        }
-      }, 500);
+      setTimeout(() => loadDirectConversations(), 500);
 
     } catch (error) {
       console.error('Error starting direct message:', error);
+    }
+  }, [onSelectConversation, loadDirectConversations]);
+
+  const handleCreateChannel = useCallback(async (e) => {
+    e.preventDefault();
+    if (!newChannelName.trim()) return;
+
+    try {
+      setLoading(true);
+      
+      const { data, error } = await supabase
+        .rpc('create_public_channel', {
+          channel_name: newChannelName.trim(),
+          channel_description: newChannelDescription.trim()
+        });
+
+      if (error) throw error;
+
+      setNewChannelName('');
+      setNewChannelDescription('');
+      setShowCreateForm(false);
+      
+      await loadPublicChannels();
+      
+    } catch (error) {
+      console.error('Error creating channel:', error);
+      alert('Error creating channel: ' + error.message);
     } finally {
-      if (isMountedRef.current) {
-        setLoading(false);
+      setLoading(false);
+    }
+  }, [newChannelName, newChannelDescription, loadPublicChannels]);
+
+  const handleArchiveChannel = useCallback(async (channelId, channelName) => {
+    if (channelName === 'general') {
+      alert('Cannot archive the general channel');
+      return;
+    }
+
+    if (!confirm(`${t('confirmArchive')} #${channelName}?`)) {
+      return;
+    }
+
+    try {
+      // Try RPC function first
+      const { error: rpcError } = await supabase
+        .rpc('archive_public_channel', {
+          channel_id: channelId
+        });
+
+      if (rpcError) {
+        console.log('RPC failed, trying direct update:', rpcError);
+        
+        // Fallback to direct update
+        const { error: updateError } = await supabase
+          .from('channels')
+          .update({ 
+            is_archived: true,
+            is_active: false,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', channelId)
+          .eq('type', 'public');
+
+        if (updateError) throw updateError;
       }
+      
+      // Update local state immediately
+      setPublicChannels(prev => prev.filter(channel => channel.id !== channelId));
+      
+      // If we're currently in the archived channel, switch to general
+      if (currentChannel?.id === channelId) {
+        const generalChannel = publicChannels.find(ch => ch.name === 'general');
+        if (generalChannel) {
+          onSelectConversation(generalChannel);
+        }
+      }
+      
+      console.log(`Channel ${channelName} archived successfully`);
+      
+    } catch (error) {
+      console.error('Error archiving channel:', error);
+      alert('Error archiving channel: ' + error.message);
+      await loadPublicChannels();
     }
-  };
+  }, [currentChannel, publicChannels, onSelectConversation, loadPublicChannels]);
 
-  // Get name of the other participant
-  const getOtherParticipant = (conversation) => {
-    if (!conversation.participant_1 || !conversation.participant_2) return 'Unknown';
-    
-    // Use user data if available
-    if (conversation.otherUser) {
-      return conversation.otherUser.username || conversation.otherUser.email?.split('@')[0] || 'Unknown User';
-    }
-    
-    // Fallback: find other user ID
-    const otherUserId = conversation.participant_1 === user.id 
-      ? conversation.participant_2 
-      : conversation.participant_1;
-    
-    return 'Unknown User';
-  };
-
-  // Get theme styles
-  const getThemeStyles = () => {
+  // Memoize theme styles to prevent re-calculations
+  const themeStyles = useMemo(() => {
     switch (currentTheme) {
       case 'matrix':
         return {
-          container: 'text-green-400',
           item: 'hover:bg-green-500/30 text-green-300 border-green-500/20',
           activeItem: 'bg-green-500/40 text-green-200 border-green-400',
           button: 'text-green-300 hover:text-green-200 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30'
         };
       case 'coolRetro':
         return {
-          container: 'text-cyan-400',
           item: 'hover:bg-cyan-400/30 text-cyan-300 border-cyan-400/20',
           activeItem: 'bg-cyan-400/40 text-cyan-200 border-cyan-300',
           button: 'text-cyan-300 hover:text-cyan-200 bg-cyan-400/20 hover:bg-cyan-400/30 border border-cyan-400/30'
         };
       case 'windows95':
         return {
-          container: 'text-black',
           item: 'hover:bg-blue-600 hover:text-white text-black border-gray-300',
           activeItem: 'bg-blue-600 text-white border-blue-700',
           button: 'text-black hover:bg-gray-300 bg-white border border-gray-400 shadow-sm'
         };
       case 'ubuntu':
         return {
-          container: 'text-orange-200',
           item: 'hover:bg-orange-500/30 text-orange-200 border-orange-400/20',
           activeItem: 'bg-orange-500/40 text-orange-100 border-orange-300',
           button: 'text-orange-300 hover:text-orange-200 bg-orange-500/20 hover:bg-orange-500/30 border border-orange-400/30'
         };
-      case 'macOS':
-        return {
-          container: 'text-white',
-          item: 'hover:bg-blue-500/30 text-white border-gray-600',
-          activeItem: 'bg-blue-500/40 text-blue-100 border-blue-400',
-          button: 'text-blue-300 hover:text-blue-200 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/30'
-        };
       default:
         return {
-          container: 'text-white',
           item: 'hover:bg-gray-600 text-gray-200 border-gray-600',
           activeItem: 'bg-blue-600 text-white border-blue-500',
           button: 'text-gray-300 hover:text-white bg-gray-700 hover:bg-gray-600 border border-gray-500'
         };
     }
-  };
+  }, [currentTheme]);
 
-  const themeStyles = getThemeStyles();
-
-  // Real-time subscription with cleanup
+  // Simplified real-time subscriptions
   useEffect(() => {
-    if (!user?.id) return;
+    if (!userId) return;
 
-    const channelSubscription = supabase
-      .channel('direct_channels_changes')
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'channels',
-        filter: `type=eq.direct`
-      }, (payload) => {
-        if (isMountedRef.current && (
-          payload.new?.participant_1 === user.id || 
-          payload.new?.participant_2 === user.id ||
-          payload.old?.participant_1 === user.id || 
-          payload.old?.participant_2 === user.id
-        )) {
-          setTimeout(() => {
-            if (isMountedRef.current) {
-              loadDirectConversations();
+    let subscription;
+    let timeoutId;
+
+    const setupSubscription = () => {
+      subscription = supabase
+        .channel(`sidebar_${userId}`)
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'channels'
+        }, (payload) => {
+          // Debounce updates to prevent excessive reloads
+          clearTimeout(timeoutId);
+          timeoutId = setTimeout(() => {
+            if (payload.new?.type === 'public' || payload.old?.type === 'public') {
+              loadPublicChannels();
             }
-          }, 100);
-        }
-      })
-      .subscribe();
+            if (payload.new?.type === 'direct' || payload.old?.type === 'direct') {
+              if (payload.new?.participant_1 === userId || 
+                  payload.new?.participant_2 === userId ||
+                  payload.old?.participant_1 === userId || 
+                  payload.old?.participant_2 === userId) {
+                loadDirectConversations();
+              }
+            }
+          }, 500);
+        })
+        .subscribe();
+    };
+
+    setupSubscription();
 
     return () => {
-      supabase.removeChannel(channelSubscription);
+      clearTimeout(timeoutId);
+      if (subscription) {
+        supabase.removeChannel(subscription);
+      }
     };
-  }, [user?.id]);
+  }, [userId, loadPublicChannels, loadDirectConversations]);
 
-  if (loading) {
+  // Memoize helper functions
+  const getOtherParticipant = useCallback((conversation) => {
+    if (!conversation.participant_1 || !conversation.participant_2) return 'Unknown';
+    
+    if (conversation.otherUser) {
+      return conversation.otherUser.username || conversation.otherUser.email?.split('@')[0] || 'Unknown User';
+    }
+    
+    return 'Unknown User';
+  }, []);
+
+  // Early return if still loading permissions
+  if (permissionsLoading) {
     return (
       <div className="p-4">
         <div className="animate-pulse space-y-2">
@@ -310,62 +380,167 @@ export default function Sidebar({
   }
 
   return (
-    <div className="p-4">
-      {/* Header with button for DM */}
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-bold uppercase tracking-wide opacity-70">
-          {t('directMessages')}
-        </h3>
-        <button 
-          onClick={() => setShowUserSelector(!showUserSelector)}
-          className={`text-lg leading-none px-2 py-1 rounded ${themeStyles.button}`}
-          title="Start new DM"
-        >
-          <BsPlus className='w-4 h-4' />
-        </button>
+    <div className="flex flex-col h-full">
+      {/* Public Channels */}
+      <div className="p-3 border-b" style={{ borderColor: theme.colors.border }}>
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-xs font-bold uppercase tracking-wide opacity-70">
+            {t('publicChannels')} ({publicChannels.length})
+          </h3>
+          {isAdmin && (
+            <button
+              onClick={() => setShowCreateForm(!showCreateForm)}
+              className="p-1 rounded hover:opacity-80"
+              style={{ color: theme.colors.accent }}
+              title={t('createChannel')}
+            >
+              <BsPlus className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+
+        {/* Create channel form */}
+        {isAdmin && showCreateForm && (
+          <form onSubmit={handleCreateChannel} className="space-y-2 mt-2 mb-3">
+            <input
+              type="text"
+              placeholder={t('channelName')}
+              value={newChannelName}
+              onChange={(e) => setNewChannelName(e.target.value)}
+              className="w-full px-2 py-1 rounded text-sm border bg-gray-800 border-gray-600 text-white placeholder-gray-400"
+              maxLength={50}
+              required
+            />
+            <input
+              type="text"
+              placeholder={t('channelDescription')}
+              value={newChannelDescription}
+              onChange={(e) => setNewChannelDescription(e.target.value)}
+              className="w-full px-2 py-1 rounded text-sm border bg-gray-800 border-gray-600 text-white placeholder-gray-400"
+              maxLength={200}
+            />
+            <div className="flex gap-2">
+              <button
+                type="submit"
+                disabled={loading || !newChannelName.trim()}
+                className="flex-1 px-2 py-1 disabled:opacity-50 rounded text-xs border bg-blue-600 hover:bg-blue-700 text-white border-blue-700"
+              >
+                {loading ? t('saving') + '...' : t('createChannel')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowCreateForm(false)}
+                className="px-2 py-1 rounded text-xs border bg-gray-600 hover:bg-gray-700 text-white border-gray-500"
+              >
+                {t('cancel')}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* Channels list */}
+        <div className="space-y-1">
+          {channelsLoading ? (
+            <div className="animate-pulse space-y-1">
+              <div className="h-6 bg-gray-600 rounded"></div>
+              <div className="h-6 bg-gray-600 rounded"></div>
+            </div>
+          ) : publicChannels.length === 0 ? (
+            <p className="text-xs opacity-50 text-center py-2">
+              No hay canales públicos
+            </p>
+          ) : (
+            publicChannels.map(channel => (
+              <div key={channel.id} className="flex items-center justify-between group">
+                <div
+                  onClick={() => onSelectConversation(channel)}
+                  className={`flex-1 flex border items-center gap-2 px-2 py-2 rounded cursor-pointer transition-colors text-sm ${
+                    currentChannel?.id === channel.id ? themeStyles.activeItem : themeStyles.item
+                  }`}
+                  title={channel.description}
+                >
+                  <FaHashtag className="w-4 h-4 opacity-70" />
+                  <span className="truncate">{channel.name}</span>
+                </div>
+                {isAdmin && channel.name !== 'general' && (
+                  <button
+                    onClick={() => handleArchiveChannel(channel.id, channel.name)}
+                    className="opacity-0 group-hover:opacity-70 hover:opacity-100 p-1 rounded ml-1"
+                    style={{ color: theme.colors.error || '#ef4444' }}
+                    title={`${t('archiveChannel')} #${channel.name}`}
+                  >
+                    <BsArchive className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            ))
+          )}
+        </div>
       </div>
 
-      {/* User selector */}
-      {showUserSelector && (
-        <div className="mb-4 p-2 rounded border" style={{ borderColor: theme.colors.border }}>
-          <p className="text-xs opacity-70 mb-2">{t('selectUserToChat')}:</p>
-          <div className="max-h-32 overflow-y-auto space-y-1">
-            {users.map(targetUser => (
-              <button
-                key={targetUser.id}
-                onClick={() => startDirectMessage(targetUser)}
-                className={`w-full text-left px-2 py-1 rounded text-sm ${themeStyles.item}`}
-              >
-                {targetUser.username || targetUser.email}
-              </button>
-            ))}
+      {/* Direct Messages */}
+      <div className="flex-1 p-3 overflow-y-auto">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <BsLock className="w-4 h-4 opacity-70" />
+            <h3 className="text-xs font-bold uppercase tracking-wide opacity-70">
+              {t('directMessages')} ({conversations.length})
+            </h3>
           </div>
+          <button 
+            onClick={() => setShowUserSelector(!showUserSelector)}
+            className={`text-lg leading-none px-2 py-1 rounded ${themeStyles.button}`}
+            title="Nuevo DM"
+          >
+            <BsPlus className='w-3 h-3' />
+          </button>
         </div>
-      )}
 
-      {/* Conversations list */}
-      <div className="space-y-1">
-        {conversations.length === 0 ? (
-          <p className="text-sm opacity-50 text-center py-4">
-            {t('noDirectMessages')}
-          </p>
-        ) : (
-          conversations.map(conversation => (
-            <div
-              key={conversation.id}
-              onClick={() => onSelectConversation(conversation)}
-              className={`flex border items-center gap-2 px-2 py-2 rounded cursor-pointer transition-colors text-sm ${
-                currentChannel?.id === conversation.id ? themeStyles.activeItem : themeStyles.item
-              }`}
-            >
-              <span className="text-xs opacity-70"><BsChatSquareText className='w-5 h-5' /></span>
-              <span className="truncate">
-                {getOtherParticipant(conversation)}
-              </span>
-              <span className="text-xs opacity-50 ml-auto"><BsFileLock className='w-6 h-6' /></span>
+        {showUserSelector && (
+          <div className="mb-4 p-2 rounded border" style={{ borderColor: theme.colors.border }}>
+            <p className="text-xs opacity-70 mb-2">{t('selectUserToChat')}</p>
+            <div className="max-h-32 overflow-y-auto space-y-1">
+              {users.map(targetUser => (
+                <button
+                  key={targetUser.id}
+                  onClick={() => startDirectMessage(targetUser)}
+                  className={`w-full text-left px-2 py-1 rounded text-sm ${themeStyles.item}`}
+                >
+                  {targetUser.username || targetUser.email}
+                </button>
+              ))}
             </div>
-          ))
+          </div>
         )}
+
+        <div className="space-y-1">
+          {conversationsLoading ? (
+            <div className="animate-pulse space-y-1">
+              <div className="h-8 bg-gray-600 rounded"></div>
+              <div className="h-8 bg-gray-600 rounded"></div>
+            </div>
+          ) : conversations.length === 0 ? (
+            <p className="text-sm opacity-50 text-center py-4">
+              {t('noDirectMessages')}
+            </p>
+          ) : (
+            conversations.map(conversation => (
+              <div
+                key={conversation.id}
+                onClick={() => onSelectConversation(conversation)}
+                className={`flex border items-center gap-2 px-2 py-2 rounded cursor-pointer transition-colors text-sm ${
+                  currentChannel?.id === conversation.id ? themeStyles.activeItem : themeStyles.item
+                }`}
+              >
+                <span className="text-xs opacity-70"><BsChatSquareText className='w-5 h-5' /></span>
+                <span className="truncate">
+                  {getOtherParticipant(conversation)}
+                </span>
+                <span className="text-xs opacity-50 ml-auto"></span>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
