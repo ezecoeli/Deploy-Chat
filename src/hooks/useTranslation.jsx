@@ -47,9 +47,6 @@ const translations = {
     membersCount: "{count} miembros",
     
     // Channels 
-    general: "General",
-    random: "Random",
-    tech: "Tecnología",
     createChannel: "Crear canal",
     joinChannel: "Unirse al canal",
     leaveChannel: "Salir del canal",
@@ -60,6 +57,20 @@ const translations = {
     confirmArchive: "¿Estás seguro de que quieres archivar este canal? El canal no se eliminará, pero ya no estará disponible para los miembros.",
     channelCreated: "Canal creado exitosamente",
     channelArchived: "Canal archivado exitosamente",
+    // Channel names
+    announcements: "Comunicados",
+    general: "General", 
+    dailyStandups: "Daily Standups",
+    events: "Eventos",
+    support: "Soporte",
+    random: "Random",
+    // Channel descriptions
+    announcementsDescription: "Anuncios oficiales y comunicados importantes",
+    generalDescription: "Conversaciones generales del equipo y coordinación diaria",
+    dailyStandupsDescription: "Reuniones diarias del equipo - Updates, blockers y planificación",
+    eventsDescription: "Eventos corporativos, team building y celebraciones",
+    supportDescription: "Soporte técnico, resolución de problemas y ayuda",
+    randomDescription: "Conversaciones casuales y temas diversos fuera del trabajo",
     
     // UI
     darkMode: "Modo oscuro",
@@ -114,6 +125,7 @@ const translations = {
 
 
   },
+
   // INGLES
   en: {
     // Auth
@@ -160,9 +172,6 @@ const translations = {
     membersCount: "{count} members",
     
     // Channels
-    general: "General",
-    random: "Random",
-    tech: "Tech",
     createChannel: "Create channel",
     joinChannel: "Join channel",
     leaveChannel: "Leave channel",
@@ -173,7 +182,22 @@ const translations = {
     confirmArchive: "Are you sure you want to archive this channel? The channel will not be deleted, but it will no longer be available to members.",
     channelCreated: "Channel created successfully",
     channelArchived: "Channel archived successfully",
+    // Channel names
+    announcements: "Announcements",
+    general: "General",
+    dailyStandups: "Daily Standups", 
+    events: "Events",
+    support: "Support",
+    random: "Random",
+    // Channel descriptions 
+    announcementsDescription: "Official announcements and important communications",
+    generalDescription: "General team conversations and daily coordination",
+    dailyStandupsDescription: "Daily team meetings - Updates, blockers and planning",
+    eventsDescription: "Corporate events, team building and celebrations",
+    supportDescription: "Technical support, troubleshooting and help",
+    randomDescription: "Casual conversations and off-topic discussions",
     
+
     // UI
     darkMode: "Dark mode",
     lightMode: "Light mode",

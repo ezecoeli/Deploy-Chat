@@ -11,9 +11,6 @@ import MessageInput from '../components/chat/MessageInput';
 import MatrixRain from '../components/MatrixRain';
 import PrivateChat from '../components/chat/PrivateChat';
 import Sidebar from '../components/chat/Sidebar';
-import { useEncryption } from '../hooks/useEncryption';
-import { ImEarth } from "react-icons/im";
-import { BsArrowLeft } from "react-icons/bs";
 
 export default function Chat() {
   const { user, logout, loading } = useAuth();
@@ -22,7 +19,6 @@ export default function Chat() {
   
   const [messages, setMessages] = useState([]);
   const [currentChannel, setCurrentChannel] = useState(null);
-  const { userKeyPair, isKeysReady } = useEncryption(user);
   const [error, setError] = useState('');
   const [typingUsers, setTypingUsers] = useState([]);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -32,14 +28,12 @@ export default function Chat() {
   const [messagesLoading, setMessagesLoading] = useState(false);
   const isInitializedRef = useRef(false);
  
-  // Load user profile on user change
   useEffect(() => {
     if (user) {
       loadUserProfile();
     }
   }, [user]);
 
-  // Apply theme font to body
   useEffect(() => {
     document.body.style.fontFamily = theme.font;
     return () => {
@@ -59,23 +53,20 @@ export default function Chat() {
       
       setUserProfile(data);
     } catch (error) {
-      // Fallback to auth data
       setUserProfile({
         username: user.email.split('@')[0],
-        avatar_url: 'avatar-01' // Default avatar
+        avatar_url: 'avatar-01'
       });
     }
   };
 
   const handleProfileUpdated = (updatedProfile) => {
     setUserProfile(updatedProfile);
-    // Reload messages to update avatars in chat
     if (currentChannel?.id) {
       loadMessages(currentChannel.id);
     }
   };
 
-  // Load messages function - OPTIMIZED
   const loadMessages = useCallback(async (channelId) => {
     if (!channelId || messagesLoading) {
       return;
@@ -104,23 +95,21 @@ export default function Chat() {
 
       console.log('Messages loaded:', data?.length || 0);
       setMessages(data || []);
-      setError(''); // Clear any previous errors
+      setError('');
     } catch (err) {
       console.error('Error loading messages:', err);
       setError('Error cargando mensajes: ' + err.message);
-      setMessages([]); // Clear messages on error
+      setMessages([]);
     } finally {
       setMessagesLoading(false);
     }
   }, [messagesLoading]);
 
-  // Setup initial channel - FIXED
   useEffect(() => {
     if (loading || !user) {
       return;
     }
 
-    // Only initialize once
     if (isInitializedRef.current) {
       return;
     }
@@ -129,7 +118,6 @@ export default function Chat() {
 
     const initializeDefaultChannel = async () => {
       try {
-        // Get the actual general channel from database
         const { data: generalChannel, error } = await supabase
           .from('channels')
           .select('id, name, description, type')
@@ -141,9 +129,8 @@ export default function Chat() {
 
         if (error) {
           console.error('Error loading general channel:', error);
-          // Fallback to hardcoded if database query fails
           const fallbackChannel = {
-            id: '95cd8c81-bd3f-4cf2-a9d1-ce8f0c53486c',
+            id: '06cbcdea-0dff-438d-aad9-f94a097298d3',
             name: 'general',
             type: 'public'
           };
@@ -165,14 +152,12 @@ export default function Chat() {
     initializeDefaultChannel();
   }, [user, loading, loadMessages]);
 
-  // Reset initialization when user changes
   useEffect(() => {
     if (user) {
       isInitializedRef.current = false;
     }
   }, [user?.id]);
 
-  // Subscribe to new messages and typing events - OPTIMIZED
   useEffect(() => {
     if (!currentChannel?.id || !user) {
       return;
@@ -194,11 +179,9 @@ export default function Chat() {
         }, async (payload) => {
           console.log('New message received:', payload.new);
           
-          // Get complete user information who sent the message
           let messageWithUser = { ...payload.new };
           
           if (payload.new.user_id === user.id) {
-            // If it's our message, use our updated information
             messageWithUser.users = {
               id: user.id,
               email: user.email,
@@ -206,7 +189,6 @@ export default function Chat() {
               avatar_url: userProfile?.avatar_url || 'avatar-01'
             };
           } else {
-            // If it's from another user, fetch their information from the database
             try {
               const { data: userData, error } = await supabase
                 .from('users')
@@ -217,7 +199,6 @@ export default function Chat() {
               if (!error && userData) {
                 messageWithUser.users = userData;
               } else {
-                // Fallback if user is not found
                 messageWithUser.users = {
                   id: payload.new.user_id,
                   email: 'unknown_user',
@@ -226,7 +207,6 @@ export default function Chat() {
                 };
               }
             } catch (err) {
-              // Fallback in case of network or query error
               messageWithUser.users = {
                 id: payload.new.user_id,
                 email: 'unknown_user',
@@ -245,27 +225,22 @@ export default function Chat() {
             return [...current, messageWithUser];
           });
         })
-        // Subscribe to typing events
         .on('broadcast', { event: 'typing' }, (payload) => {
           const { user_id, username, is_typing } = payload.payload;
 
-          // Don't show our own typing indicator
           if (user_id === user.id) return;
           
           setTypingUsers(current => {
             if (is_typing) {
-              // Add user if not already present
               if (!current.find(u => u.user_id === user_id)) {
                 return [...current, { user_id, username }];
               }
               return current;
             } else {
-              // Remove user
               return current.filter(u => u.user_id !== user_id);
             }
           });
 
-          // Auto-remove after 3 seconds if no more events
           if (is_typing) {
             setTimeout(() => {
               setTypingUsers(current => 
@@ -276,7 +251,6 @@ export default function Chat() {
         })
         .subscribe((status) => {
           console.log('Subscription status:', status);
-          // Retry on error
           if (status === 'CHANNEL_ERROR' && retryCount < maxRetries) {
             retryCount++;
             console.log(`Retrying subscription (${retryCount}/${maxRetries})`);
@@ -300,7 +274,6 @@ export default function Chat() {
     };
   }, [currentChannel?.id, user?.id, userProfile]); 
 
-  // Callback handlers for components
   const handleOpenProfile = () => {
     setShowProfileModal(true);
   };
@@ -317,34 +290,23 @@ export default function Chat() {
     setError(errorMessage);
   };
 
-  const handleTypingChange = (isTyping) => {
-    // Handle typing status changes if needed
-  };
-
-  // FIXED: handle select conversation for both public and private chats
   const handleSelectConversation = useCallback(async (conversation) => {
     console.log('Selecting conversation:', conversation);
     
     try {
-      // Clear previous state
       setMessages([]);
       setTypingUsers([]);
       setError('');
       
-      // Update current channel
       setCurrentChannel(conversation);
       setSelectedConversation(conversation);
       
-      // Determine if it's private mode
       const isPrivate = conversation.type === 'direct';
       setIsPrivateMode(isPrivate);
       
-      // Load messages for the selected channel
       if (!isPrivate) {
-        // For public channels, load messages immediately
         await loadMessages(conversation.id);
       }
-      // For private channels, PrivateChat component handles message loading
       
     } catch (error) {
       console.error('Error selecting conversation:', error);
@@ -352,49 +314,23 @@ export default function Chat() {
     }
   }, [loadMessages]);
 
-  // FIXED: handle back to public chat
-  const handleBackToPublic = useCallback(async () => {
-    try {
-      setIsPrivateMode(false);
-      setSelectedConversation(null);
-      setMessages([]);
-      setTypingUsers([]);
-      setError('');
-      
-      // Get the actual general channel from database
-      const { data: generalChannel, error } = await supabase
-        .from('channels')
-        .select('id, name, description, type')
-        .eq('name', 'general')
-        .eq('type', 'public')
-        .eq('is_active', true)
-        .eq('is_archived', false)
-        .single();
-
-      if (error) {
-        console.error('Error loading general channel:', error);
-        // Fallback to hardcoded
-        const fallbackChannel = {
-          id: '95cd8c81-bd3f-4cf2-a9d1-ce8f0c53486c',
-          name: 'general',
-          type: 'public'
-        };
-        setCurrentChannel(fallbackChannel);
-        await loadMessages(fallbackChannel.id);
-        return;
-      }
-
-      console.log('Returning to general channel:', generalChannel);
-      setCurrentChannel(generalChannel);
-      await loadMessages(generalChannel.id);
-      
-    } catch (error) {
-      console.error('Error returning to public chat:', error);
-      setError('Error al volver al chat general');
+  const getSidebarBorderColor = () => {
+    switch (currentTheme) {
+      case 'matrix':
+        return 'rgba(0, 255, 0, 0.3)';
+      case 'coolRetro':
+        return 'rgba(0, 255, 255, 0.3)';
+      case 'windows95':
+        return '#808080';
+      case 'ubuntu':
+        return 'rgba(255, 102, 0, 0.3)';
+      case 'macOS':
+        return '#d1d5db';
+      default:
+        return 'rgba(255, 255, 255, 0.2)';
     }
-  }, [loadMessages]);
+  };
 
-  // Get sidebar styles based on current theme
   const getSidebarBackgroundColor = () => {
     switch (currentTheme) {
       case 'matrix':
@@ -406,7 +342,7 @@ export default function Chat() {
       case 'ubuntu':
         return 'rgba(45, 45, 45, 0.95)';
       case 'macOS':
-        return '#c0c0c0';
+        return 'rgba(248, 250, 252, 0.95)';
       default:
         return 'rgba(30, 30, 30, 0.95)';
     }
@@ -423,109 +359,7 @@ export default function Chat() {
       case 'ubuntu':
         return '#ff6600';
       case 'macOS':
-        return '#000000';
-      default:
-        return '#ffffff';
-    }
-  };
-
-  const getSidebarHeaderColor = () => {
-    switch (currentTheme) {
-      case 'matrix':
-        return '#00ff00';
-      case 'coolRetro':
-        return '#00ffff';
-      case 'windows95':
-        return '#000080';
-      case 'ubuntu':
-        return '#ff6600';
-      case 'macOS':
-        return '#000000';
-      default:
-        return '#ffffff';
-    }
-  };
-
-  const getSidebarBorderColor = () => {
-    switch (currentTheme) {
-      case 'matrix':
-        return 'rgba(0, 255, 0, 0.3)';
-      case 'coolRetro':
-        return 'rgba(0, 255, 255, 0.3)';
-      case 'windows95':
-        return '#808080';
-      case 'ubuntu':
-        return 'rgba(255, 102, 0, 0.3)';
-      case 'macOS':
-        return '#000000';
-      default:
-        return 'rgba(255, 255, 255, 0.2)';
-    }
-  };
-
-  const getButtonBackgroundColor = () => {
-    switch (currentTheme) {
-      case 'matrix':
-        return 'rgba(0, 255, 0, 0.1)';
-      case 'coolRetro':
-        return 'rgba(0, 255, 255, 0.1)';
-      case 'windows95':
-        return '#ffffff';
-      case 'ubuntu':
-        return 'rgba(255, 102, 0, 0.1)';
-      case 'macOS':
-        return '#ffffff';
-      default:
-        return 'rgba(255, 255, 255, 0.1)';
-    }
-  };
-
-  const getButtonTextColor = () => {
-    switch (currentTheme) {
-      case 'matrix':
-        return '#00ff00';
-      case 'coolRetro':
-        return '#00ffff';
-      case 'windows95':
-        return '#000000';
-      case 'ubuntu':
-        return '#ff6600';
-      case 'macOS':
-        return '#000000';
-      default:
-        return '#ffffff';
-    }
-  };
-
-  const getActiveChannelBackgroundColor = () => {
-    switch (currentTheme) {
-      case 'matrix':
-        return 'rgba(0, 255, 0, 0.2)';
-      case 'coolRetro':
-        return 'rgba(0, 255, 255, 0.2)';
-      case 'windows95':
-        return '#c0c0c0';
-      case 'ubuntu':
-        return 'rgba(255, 102, 0, 0.2)';
-      case 'macOS':
-        return '#000000';
-      default:
-        return 'rgba(255, 255, 255, 0.2)';
-    }
-  };
-
-  const getActiveChannelTextColor = () => {
-    switch (currentTheme) {
-      case 'matrix':
-        return '#00ff00';
-      case 'coolRetro':
-        return '#00ffff';
-      case 'windows95':
-        return '#ffffff';
-      case 'ubuntu':
-        return '#ff6600';
-      case 'macOS':
-        return '#ffffff';
+        return '#374151';
       default:
         return '#ffffff';
     }
@@ -539,7 +373,6 @@ export default function Chat() {
                    currentTheme === 'matrix' ? '#000000' : undefined
       }}
     >
-      {/* Matrix Rain Effect */}
       {currentTheme === 'matrix' && (
         <MatrixRain 
           fps={30} 
@@ -550,7 +383,6 @@ export default function Chat() {
       
       <div className="w-full max-w-6xl h-screen p-4 flex relative mx-auto z-20">
         
-        {/* Sidebar */}
         <div 
           className="w-64 flex-shrink-0 border-r overflow-y-auto border"
           style={{ 
@@ -559,24 +391,6 @@ export default function Chat() {
             color: getSidebarTextColor()
           }}
         >
-          {/* Button to go back to public chat */}
-          {isPrivateMode && (
-            <div className="p-4 border-b" style={{ borderColor: getSidebarBorderColor() }}>
-              <button
-                onClick={handleBackToPublic}
-                className="w-full text-left px-3 py-2 rounded hover:opacity-80 transition-opacity font-medium"
-                style={{ 
-                  backgroundColor: getButtonBackgroundColor(),
-                  color: getButtonTextColor(),
-                  border: `1px solid ${getSidebarBorderColor()}`
-                }}
-              >
-                <BsArrowLeft className='inline-block mr-1' />{t('backGeneralChat')}
-              </button>
-            </div>
-          )}
-
-          {/* Sidebar Component */}
           <Sidebar
             user={user}
             onSelectConversation={handleSelectConversation}
@@ -586,7 +400,6 @@ export default function Chat() {
           />
         </div>
 
-        {/* main area */}
         <div className="flex-1 flex flex-col min-w-0">
           
           <ChatHeader
@@ -607,7 +420,6 @@ export default function Chat() {
             t={t}
           />
 
-          {/* Show loading state */}
           {messagesLoading && (
             <div className="flex-1 flex items-center justify-center">
               <div className="animate-pulse text-center">
@@ -616,7 +428,6 @@ export default function Chat() {
             </div>
           )}
 
-          {/* Optional: Private Chat */}
           {isPrivateMode && selectedConversation && !messagesLoading ? (
             <PrivateChat
               user={user}
@@ -644,7 +455,6 @@ export default function Chat() {
                 currentTheme={currentTheme}
                 t={t}
                 onError={handleError}
-                onTypingChange={handleTypingChange}
               />
             </>
           ) : null}
@@ -657,7 +467,6 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* Profile Modal */}
       <div className="relative z-30">
         <UserProfileModal
           isOpen={showProfileModal}

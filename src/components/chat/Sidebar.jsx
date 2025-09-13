@@ -35,10 +35,44 @@ export default function Sidebar({
     onConfirm: null
   });
 
-  // Memoize user ID to prevent unnecessary re-renders
   const userId = useMemo(() => user?.id, [user?.id]);
 
-  // Optimized data loading with useCallback
+  const getChannelDisplayName = useCallback((channelName) => {
+    const translationMap = {
+      'announcements': t('announcements'),
+      'general': t('general'),
+      'daily-standups': t('dailyStandups'),
+      'events': t('events'),
+      'support': t('support'),
+      'random': t('random')
+    };
+    
+    return translationMap[channelName] || channelName;
+  }, [t]);
+
+  const getChannelDescription = useCallback((channelName, originalDescription) => {
+    const translationMap = {
+      'announcements': t('announcementsDescription'),
+      'general': t('generalDescription'),
+      'daily-standups': t('dailyStandupsDescription'),
+      'events': t('eventsDescription'),
+      'support': t('supportDescription'),
+      'random': t('randomDescription')
+    };
+    
+    return translationMap[channelName] || originalDescription;
+  }, [t]);
+
+  const getOtherParticipant = useCallback((conversation) => {
+    if (!conversation.participant_1 || !conversation.participant_2) return 'Unknown';
+    
+    if (conversation.otherUser) {
+      return conversation.otherUser.username || conversation.otherUser.email?.split('@')[0] || 'Unknown User';
+    }
+    
+    return 'Unknown User';
+  }, []);
+
   const loadPublicChannels = useCallback(async () => {
     if (loadingRef.current || !userId) return;
     
@@ -144,7 +178,78 @@ export default function Sidebar({
     }
   }, [userId]);
 
-  // Load data only once when user changes
+  const handleArchiveChannel = useCallback(async (channelId, channelName) => {
+    if (['general', 'announcements'].includes(channelName)) {
+      setConfirmModal({
+        isOpen: true,
+        title: t('cannotArchiveGeneral'),
+        message: `El canal ${getChannelDisplayName(channelName)} no puede ser archivado.`,
+        onConfirm: () => {}
+      });
+      return;
+    }
+
+    setConfirmModal({
+      isOpen: true,
+      title: t('archiveChannel'),
+      message: t('confirmArchive'),
+      onConfirm: async () => {
+        try {
+          const { error: rpcError } = await supabase
+            .rpc('archive_public_channel', {
+              channel_id: channelId
+            });
+
+          if (rpcError) {
+            console.log('RPC failed, trying direct update:', rpcError);
+            
+            const { error: updateError } = await supabase
+              .from('channels')
+              .update({ 
+                is_archived: true,
+                is_active: false,
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', channelId)
+              .eq('type', 'public');
+
+            if (updateError) throw updateError;
+          }
+          
+          setPublicChannels(prev => prev.filter(channel => channel.id !== channelId));
+          
+          if (currentChannel?.id === channelId) {
+            const generalChannel = publicChannels.find(ch => ch.name === 'general');
+            if (generalChannel) {
+              onSelectConversation(generalChannel);
+            }
+          }
+          
+          console.log(`Channel ${channelName} archived successfully`);
+          
+          setConfirmModal({
+            isOpen: true,
+            title: t('channelArchived'),
+            message: `El canal #${getChannelDisplayName(channelName)} ha sido archivado exitosamente.`,
+            onConfirm: () => {}
+          });
+          
+        } catch (error) {
+          console.error('Error archiving channel:', error);
+          
+          setConfirmModal({
+            isOpen: true,
+            title: t('unexpectedError'),
+            message: `Error al archivar el canal: ${error.message}`,
+            onConfirm: () => {}
+          });
+          
+          await loadPublicChannels();
+        }
+      }
+    });
+  }, [currentChannel, publicChannels, onSelectConversation, loadPublicChannels, t, getChannelDisplayName]);
+
   useEffect(() => {
     if (!userId || isInitializedRef.current) return;
     
@@ -158,9 +263,8 @@ export default function Sidebar({
     };
     
     loadData();
-  }, [userId]); // Remove dependencies causing re-renders
+  }, [userId, loadPublicChannels, loadDirectConversations, loadAllUsers]);
 
-  // Reset initialization when user changes
   useEffect(() => {
     if (userId) {
       isInitializedRef.current = false;
@@ -229,86 +333,6 @@ export default function Sidebar({
     }
   }, [newChannelName, newChannelDescription, loadPublicChannels]);
 
-  // handle archiving channel
-  const handleArchiveChannel = useCallback(async (channelId, channelName) => {
-    if (channelName === 'general') {
-      setConfirmModal({
-        isOpen: true,
-        title: t('cannotArchiveGeneral') || 'No se puede archivar',
-        message: 'El canal general no puede ser archivado.',
-        onConfirm: () => {}
-      });
-      return;
-    }
-
-    setConfirmModal({
-      isOpen: true,
-      title: t('archiveChannel'),
-      message:  t('confirmArchive'),
-      onConfirm: async () => {
-        try {
-          // Try RPC function first
-          const { error: rpcError } = await supabase
-            .rpc('archive_public_channel', {
-              channel_id: channelId
-            });
-
-          if (rpcError) {
-            console.log('RPC failed, trying direct update:', rpcError);
-            
-            // Fallback to direct update
-            const { error: updateError } = await supabase
-              .from('channels')
-              .update({ 
-                is_archived: true,
-                is_active: false,
-                updated_at: new Date().toISOString()
-              })
-              .eq('id', channelId)
-              .eq('type', 'public');
-
-            if (updateError) throw updateError;
-          }
-          
-          // Update local state immediately
-          setPublicChannels(prev => prev.filter(channel => channel.id !== channelId));
-          
-          // If we're currently in the archived channel, switch to general
-          if (currentChannel?.id === channelId) {
-            const generalChannel = publicChannels.find(ch => ch.name === 'general');
-            if (generalChannel) {
-              onSelectConversation(generalChannel);
-            }
-          }
-          
-          console.log(`Channel ${channelName} archived successfully`);
-          
-          // show success with modal
-          setConfirmModal({
-            isOpen: true,
-            title: 'Canal Archivado',
-            message: `El canal #${channelName} ha sido archivado exitosamente.`,
-            onConfirm: () => {}
-          });
-          
-        } catch (error) {
-          console.error('Error archiving channel:', error);
-          
-          // show error with modal
-          setConfirmModal({
-            isOpen: true,
-            title: 'Error',
-            message: `Error al archivar el canal: ${error.message}`,
-            onConfirm: () => {}
-          });
-          
-          await loadPublicChannels();
-        }
-      }
-    });
-  }, [currentChannel, publicChannels, onSelectConversation, loadPublicChannels, t]);
-
-  // close confirm modal
   const closeConfirmModal = useCallback(() => {
     setConfirmModal({
       isOpen: false,
@@ -318,7 +342,6 @@ export default function Sidebar({
     });
   }, []);
 
-  // Memoize theme styles to prevent re-calculations
   const themeStyles = useMemo(() => {
     switch (currentTheme) {
       case 'matrix':
@@ -346,11 +369,11 @@ export default function Sidebar({
           button: 'text-orange-300 hover:text-orange-200 bg-orange-500/20 hover:bg-orange-500/30 border border-orange-400/30'
         };
       case 'macOS':
-      return {
-        item: 'hover:bg-gray-300 hover:text-black text-gray-800 border-gray-400/30',
-        activeItem: 'bg-blue-500 text-white border-blue-600',
-        button: 'text-gray-700 hover:text-black bg-gray-200 hover:bg-gray-300 border border-gray-400 shadow-sm'
-      };
+        return {
+          item: 'hover:bg-gray-300 hover:text-black text-gray-800 border-gray-400/30',
+          activeItem: 'bg-blue-500 text-white border-blue-600',
+          button: 'text-gray-700 hover:text-black bg-gray-200 hover:bg-gray-300 border border-gray-400 shadow-sm'
+        };
       default:
         return {
           item: 'hover:bg-gray-600 text-gray-200 border-gray-600',
@@ -360,7 +383,6 @@ export default function Sidebar({
     }
   }, [currentTheme]);
 
-  // Simplified real-time subscriptions
   useEffect(() => {
     if (!userId) return;
 
@@ -375,7 +397,6 @@ export default function Sidebar({
           schema: 'public',
           table: 'channels'
         }, (payload) => {
-          // Debounce updates to prevent excessive reloads
           clearTimeout(timeoutId);
           timeoutId = setTimeout(() => {
             if (payload.new?.type === 'public' || payload.old?.type === 'public') {
@@ -404,18 +425,6 @@ export default function Sidebar({
     };
   }, [userId, loadPublicChannels, loadDirectConversations]);
 
-  // Memoize helper functions
-  const getOtherParticipant = useCallback((conversation) => {
-    if (!conversation.participant_1 || !conversation.participant_2) return 'Unknown';
-    
-    if (conversation.otherUser) {
-      return conversation.otherUser.username || conversation.otherUser.email?.split('@')[0] || 'Unknown User';
-    }
-    
-    return 'Unknown User';
-  }, []);
-
-  // Early return if still loading permissions
   if (permissionsLoading) {
     return (
       <div className="p-4">
@@ -430,7 +439,6 @@ export default function Sidebar({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Public Channels */}
       <div className="p-3 border-b" style={{ borderColor: theme.colors.border }}>
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-xs font-bold uppercase tracking-wide opacity-70">
@@ -439,7 +447,7 @@ export default function Sidebar({
           {isAdmin && (
             <button
               onClick={() => setShowCreateForm(!showCreateForm)}
-              className={`p-1.5 rounded transition-all ${themeStyles.button}`}  // ✅ Usa themeStyles.button
+              className={`p-1.5 rounded transition-all ${themeStyles.button}`}
               title={t('createChannel')}
             >
               <BsPlus className="w-4 h-4" />
@@ -447,7 +455,6 @@ export default function Sidebar({
           )}
         </div>
 
-        {/* Create channel form */}
         {isAdmin && showCreateForm && (
           <form onSubmit={handleCreateChannel} className="space-y-2 mt-2 mb-3">
             <input
@@ -486,7 +493,6 @@ export default function Sidebar({
           </form>
         )}
 
-        {/* Channels list */}
         <div className="space-y-1">
           {channelsLoading ? (
             <div className="animate-pulse space-y-1">
@@ -505,17 +511,17 @@ export default function Sidebar({
                   className={`flex-1 flex border items-center gap-2 px-2 py-2 rounded cursor-pointer transition-colors text-sm ${
                     currentChannel?.id === channel.id ? themeStyles.activeItem : themeStyles.item
                   }`}
-                  title={channel.description}
+                  title={getChannelDescription(channel.name, channel.description)}
                 >
                   <FaHashtag className="w-4 h-4 opacity-70" />
-                  <span className="truncate">{channel.name}</span>
+                  <span className="truncate">{getChannelDisplayName(channel.name)}</span>
                 </div>
-                {isAdmin && channel.name !== 'general' && (
+                {isAdmin && channel.name !== 'general' && channel.name !== 'announcements' && (
                   <button
                     onClick={() => handleArchiveChannel(channel.id, channel.name)}
                     className="opacity-0 group-hover:opacity-70 hover:opacity-100 p-1 rounded ml-1"
                     style={{ color: theme.colors.error || '#ef4444' }}
-                    title={`${t('archiveChannel')} #${channel.name}`}
+                    title={`${t('archiveChannel')} #${getChannelDisplayName(channel.name)}`}
                   >
                     <BsArchive className="w-4 h-4" />
                   </button>
@@ -526,7 +532,6 @@ export default function Sidebar({
         </div>
       </div>
 
-      {/* Direct Messages */}
       <div className="flex-1 p-3 overflow-y-auto">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
