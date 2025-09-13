@@ -57,7 +57,7 @@ const translations = {
     channelDescription: "Descripción (opcional)",
     archiveChannel: "Archivar canal",
     cannotArchiveGeneral: "No se puede archivar el canal general",
-    confirmArchive: "¿Estás seguro de que quieres archivar este canal?",
+    confirmArchive: "¿Estás seguro de que quieres archivar este canal? El canal no se eliminará, pero ya no estará disponible para los miembros.",
     channelCreated: "Canal creado exitosamente",
     channelArchived: "Canal archivado exitosamente",
     
@@ -66,6 +66,7 @@ const translations = {
     lightMode: "Modo claro",
     language: "Idioma",
     settings: "Configuración",
+    confirm: "Confirmar",
     
     // Navigation
     home: "Inicio",
@@ -169,7 +170,7 @@ const translations = {
     channelDescription: "Description (optional)",
     archiveChannel: "Archive Channel",
     cannotArchiveGeneral: "Cannot archive the general channel",
-    confirmArchive: "Are you sure you want to archive this channel?",
+    confirmArchive: "Are you sure you want to archive this channel? The channel will not be deleted, but it will no longer be available to members.",
     channelCreated: "Channel created successfully",
     channelArchived: "Channel archived successfully",
     
@@ -178,6 +179,7 @@ const translations = {
     lightMode: "Light mode",
     language: "Language",
     settings: "Settings",
+    confirm: "Confirm",
 
     // Navigation
     home: "Home",

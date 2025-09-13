@@ -4,6 +4,7 @@ import { BsLock, BsPlus, BsChatSquareText, BsArchive} from "react-icons/bs";
 import { useTranslation } from '../../hooks/useTranslation';
 import { usePermissions } from '../../hooks/usePermissions';
 import { FaHashtag } from "react-icons/fa";
+import ArchiveConfirmModal from '../ui/ArchiveConfirmModal';
 
 export default function Sidebar({ 
   user, 
@@ -26,6 +27,13 @@ export default function Sidebar({
   const isInitializedRef = useRef(false);
   const { t } = useTranslation();
   const { isAdmin, loading: permissionsLoading } = usePermissions(user);
+
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: null
+  });
 
   // Memoize user ID to prevent unnecessary re-renders
   const userId = useMemo(() => user?.id, [user?.id]);
@@ -221,59 +229,94 @@ export default function Sidebar({
     }
   }, [newChannelName, newChannelDescription, loadPublicChannels]);
 
+  // handle archiving channel
   const handleArchiveChannel = useCallback(async (channelId, channelName) => {
     if (channelName === 'general') {
-      alert('Cannot archive the general channel');
+      setConfirmModal({
+        isOpen: true,
+        title: t('cannotArchiveGeneral') || 'No se puede archivar',
+        message: 'El canal general no puede ser archivado.',
+        onConfirm: () => {}
+      });
       return;
     }
 
-    if (!confirm(`${t('confirmArchive')} #${channelName}?`)) {
-      return;
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: t('archiveChannel'),
+      message:  t('confirmArchive'),
+      onConfirm: async () => {
+        try {
+          // Try RPC function first
+          const { error: rpcError } = await supabase
+            .rpc('archive_public_channel', {
+              channel_id: channelId
+            });
 
-    try {
-      // Try RPC function first
-      const { error: rpcError } = await supabase
-        .rpc('archive_public_channel', {
-          channel_id: channelId
-        });
+          if (rpcError) {
+            console.log('RPC failed, trying direct update:', rpcError);
+            
+            // Fallback to direct update
+            const { error: updateError } = await supabase
+              .from('channels')
+              .update({ 
+                is_archived: true,
+                is_active: false,
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', channelId)
+              .eq('type', 'public');
 
-      if (rpcError) {
-        console.log('RPC failed, trying direct update:', rpcError);
-        
-        // Fallback to direct update
-        const { error: updateError } = await supabase
-          .from('channels')
-          .update({ 
-            is_archived: true,
-            is_active: false,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', channelId)
-          .eq('type', 'public');
-
-        if (updateError) throw updateError;
-      }
-      
-      // Update local state immediately
-      setPublicChannels(prev => prev.filter(channel => channel.id !== channelId));
-      
-      // If we're currently in the archived channel, switch to general
-      if (currentChannel?.id === channelId) {
-        const generalChannel = publicChannels.find(ch => ch.name === 'general');
-        if (generalChannel) {
-          onSelectConversation(generalChannel);
+            if (updateError) throw updateError;
+          }
+          
+          // Update local state immediately
+          setPublicChannels(prev => prev.filter(channel => channel.id !== channelId));
+          
+          // If we're currently in the archived channel, switch to general
+          if (currentChannel?.id === channelId) {
+            const generalChannel = publicChannels.find(ch => ch.name === 'general');
+            if (generalChannel) {
+              onSelectConversation(generalChannel);
+            }
+          }
+          
+          console.log(`Channel ${channelName} archived successfully`);
+          
+          // show success with modal
+          setConfirmModal({
+            isOpen: true,
+            title: 'Canal Archivado',
+            message: `El canal #${channelName} ha sido archivado exitosamente.`,
+            onConfirm: () => {}
+          });
+          
+        } catch (error) {
+          console.error('Error archiving channel:', error);
+          
+          // show error with modal
+          setConfirmModal({
+            isOpen: true,
+            title: 'Error',
+            message: `Error al archivar el canal: ${error.message}`,
+            onConfirm: () => {}
+          });
+          
+          await loadPublicChannels();
         }
       }
-      
-      console.log(`Channel ${channelName} archived successfully`);
-      
-    } catch (error) {
-      console.error('Error archiving channel:', error);
-      alert('Error archiving channel: ' + error.message);
-      await loadPublicChannels();
-    }
-  }, [currentChannel, publicChannels, onSelectConversation, loadPublicChannels]);
+    });
+  }, [currentChannel, publicChannels, onSelectConversation, loadPublicChannels, t]);
+
+  // close confirm modal
+  const closeConfirmModal = useCallback(() => {
+    setConfirmModal({
+      isOpen: false,
+      title: '',
+      message: '',
+      onConfirm: null
+    });
+  }, []);
 
   // Memoize theme styles to prevent re-calculations
   const themeStyles = useMemo(() => {
@@ -302,6 +345,12 @@ export default function Sidebar({
           activeItem: 'bg-orange-500/40 text-orange-100 border-orange-300',
           button: 'text-orange-300 hover:text-orange-200 bg-orange-500/20 hover:bg-orange-500/30 border border-orange-400/30'
         };
+      case 'macOS':
+      return {
+        item: 'hover:bg-gray-300 hover:text-black text-gray-800 border-gray-400/30',
+        activeItem: 'bg-blue-500 text-white border-blue-600',
+        button: 'text-gray-700 hover:text-black bg-gray-200 hover:bg-gray-300 border border-gray-400 shadow-sm'
+      };
       default:
         return {
           item: 'hover:bg-gray-600 text-gray-200 border-gray-600',
@@ -390,8 +439,7 @@ export default function Sidebar({
           {isAdmin && (
             <button
               onClick={() => setShowCreateForm(!showCreateForm)}
-              className="p-1 rounded hover:opacity-80"
-              style={{ color: theme.colors.accent }}
+              className={`p-1.5 rounded transition-all ${themeStyles.button}`}  // ✅ Usa themeStyles.button
               title={t('createChannel')}
             >
               <BsPlus className="w-4 h-4" />
@@ -542,6 +590,17 @@ export default function Sidebar({
           )}
         </div>
       </div>
+      <ArchiveConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={closeConfirmModal}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        theme={theme}
+        currentTheme={currentTheme}
+        confirmText={t('confirm')}
+        cancelText={t('cancel')}
+      />
     </div>
   );
 }
