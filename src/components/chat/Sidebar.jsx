@@ -6,12 +6,19 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { FaHashtag } from "react-icons/fa";
 import ArchiveConfirmModal from '../ui/ArchiveConfirmModal';
 
+function UnreadDot({ hasUnread }) {
+  return hasUnread ? (
+    <span className="ml-2 w-2 h-2 rounded-full bg-red-500 inline-block" />
+  ) : null;
+}
+
 export default function Sidebar({ 
   user, 
   onSelectConversation, 
   currentChannel,
   theme,
-  currentTheme 
+  currentTheme,
+  unreadChannels
 }) {
   const [conversations, setConversations] = useState([]);
   const [publicChannels, setPublicChannels] = useState([]);
@@ -46,7 +53,6 @@ export default function Sidebar({
       'support': t('support'),
       'random': t('random')
     };
-    
     return translationMap[channelName] || channelName;
   }, [t]);
 
@@ -59,27 +65,22 @@ export default function Sidebar({
       'support': t('supportDescription'),
       'random': t('randomDescription')
     };
-    
     return translationMap[channelName] || originalDescription;
   }, [t]);
 
   const getOtherParticipant = useCallback((conversation) => {
     if (!conversation.participant_1 || !conversation.participant_2) return 'Unknown';
-    
     if (conversation.otherUser) {
       return conversation.otherUser.username || conversation.otherUser.email?.split('@')[0] || 'Unknown User';
     }
-    
     return 'Unknown User';
   }, []);
 
   const loadPublicChannels = useCallback(async () => {
     if (loadingRef.current || !userId) return;
-    
     try {
       setChannelsLoading(true);
       loadingRef.current = true;
-      
       const { data, error } = await supabase
         .from('channels')
         .select('id, name, description, created_by, created_at, type, is_active, is_archived')
@@ -87,13 +88,9 @@ export default function Sidebar({
         .eq('is_active', true)
         .eq('is_archived', false)
         .order('created_at', { ascending: true });
-
       if (error) throw error;
-      
       setPublicChannels(data || []);
-      
     } catch (error) {
-      console.error('Failed to load public channels:', error);
       setPublicChannels([]);
     } finally {
       setChannelsLoading(false);
@@ -103,10 +100,8 @@ export default function Sidebar({
 
   const loadDirectConversations = useCallback(async () => {
     if (!userId) return;
-    
     try {
       setConversationsLoading(true);
-      
       const { data: channels, error: channelsError } = await supabase
         .from('channels')
         .select('id, name, type, participant_1, participant_2, created_at, updated_at')
@@ -114,47 +109,38 @@ export default function Sidebar({
         .or(`participant_1.eq.${userId},participant_2.eq.${userId}`)
         .eq('is_active', true)
         .order('updated_at', { ascending: false });
-
       if (channelsError) throw channelsError;
-
       if (!channels || channels.length === 0) {
         setConversations([]);
         return;
       }
-
       const userIds = new Set();
       channels.forEach(channel => {
         if (channel.participant_1) userIds.add(channel.participant_1);
         if (channel.participant_2) userIds.add(channel.participant_2);
       });
-
       const { data: userData } = await supabase
         .from('users')
         .select('id, email, username, avatar_url')
         .in('id', Array.from(userIds));
-
       const conversationsWithUsers = channels.map(channel => {
         const otherUserId = channel.participant_1 === userId 
           ? channel.participant_2 
           : channel.participant_1;
-        
         const otherUser = userData?.find(u => u.id === otherUserId) || {
           id: otherUserId,
           username: 'Unknown User',
           email: 'unknown@example.com',
           avatar_url: 'avatar-01'
         };
-
         return {
           ...channel,
           otherUser,
           name: otherUser.username || otherUser.email?.split('@')[0] || 'Unknown User'
         };
       });
-
       setConversations(conversationsWithUsers);
     } catch (error) {
-      console.error('Error loading direct conversations:', error);
       setConversations([]);
     } finally {
       setConversationsLoading(false);
@@ -163,19 +149,15 @@ export default function Sidebar({
 
   const loadAllUsers = useCallback(async () => {
     if (!userId) return;
-    
     try {
       const { data, error } = await supabase
         .from('users')
         .select('id, email, username, avatar_url')
         .neq('id', userId)
         .order('email');
-
       if (error) throw error;
       setUsers(data || []);
-    } catch (err) {
-      console.error('Error loading users:', err);
-    }
+    } catch (err) {}
   }, [userId]);
 
   const handleArchiveChannel = useCallback(async (channelId, channelName) => {
@@ -188,7 +170,6 @@ export default function Sidebar({
       });
       return;
     }
-
     setConfirmModal({
       isOpen: true,
       title: t('archiveChannel'),
@@ -199,10 +180,7 @@ export default function Sidebar({
             .rpc('archive_public_channel', {
               channel_id: channelId
             });
-
           if (rpcError) {
-            console.log('RPC failed, trying direct update:', rpcError);
-            
             const { error: updateError } = await supabase
               .from('channels')
               .update({ 
@@ -212,38 +190,28 @@ export default function Sidebar({
               })
               .eq('id', channelId)
               .eq('type', 'public');
-
             if (updateError) throw updateError;
           }
-          
           setPublicChannels(prev => prev.filter(channel => channel.id !== channelId));
-          
           if (currentChannel?.id === channelId) {
             const generalChannel = publicChannels.find(ch => ch.name === 'general');
             if (generalChannel) {
               onSelectConversation(generalChannel);
             }
           }
-          
-          console.log(`Channel ${channelName} archived successfully`);
-          
           setConfirmModal({
             isOpen: true,
             title: t('channelArchived'),
             message: `El canal #${getChannelDisplayName(channelName)} ha sido archivado exitosamente.`,
             onConfirm: () => {}
           });
-          
         } catch (error) {
-          console.error('Error archiving channel:', error);
-          
           setConfirmModal({
             isOpen: true,
             title: t('unexpectedError'),
             message: `Error al archivar el canal: ${error.message}`,
             onConfirm: () => {}
           });
-          
           await loadPublicChannels();
         }
       }
@@ -252,16 +220,12 @@ export default function Sidebar({
 
   useEffect(() => {
     if (!userId || isInitializedRef.current) return;
-    
-    console.log('Sidebar: Initial load for user:', userId);
     isInitializedRef.current = true;
-    
     const loadData = async () => {
       await loadPublicChannels();
       await loadDirectConversations();
       await loadAllUsers();
     };
-    
     loadData();
   }, [userId, loadPublicChannels, loadDirectConversations, loadAllUsers]);
 
@@ -277,58 +241,40 @@ export default function Sidebar({
         .rpc('get_or_create_direct_channel', { 
           other_user_id: otherUser.id 
         });
-
       if (rpcError) throw rpcError;
-
       const { data: channelData, error: channelError } = await supabase
         .from('channels')
         .select('*')
         .eq('id', channelId)
         .single();
-
       if (channelError) throw channelError;
-
       const conversation = {
         ...channelData,
         otherUser: otherUser,
         name: otherUser.username || otherUser.email?.split('@')[0] || 'Unknown User'
       };
-
       onSelectConversation(conversation);
       setShowUserSelector(false);
-      
       setTimeout(() => loadDirectConversations(), 500);
-
-    } catch (error) {
-      console.error('Error starting direct message:', error);
-    }
+    } catch (error) {}
   }, [onSelectConversation, loadDirectConversations]);
 
   const handleCreateChannel = useCallback(async (e) => {
     e.preventDefault();
     if (!newChannelName.trim()) return;
-
     try {
       setLoading(true);
-      
       const { data, error } = await supabase
         .rpc('create_public_channel', {
           channel_name: newChannelName.trim(),
           channel_description: newChannelDescription.trim()
         });
-
       if (error) throw error;
-
       setNewChannelName('');
       setNewChannelDescription('');
       setShowCreateForm(false);
-      
       await loadPublicChannels();
-      
-    } catch (error) {
-      console.error('Error creating channel:', error);
-      alert('Error creating channel: ' + error.message);
-    } finally {
+    } catch (error) {} finally {
       setLoading(false);
     }
   }, [newChannelName, newChannelDescription, loadPublicChannels]);
@@ -385,10 +331,8 @@ export default function Sidebar({
 
   useEffect(() => {
     if (!userId) return;
-
     let subscription;
     let timeoutId;
-
     const setupSubscription = () => {
       subscription = supabase
         .channel(`sidebar_${userId}`)
@@ -414,9 +358,7 @@ export default function Sidebar({
         })
         .subscribe();
     };
-
     setupSubscription();
-
     return () => {
       clearTimeout(timeoutId);
       if (subscription) {
@@ -454,7 +396,6 @@ export default function Sidebar({
             </button>
           )}
         </div>
-
         {isAdmin && showCreateForm && (
           <form onSubmit={handleCreateChannel} className="space-y-2 mt-2 mb-3">
             <input
@@ -492,7 +433,6 @@ export default function Sidebar({
             </div>
           </form>
         )}
-
         <div className="space-y-1">
           {channelsLoading ? (
             <div className="animate-pulse space-y-1">
@@ -515,6 +455,7 @@ export default function Sidebar({
                 >
                   <FaHashtag className="w-4 h-4 opacity-70" />
                   <span className="truncate">{getChannelDisplayName(channel.name)}</span>
+                  <UnreadDot hasUnread={unreadChannels?.has(channel.id)} />
                 </div>
                 {isAdmin && channel.name !== 'general' && channel.name !== 'announcements' && (
                   <button
@@ -531,7 +472,6 @@ export default function Sidebar({
           )}
         </div>
       </div>
-
       <div className="flex-1 p-3 overflow-y-auto">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
@@ -548,7 +488,6 @@ export default function Sidebar({
             <BsPlus className='w-3 h-3' />
           </button>
         </div>
-
         {showUserSelector && (
           <div className="mb-4 p-2 rounded border" style={{ borderColor: theme.colors.border }}>
             <p className="text-xs opacity-70 mb-2">{t('selectUserToChat')}</p>
@@ -565,7 +504,6 @@ export default function Sidebar({
             </div>
           </div>
         )}
-
         <div className="space-y-1">
           {conversationsLoading ? (
             <div className="animate-pulse space-y-1">
@@ -589,7 +527,7 @@ export default function Sidebar({
                 <span className="truncate">
                   {getOtherParticipant(conversation)}
                 </span>
-                <span className="text-xs opacity-50 ml-auto"></span>
+                <UnreadDot hasUnread={unreadChannels?.has(conversation.id)} />
               </div>
             ))
           )}

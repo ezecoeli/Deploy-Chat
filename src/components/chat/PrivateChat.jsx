@@ -4,6 +4,7 @@ import { useEncryption } from '../../hooks/useEncryption';
 import MessageArea from './MessageArea';
 import MessageInput from './MessageInput';
 import { useTranslation } from '../../hooks/useTranslation';
+import { getAvatarById } from '../../config/avatars';
 
 export default function PrivateChat({
     conversation,
@@ -369,6 +370,13 @@ export default function PrivateChat({
         // implement if needed
     };
 
+    const otherUser = conversation.otherUser || {
+        username: 'Usuario',
+        avatar_url: 'avatar-01'
+    };
+
+    const avatarSrc = getAvatarById(otherUser.avatar_url)?.src || '/assets/avatars/avatar-01.png';
+
     if (!conversation || !user) {
         return (
             <div className="flex-1 flex items-center justify-center">
@@ -426,22 +434,19 @@ export default function PrivateChat({
     return (
         <div className="flex-1 flex flex-col">
             <div className="p-4 border-b border-gray-600 flex items-center gap-3">
+                <img
+                    src={avatarSrc}
+                    alt={otherUser.username}
+                    className="w-8 h-8 rounded-full object-cover bg-gray-700"
+                />
                 <div>
                     <h2 
-                        className="font-semibold"
-                        style={{ color: theme?.colors?.text || '#ffffff' }} 
+                    className="font-semibold"
+                    style={{ color: theme?.colors?.text || '#ffffff' }} 
                     >
-                        {getOtherParticipant()}
+                    {otherUser.username}
                     </h2>
-                    <p 
-                        className="text-xs flex items-center gap-1"
-                        style={{ 
-                            color: theme?.colors?.accent || theme?.colors?.textSecondary || '#00ff00', 
-                            opacity: 0.8
-                        }}
-                    >
-                        {t('privateChat')} 
-                    </p>
+                    
                 </div>
             </div>
 

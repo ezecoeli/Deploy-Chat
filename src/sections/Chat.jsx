@@ -19,6 +19,7 @@ export default function Chat() {
   
   const [messages, setMessages] = useState([]);
   const [currentChannel, setCurrentChannel] = useState(null);
+  const [unreadChannels, setUnreadChannels] = useState(new Set());
   const [error, setError] = useState('');
   const [typingUsers, setTypingUsers] = useState([]);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -27,7 +28,7 @@ export default function Chat() {
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [messagesLoading, setMessagesLoading] = useState(false);
   const isInitializedRef = useRef(false);
- 
+
   useEffect(() => {
     if (user) {
       loadUserProfile();
@@ -74,8 +75,6 @@ export default function Chat() {
 
     try {
       setMessagesLoading(true);
-      console.log('Loading messages for channel:', channelId);
-      
       const { data, error } = await supabase
         .from('messages')
         .select(`
@@ -93,11 +92,9 @@ export default function Chat() {
 
       if (error) throw error;
 
-      console.log('Messages loaded:', data?.length || 0);
       setMessages(data || []);
       setError('');
     } catch (err) {
-      console.error('Error loading messages:', err);
       setError('Error cargando mensajes: ' + err.message);
       setMessages([]);
     } finally {
@@ -128,7 +125,6 @@ export default function Chat() {
           .single();
 
         if (error) {
-          console.error('Error loading general channel:', error);
           const fallbackChannel = {
             id: '06cbcdea-0dff-438d-aad9-f94a097298d3',
             name: 'general',
@@ -139,12 +135,10 @@ export default function Chat() {
           return;
         }
 
-        console.log('Setting initial channel to general:', generalChannel);
         setCurrentChannel(generalChannel);
         await loadMessages(generalChannel.id);
 
       } catch (err) {
-        console.error('Error initializing default channel:', err);
         setError('Error inicializando canal general');
       }
     };
@@ -159,11 +153,33 @@ export default function Chat() {
   }, [user?.id]);
 
   useEffect(() => {
+    if (!user) return;
+
+    const globalSubscription = supabase
+      .channel(`messages_global_${user.id}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages'
+      }, (payload) => {
+        if (
+          payload.new.user_id !== user.id &&
+          payload.new.channel_id !== currentChannel?.id
+        ) {
+          setUnreadChannels(prev => new Set([...prev, payload.new.channel_id]));
+        }
+      })
+      .subscribe();
+
+    return () => {
+      globalSubscription.unsubscribe();
+    };
+  }, [user, currentChannel?.id]);
+
+  useEffect(() => {
     if (!currentChannel?.id || !user) {
       return;
     }
-    
-    console.log('Setting up subscription for channel:', currentChannel.id);
     
     let retryCount = 0;
     const maxRetries = 3;
@@ -177,8 +193,6 @@ export default function Chat() {
           table: 'messages',
           filter: `channel_id=eq.${currentChannel.id}`
         }, async (payload) => {
-          console.log('New message received:', payload.new);
-          
           let messageWithUser = { ...payload.new };
           
           if (payload.new.user_id === user.id) {
@@ -221,8 +235,13 @@ export default function Chat() {
             if (messageExists) {
               return current;
             }
-
             return [...current, messageWithUser];
+          });
+
+          setUnreadChannels(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(currentChannel.id);
+            return newSet;
           });
         })
         .on('broadcast', { event: 'typing' }, (payload) => {
@@ -250,10 +269,8 @@ export default function Chat() {
           }
         })
         .subscribe((status) => {
-          console.log('Subscription status:', status);
           if (status === 'CHANNEL_ERROR' && retryCount < maxRetries) {
             retryCount++;
-            console.log(`Retrying subscription (${retryCount}/${maxRetries})`);
             setTimeout(() => {
               subscription.unsubscribe();
               createSubscription();
@@ -267,12 +284,11 @@ export default function Chat() {
     const subscription = createSubscription();
 
     return () => {
-      console.log('Cleaning up subscription for channel:', currentChannel.id);
       if (subscription) {
         subscription.unsubscribe();
       }
     };
-  }, [currentChannel?.id, user?.id, userProfile]); 
+  }, [currentChannel?.id, user?.id, userProfile]);
 
   const handleOpenProfile = () => {
     setShowProfileModal(true);
@@ -291,25 +307,26 @@ export default function Chat() {
   };
 
   const handleSelectConversation = useCallback(async (conversation) => {
-    console.log('Selecting conversation:', conversation);
-    
     try {
       setMessages([]);
       setTypingUsers([]);
       setError('');
-      
       setCurrentChannel(conversation);
       setSelectedConversation(conversation);
-      
+
+      setUnreadChannels(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(conversation.id);
+        return newSet;
+      });
+
       const isPrivate = conversation.type === 'direct';
       setIsPrivateMode(isPrivate);
-      
+
       if (!isPrivate) {
         await loadMessages(conversation.id);
       }
-      
     } catch (error) {
-      console.error('Error selecting conversation:', error);
       setError('Error al cambiar de canal');
     }
   }, [loadMessages]);
@@ -397,6 +414,7 @@ export default function Chat() {
             currentChannel={currentChannel}
             theme={theme}
             currentTheme={currentTheme}
+            unreadChannels={unreadChannels}
           />
         </div>
 
