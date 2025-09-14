@@ -455,7 +455,7 @@ export default function Sidebar({
                   onClick={() => onSelectConversation(channel)}
                   className={`flex-1 flex border items-center gap-2 px-2 py-2 rounded cursor-pointer transition-colors text-sm ${
                     currentChannel?.id === channel.id ? themeStyles.activeItem : themeStyles.item
-                  }`}
+                  } ${unreadChannels?.has(channel.id) ? 'glitch-effect' : ''}`}
                   title={getChannelDescription(channel.name, channel.description)}
                 >
                   <FaHashtag className="w-4 h-4 opacity-70" />
@@ -526,7 +526,7 @@ export default function Sidebar({
                 onClick={() => onSelectConversation(conversation)}
                 className={`flex border items-center gap-2 px-2 py-2 rounded cursor-pointer transition-colors text-sm ${
                   currentChannel?.id === conversation.id ? themeStyles.activeItem : themeStyles.item
-                }`}
+                } ${unreadChannels?.has(conversation.id) ? 'glitch-effect' : ''}`}
               >
                 <span className="text-xs opacity-70"><BsChatSquareText className='w-5 h-5' /></span>
                 <span className="truncate">

@@ -306,30 +306,67 @@ export default function Chat() {
     setError(errorMessage);
   };
 
-  const handleSelectConversation = useCallback(async (conversation) => {
-    try {
-      setMessages([]);
-      setTypingUsers([]);
-      setError('');
-      setCurrentChannel(conversation);
-      setSelectedConversation(conversation);
+  const [publicChannels, setPublicChannels] = useState([]);
 
-      setUnreadChannels(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(conversation.id);
-        return newSet;
-      });
+  // check for unread messages in public channels
+  useEffect(() => {
+    if (user?.id && publicChannels.length > 0) {
+      const checkUnread = async () => {
+        const newUnread = new Set();
 
-      const isPrivate = conversation.type === 'direct';
-      setIsPrivateMode(isPrivate);
+        // get last read times for all public channels
+        const { data: reads } = await supabase
+          .from('user_channel_reads')
+          .select('channel_id, last_read_at')
+          .eq('user_id', user.id);
 
-      if (!isPrivate) {
-        await loadMessages(conversation.id);
-      }
-    } catch (error) {
-      setError('Error al cambiar de canal');
+        for (const channel of publicChannels) {
+          const read = reads?.find(r => r.channel_id === channel.id);
+          const { data: messages } = await supabase
+            .from('messages')
+            .select('id, created_at')
+            .eq('channel_id', channel.id)
+            .gt('created_at', read?.last_read_at || '1970-01-01');
+          if (messages && messages.length > 0) {
+            newUnread.add(channel.id);
+          }
+        }
+        setUnreadChannels(newUnread);
+      };
+      checkUnread();
     }
-  }, [loadMessages]);
+  }, [user?.id, publicChannels]);
+
+  // when a channel is selected, mark it as read
+  const handleSelectConversation = useCallback(async (conversation) => {
+    setMessages([]);
+    setTypingUsers([]);
+    setError('');
+    setCurrentChannel(conversation);
+    setSelectedConversation(conversation);
+
+    // update date in supabase
+    await supabase
+      .from('user_channel_reads')
+      .upsert({
+        user_id: user.id,
+        channel_id: conversation.id,
+        last_read_at: new Date().toISOString()
+      }, { onConflict: ['user_id', 'channel_id'] });
+
+    setUnreadChannels(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(conversation.id);
+      return newSet;
+    });
+
+    const isPrivate = conversation.type === 'direct';
+    setIsPrivateMode(isPrivate);
+
+    if (!isPrivate) {
+      await loadMessages(conversation.id);
+    }
+  }, [loadMessages, user?.id]);
 
   const getSidebarBorderColor = () => {
     switch (currentTheme) {
@@ -381,6 +418,23 @@ export default function Chat() {
         return '#ffffff';
     }
   };
+
+  // load stored unread channels from localStorage on mount
+  useEffect(() => {
+    if (user?.id) {
+      const stored = localStorage.getItem(`unreadChannels_${user.id}`);
+      if (stored) {
+        setUnreadChannels(new Set(JSON.parse(stored)));
+      }
+    }
+  }, [user?.id]);
+
+  // Save state to localStorage whenever it changes
+  useEffect(() => {
+    if (user?.id) {
+      localStorage.setItem(`unreadChannels_${user.id}`, JSON.stringify([...unreadChannels]));
+    }
+  }, [unreadChannels, user?.id]);
 
   return (
     <div 
