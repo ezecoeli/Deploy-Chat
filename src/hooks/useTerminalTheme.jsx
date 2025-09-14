@@ -116,6 +116,8 @@ const terminalThemes = {
             secondary: '#ffffff',
             text: '#ffffff',
             textSecondary: '#c0c7c8',
+            memberIcon: '#ffffff',
+            sidebarText: '#000000',
             accent: '#ffffff',
             border: '#c0c7c8',
             input: 'bg-black border-[#c0c7c8] border-1',

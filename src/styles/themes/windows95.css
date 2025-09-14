@@ -154,7 +154,7 @@ body[data-theme="windows95"] textarea::placeholder {
   font-style: normal !important;
 }
 
-/* Prompt Windows 95 - PLANO */
+/* Prompt Windows 95 */
 body[data-theme="windows95"] span.px-1,
 body[data-theme="windows95"] .flex-1.flex.items-start span.px-1,
 body[data-theme="windows95"] form span.px-1,
@@ -283,15 +283,10 @@ body[data-theme="windows95"] .ml-2.mb-1.mt-1.flex.items-center.justify-between {
   border-radius: 0px !important;
 }
 
-/* Ícono de usuarios Windows 95 */
-body[data-theme="windows95"] .ml-2.mb-1.mt-1.flex svg {
-  color: #000000 !important;
-}
-
 /* Texto de miembros Windows 95 */
 body[data-theme="windows95"] .ml-2.mb-1.mt-1.flex p,
 body[data-theme="windows95"] .ml-2.mb-1.mt-1.flex span {
-  color: #000000 !important;
+  color: #ffffff !important;
   font-family: "MS Sans Serif", sans-serif !important;
   font-size: 11px !important;
   font-weight: bold !important;
@@ -321,12 +316,8 @@ body[data-theme="windows95"] .text-gray-400 {
 
 /* Punto de estado Windows 95 */
 body[data-theme="windows95"] .w-2.h-2.rounded-full {
-  border: 1px solid #000000 !important;
+  border: 1px solid #ffffff !important;
   box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3) !important;
-}
-
-body[data-theme="windows95"] .flex.items-center.gap-2 * {
-  color: #000000 !important;
 }
 
 /* Nombres de usuarios Windows 95 */

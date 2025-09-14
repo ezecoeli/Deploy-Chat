@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { supabase } from '../../utils/supabaseClient';
-import { BsLock, BsPlus, BsChatSquareText, BsArchive} from "react-icons/bs";
+import { BsPlus, BsChatSquareText, BsArchive, BsPeopleFill} from "react-icons/bs";
 import { useTranslation } from '../../hooks/useTranslation';
 import { usePermissions } from '../../hooks/usePermissions';
-import { FaHashtag } from "react-icons/fa";
+import { FaHashtag, FaCodeBranch } from "react-icons/fa";
 import ArchiveConfirmModal from '../ui/ArchiveConfirmModal';
+import { IoEarth } from "react-icons/io5";
 
 function UnreadDot({ hasUnread }) {
   return hasUnread ? (
-    <span className="ml-2 w-2 h-2 rounded-full bg-red-500 inline-block" />
+    <FaCodeBranch className="ml-2 text-red-500 w-4 h-4 animate-pulse" />
   ) : null;
 }
 
@@ -383,9 +384,13 @@ export default function Sidebar({
     <div className="flex flex-col h-full">
       <div className="p-3 border-b" style={{ borderColor: theme.colors.border }}>
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-xs font-bold uppercase tracking-wide opacity-70">
-            {t('publicChannels')} ({publicChannels.length})
-          </h3>
+          <div className="flex items-center gap-1">
+            <IoEarth className='w-4 h-4 mr-1'/>
+            <h3 className="text-xs font-bold uppercase tracking-wide opacity-70">
+              {t('publicChannels')} ({publicChannels.length})
+            </h3>
+          </div>
+          
           {isAdmin && (
             <button
               onClick={() => setShowCreateForm(!showCreateForm)}
@@ -475,7 +480,7 @@ export default function Sidebar({
       <div className="flex-1 p-3 overflow-y-auto">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <BsLock className="w-4 h-4 opacity-70" />
+            <BsPeopleFill className="w-4 h-4" />
             <h3 className="text-xs font-bold uppercase tracking-wide opacity-70">
               {t('directMessages')} ({conversations.length})
             </h3>
