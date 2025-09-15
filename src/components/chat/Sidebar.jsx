@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { supabase } from '../../utils/supabaseClient';
-import { BsPlus, BsChatSquareText, BsArchive, BsPeopleFill} from "react-icons/bs";
 import { useTranslation } from '../../hooks/useTranslation';
 import { usePermissions } from '../../hooks/usePermissions';
-import { FaHashtag, FaCodeBranch } from "react-icons/fa";
+import ChatAI from './ChatAI';
 import ArchiveConfirmModal from '../ui/ArchiveConfirmModal';
 import { IoEarth } from "react-icons/io5";
+import { FaHashtag, FaCodeBranch } from "react-icons/fa";
+import { BsPlus, BsChatSquareText, BsArchive, BsPeopleFill} from "react-icons/bs";
 
 function UnreadDot({ hasUnread }) {
   return hasUnread ? (
@@ -538,6 +539,16 @@ export default function Sidebar({
           )}
         </div>
       </div>
+
+      {/* AI Assistant */}
+      <ChatAI
+        user={user}
+        conversationId={currentChannel?.id}
+        theme={theme}
+        currentTheme={currentTheme}
+      />
+      
+      {/* Archive Confirmation Modal */}
       <ArchiveConfirmModal
         isOpen={confirmModal.isOpen}
         onClose={closeConfirmModal}

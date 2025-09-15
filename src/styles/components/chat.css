@@ -1,0 +1,4 @@
+input::placeholder {
+  color: var(--input-placeholder, #888);
+  opacity: 1;
+}

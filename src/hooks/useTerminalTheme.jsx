@@ -16,7 +16,10 @@ const terminalThemes = {
             input: 'bg-gray-700 border-gray-600',
             button: 'bg-violet-600 hover:bg-violet-800 text-white',
             message: 'bg-gray-800',
-            statusOnline: '#22c55e'
+            statusOnline: '#22c55e',
+            inputBg: '#fff',
+            inputText: '#222',
+            inputPlaceholder: '#888',
         },
         effects: {
             textShadow: 'none',
@@ -39,7 +42,10 @@ const terminalThemes = {
             input: 'bg-black border-green-500',
             button: 'bg-black hover:bg-[#001100] text-[#00ff00] border-2 border-[#00ff00] shadow-[0_0_10px_#00ff00] font-mono font-bold hover:shadow-[0_0_20px_#00ff00] transition-all duration-300',
             message: 'bg-gray-900 border-l-4 border-l-green-500',
-            statusOnline: '#22c55e'
+            statusOnline: '#22c55e',
+            inputBg: '#000',
+            inputText: '#00ff00',
+            inputPlaceholder: '#39ff14',
         },
         effects: {
             textShadow: '0 0 10px #00ff00',
@@ -66,7 +72,10 @@ const terminalThemes = {
             directory: '#5555ff',
             command: '#55ff55', 
             username: '#e95420', 
-            hostname: '#ffffff' 
+            hostname: '#ffffff',
+            inputBg: '#300a24',
+            inputText: '#fff',
+            inputPlaceholder: '#e95420',
         },
         effects: {
             textShadow: 'none',
@@ -95,7 +104,10 @@ const terminalThemes = {
             titleBar: '#c0c0c0',
             titleText: '#000000',
             menuBar: '#c0c0c0',
-            scrollBar: '#c0c0c0'
+            scrollBar: '#c0c0c0',
+            inputBg: '#fff',
+            putText: '#222',
+            inputPlaceholder: '#888',
         },
         effects: {
             textShadow: 'none',
@@ -125,7 +137,10 @@ const terminalThemes = {
             message: 'bg-black border-l-2 border-l-[#c0c7c8]',
             statusOnline: '#00ff00',
             headerBg: '#000080',
-            headerText: '#ffffff'
+            headerText: '#ffffff',
+            inputBg: '#000',
+            inputText: '#fff',
+            inputPlaceholder: '#c0c7c8',
         },
         effects: {
             textShadow: 'none',
@@ -151,7 +166,10 @@ const terminalThemes = {
             input: 'bg-black border-amber-500',
             button: 'bg-amber-600 hover:bg-amber-500 text-black font-bold',
             message: 'bg-black border-l-2 border-l-amber-500',
-            statusOnline: '#22c55e'
+            statusOnline: '#22c55e',
+            inputBg: '#000',
+            inputText: '#ffcc00',
+            inputPlaceholder: '#ffaa00',
         },
         effects: {
             textShadow: '0 0 6px #ffb000, 0 0 12px rgba(255, 176, 0, 0.5)',

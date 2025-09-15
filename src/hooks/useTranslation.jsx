@@ -41,6 +41,9 @@ const translations = {
     selectUserToChat: "Selecciona un usuario para chatear",
     encrypted: "Encriptado",
     noMessagesYet: "No hay mensajes aún. Empieza una conversación.",
+    loading: "Cargando...",
+    placeholderAI: "¿Cómo le ayudo hoy?",
+    hello: "¡Hola!",
 
     // Members count
     oneMember: "1 miembro",
@@ -166,6 +169,9 @@ const translations = {
     selectUserToChat: "Select a user to chat",
     encrypted: "Encrypted",
     noMessagesYet: "No messages yet. Start a conversation.",
+    loading: "Loading...",
+    placeholderAI: "How can I help you?", 
+    hello: "Hello!",
 
     // Members count  
     oneMember: "1 member",
