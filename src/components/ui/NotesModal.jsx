@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "../../hooks/useTranslation";
-import { LiaWindowClose, LiaPenSolid } from "react-icons/lia";
+import { LiaWindowClose } from "react-icons/lia";
 
 const NOTES_KEY = "user_notes";
 
@@ -49,23 +49,20 @@ export default function NotesModal({ open, onClose, theme, currentTheme }) {
           className="text-lg font-bold mb-4"
           style={{ color: '#ffffff' }}
         >
-          {t("notes")}
+          {t("notes")}:
         </h2>
-        <div className="relative">
-            <textarea
-                className="w-full h-40 p-2 border rounded resize-none focus:outline-none pr-10"
-                style={{
-                background: colors.inputBg || '#f3f4f6',
-                color: colors.inputText || colors.text || '#222',
-                borderColor: colors.border || '#374151',
-                fontFamily: theme.font,
-                }}
-                value={note}
-                onChange={e => setNote(e.target.value)}
-                placeholder={t("writeNotes")}
-            />
-            <LiaPenSolid className="absolute top-3 right-3 text-gray-400 pointer-events-none" />
-        </div>
+        <textarea
+          className="w-full h-40 p-2 border rounded resize-none focus:outline-none"
+          style={{
+            background: colors.inputBg || '#f3f4f6',
+            color: colors.inputText || colors.text || '#222',
+            borderColor: colors.border || '#374151',
+            fontFamily: theme.font,
+          }}
+          value={note}
+          onChange={e => setNote(e.target.value)}
+          placeholder={t("writeNotes") }
+        />
         
       </div>
     </div>

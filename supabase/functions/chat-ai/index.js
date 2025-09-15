@@ -46,7 +46,7 @@ serve(async (req) => {
           { role: 'system', content: 'You are a helpful assistant for general questions.' },
           { role: 'user', content: message }
         ],
-        max_tokens: 150,
+        max_tokens: 1024,
         temperature: 0.7,
       }),
     });

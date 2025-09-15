@@ -92,7 +92,7 @@ export default function ChatAI({ user, conversationId, theme, currentTheme }) {
       )}
       {response && (
         <div
-          className="text-xs border rounded p-2"
+          className="text-xs border rounded p-2 max-h-48 overflow-y-auto break-words"
           style={{
             color: colors.accent || '#34d399',
             borderColor: colors.border || '#374151',
