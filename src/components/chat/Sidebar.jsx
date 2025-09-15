@@ -560,6 +560,7 @@ export default function Sidebar({
         confirmText={t('confirm')}
         cancelText={t('cancel')}
       />
+
     </div>
   );
 }

@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import UserMenu from './UserMenu';
+import NotesModal from '../ui/NotesModal';
 import { BsShieldLock } from "react-icons/bs";
+import { LuNotebookText } from "react-icons/lu";
 
 export default function ChatHeader({ 
   currentChannel, 
@@ -13,6 +15,9 @@ export default function ChatHeader({
   onLogout,
   isPrivateMode 
 }) {
+
+  const [showNotes, setShowNotes] = useState(false);
+
   return (
     <div 
       className="border p-4 flex justify-between items-center"
@@ -63,10 +68,17 @@ export default function ChatHeader({
           </div>
         )}
       </div>
-      
-      {/* User Profile Section */}
+
+      {/* User Profile Section + Notas */}
       <div className="flex items-center gap-4">
-        
+        {/* create note button */}
+        <button
+          className="p-2 rounded hover:bg-blue-600 transition text-blue-600 hover:text-white"
+          title={t("notes")}
+          onClick={() => setShowNotes(true)}
+        >
+          <LuNotebookText className="w-6 h-6" />
+        </button>
         {/* User menu component */}
         <UserMenu
           user={user}
@@ -78,6 +90,14 @@ export default function ChatHeader({
           onLogout={onLogout}
         />
       </div>
+
+      {/* notes modal */}
+      <NotesModal
+        open={showNotes}
+        onClose={() => setShowNotes(false)}
+        theme={theme}
+        currentTheme={currentTheme}
+      />
     </div>
   );
 }

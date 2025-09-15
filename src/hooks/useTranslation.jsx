@@ -46,6 +46,9 @@ const translations = {
     hello: "¡Hola!",
     newDM: "Nuevo MD",
     menu: "Menú",
+    notes: "Notas",
+    close: "Cerrar",
+    writeNotes: "Escribe tus notas aquí...",
 
     // Members count
     oneMember: "1 miembro",
@@ -176,6 +179,9 @@ const translations = {
     hello: "Hello!",
     newDM: "New DM",
     menu: "Menu",
+    notes: "Notes",
+    close: "Close",
+    writeNotes: "Write your notes here...",
 
     // Members count  
     oneMember: "1 member",
