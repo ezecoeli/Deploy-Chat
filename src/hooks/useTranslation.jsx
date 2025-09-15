@@ -42,8 +42,10 @@ const translations = {
     encrypted: "Encriptado",
     noMessagesYet: "No hay mensajes aún. Empieza una conversación.",
     loading: "Cargando...",
-    placeholderAI: "¿Cómo le ayudo hoy?",
+    placeholderAI: "¿Cómo te ayudo hoy?",
     hello: "¡Hola!",
+    newDM: "Nuevo MD",
+    menu: "Menú",
 
     // Members count
     oneMember: "1 miembro",
@@ -172,6 +174,8 @@ const translations = {
     loading: "Loading...",
     placeholderAI: "How can I help you?", 
     hello: "Hello!",
+    newDM: "New DM",
+    menu: "Menu",
 
     // Members count  
     oneMember: "1 member",

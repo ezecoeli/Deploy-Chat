@@ -489,7 +489,7 @@ export default function Sidebar({
           <button 
             onClick={() => setShowUserSelector(!showUserSelector)}
             className={`text-lg leading-none px-2 py-1 rounded ${themeStyles.button}`}
-            title="Nuevo DM"
+            title={t('newDM')}
           >
             <BsPlus className='w-3 h-3' />
           </button>

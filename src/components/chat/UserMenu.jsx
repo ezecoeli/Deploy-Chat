@@ -190,6 +190,7 @@ export default function UserMenu({
       <button
         onClick={() => setShowUserMenu(!showUserMenu)}
         className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${theme.colors.input} hover:opacity-80`}
+        title={t('menu')}
         style={{ 
           color: theme.colors.text,
           fontFamily: theme.font 
@@ -204,7 +205,7 @@ export default function UserMenu({
           animate={{ rotate: showUserMenu ? 180 : 0 }}
           transition={{ duration: 0.2 }}
         >
-          <FiChevronDown className="w-3 h-3" />
+          <FiChevronDown className="w-4 h-4" />
         </motion.div>
       </button>
 

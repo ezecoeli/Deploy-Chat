@@ -210,10 +210,11 @@ export default function MessageInput({
         
         <button
           type="submit"
+          title={t('send')}
           disabled={!newMessage?.trim() || !currentChannel}
           className={`px-3 sm:px-6 py-2 rounded-lg transition-colors duration-200 text-sm sm:text-base flex-shrink-0 self-start ${ 
             currentTheme === 'default' ? 'font-medium' : 'font-mono'
-          } ${currentTheme === 'windows95' ? 'windows95-button' : ''} ${theme.colors.button}`}
+          } ${currentTheme === 'windows95' ? 'windows95-button' : ''} ${theme.colors.button} cursor-pointer`}
           style={{
             marginTop: '2px',
             transition: 'none'

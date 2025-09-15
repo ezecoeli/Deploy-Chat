@@ -141,6 +141,7 @@ const terminalThemes = {
             inputBg: '#000',
             inputText: '#fff',
             inputPlaceholder: '#c0c7c8',
+            icon: '#000000',
         },
         effects: {
             textShadow: 'none',
