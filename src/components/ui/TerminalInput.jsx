@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import TerminalCursor from './TerminalCursor';
 
 export default function TerminalInput({ 
-  value, 
+  value = '', 
   onChange, 
   currentTheme, 
   prompt,
@@ -12,133 +12,172 @@ export default function TerminalInput({
 }) {
   const [isFocused, setIsFocused] = useState(false);
   const [cursorPosition, setCursorPosition] = useState(0);
+  const [visualCursorPosition, setVisualCursorPosition] = useState(0);
   const inputRef = useRef(null);
   const measureRef = useRef(null);
+  const containerRef = useRef(null);
+
+  // Calculate cursor position without complex scrolling
+  const updateCursorDisplay = useCallback(() => {
+    if (!measureRef.current || !containerRef.current) return;
+    
+    const textBeforeCursor = value.substring(0, cursorPosition);
+    measureRef.current.textContent = textBeforeCursor || '';
+    
+    const textWidth = measureRef.current.offsetWidth;
+    setVisualCursorPosition(textWidth);
+  }, [value, cursorPosition]);
 
   // Update cursor position when value changes
   useEffect(() => {
     if (inputRef.current) {
-      setCursorPosition(inputRef.current.selectionStart || value.length);
+      const newPosition = inputRef.current.selectionStart || value.length;
+      setCursorPosition(newPosition);
     }
   }, [value]);
 
-  // Handle input changes and update cursor position
+  // Update visual cursor position
+  useEffect(() => {
+    updateCursorDisplay();
+  }, [updateCursorDisplay]);
+
+  // Handle input changes
   const handleChange = (e) => {
-    onChange(e.target.value);
+    const newValue = e.target.value;
+    onChange(newValue);
     setCursorPosition(e.target.selectionStart);
   };
 
-  // Handle click to update cursor position
-  const handleClick = () => {
-    setTimeout(() => {
-      if (inputRef.current) {
-        setCursorPosition(inputRef.current.selectionStart);
+  // Handle cursor position updates
+  const handleSelectionChange = useCallback(() => {
+    if (inputRef.current) {
+      setCursorPosition(inputRef.current.selectionStart);
+    }
+  }, []);
+
+  // Auto-scroll input to keep cursor visible
+  useEffect(() => {
+    if (inputRef.current && isFocused) {
+      const input = inputRef.current;
+      const cursorPixelPosition = visualCursorPosition;
+      const containerWidth = containerRef.current?.offsetWidth || 0;
+      const scrollLeft = input.scrollLeft;
+      const visibleStart = scrollLeft;
+      const visibleEnd = scrollLeft + containerWidth - 60; // Reserve space for cursor
+
+      // Scroll if cursor is outside visible area
+      if (cursorPixelPosition < visibleStart) {
+        input.scrollLeft = Math.max(0, cursorPixelPosition - 20);
+      } else if (cursorPixelPosition > visibleEnd) {
+        input.scrollLeft = cursorPixelPosition - containerWidth + 60;
       }
-    }, 10);
-  };
+    }
+  }, [visualCursorPosition, isFocused]);
 
-  // Handle key navigation 
-  const handleKeyUp = (e) => {
-    setCursorPosition(e.target.selectionStart);
-  };
-
-  // Calculate visual cursor position based on text width
-  const getVisualCursorPosition = () => {
-    if (!measureRef.current) return 0;
-    
-    // Create text up to cursor position
-    const textBeforeCursor = value.substring(0, cursorPosition);
-    measureRef.current.textContent = textBeforeCursor;
-    
-    return measureRef.current.offsetWidth;
-  };
-
-  // Get prompt styles based on theme
+  // Get styles based on theme
   const getPromptStyles = () => {
     switch (currentTheme) {
-      case 'matrix':
-        return 'text-green-400 font-mono';
-      case 'coolRetro':
-        return 'text-cyan-400 font-mono';
-      case 'ubuntu':
-        return 'text-orange-400 font-mono';
-      case 'windows95':
-        return 'text-black font-sans text-sm';
-      case 'macOS':
-        return 'text-blue-400 font-mono';
-      default:
-        return 'text-gray-400 font-mono';
+      case 'matrix': return 'text-green-400 font-mono';
+      case 'coolRetro': return 'text-cyan-400 font-mono';
+      case 'ubuntu': return 'text-orange-400 font-mono';
+      case 'windows95': return 'text-black font-sans text-sm';
+      case 'macOS': return 'text-blue-400 font-mono';
+      default: return 'text-gray-400 font-mono';
     }
   };
 
-  // Get input styles based on theme
   const getInputStyles = () => {
-    const baseStyles = "bg-transparent outline-none w-full font-mono terminal-input";
+    const baseStyles = "bg-transparent outline-none w-full font-mono";
     
     switch (currentTheme) {
-      case 'matrix':
-        return `${baseStyles} text-green-400 caret-transparent`;
-      case 'coolRetro':
-        return `${baseStyles} text-cyan-400 caret-transparent`;
-      case 'ubuntu':
-        return `${baseStyles} text-orange-100 caret-transparent`;
-      case 'windows95':
-        return `${baseStyles} text-black caret-transparent`;
-      case 'macOS':
-        return `${baseStyles} text-white caret-transparent`;
-      default:
-        return `${baseStyles} text-white caret-transparent`;
+      case 'matrix': return `${baseStyles} text-green-400`;
+      case 'coolRetro': return `${baseStyles} text-cyan-400`;
+      case 'ubuntu': return `${baseStyles} text-orange-100`;
+      case 'windows95': return `${baseStyles} text-black`;
+      case 'macOS': return `${baseStyles} text-white`;
+      default: return `${baseStyles} text-white`;
+    }
+  };
+
+  const getPlaceholderStyles = () => {
+    switch (currentTheme) {
+      case 'matrix': return 'text-green-600';
+      case 'coolRetro': return 'text-cyan-600';
+      case 'ubuntu': return 'text-orange-600';
+      case 'windows95': return 'text-gray-400';
+      case 'macOS': return 'text-gray-400';
+      default: return 'text-gray-500';
     }
   };
 
   return (
-    <div className={`flex items-center relative terminal-input-container ${className}`}>
+    <div className={`flex items-center relative ${className}`}>
       {/* Terminal prompt */}
       {prompt && (
-        <span className={`${getPromptStyles()} mr-1 flex-shrink-0`}>
+        <span className={`${getPromptStyles()} mr-2 flex-shrink-0 select-none`}>
           {prompt}
         </span>
       )}
       
-      {/* Input container with custom cursor */}
-      <div className="flex-1 relative">
-        {/* Invisible element to measure text width */}
+      {/* Input container */}
+      <div ref={containerRef} className="flex-1 relative overflow-hidden">
+        {/* Invisible element for text measurement */}
         <span 
           ref={measureRef}
-          className={`absolute invisible whitespace-pre cursor-position-measure ${getInputStyles()}`}
+          className="absolute invisible whitespace-pre font-mono pointer-events-none"
           style={{ 
             fontSize: 'inherit',
             fontFamily: 'inherit',
-            letterSpacing: 'inherit'
+            letterSpacing: 'inherit',
+            top: 0,
+            left: 0,
+            zIndex: -1
           }}
         />
         
-        {/* Actual input field */}
+        {/* Placeholder (only when not focused and no value) */}
+        {!isFocused && !value && placeholder && (
+          <div 
+            className={`absolute top-0 left-0 pointer-events-none whitespace-nowrap overflow-hidden font-mono ${getPlaceholderStyles()}`}
+            style={{
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center'
+            }}
+          >
+            {placeholder}
+          </div>
+        )}
+        
+        {/* Actual input */}
         <input
           ref={inputRef}
           type="text"
           value={value}
           onChange={handleChange}
-          onClick={handleClick}
-          onKeyUp={handleKeyUp}
+          onKeyUp={handleSelectionChange}
+          onClick={handleSelectionChange}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          placeholder={isFocused ? '' : placeholder}
           disabled={disabled}
-          className={getInputStyles()}
+          className={`${getInputStyles()} caret-transparent`}
           autoComplete="off"
           spellCheck="false"
+          style={{
+            width: '100%',
+            paddingRight: '30px',
+            overflow: 'hidden',
+            textOverflow: 'clip'
+          }}
         />
         
-        {/* Custom terminal cursor */}
+        {/* Custom cursor */}
         {isFocused && (
           <div 
-            className="absolute top-0 pointer-events-none"
+            className="absolute top-0 bottom-0 pointer-events-none flex items-center"
             style={{ 
-              left: `${getVisualCursorPosition()}px`,
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
+              left: `${Math.min(visualCursorPosition, (containerRef.current?.offsetWidth || 0) - 30)}px`,
               zIndex: 10
             }}
           >

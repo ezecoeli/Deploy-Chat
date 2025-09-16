@@ -178,13 +178,14 @@ export default function MessageInput({
           : 'rgba(0, 0, 0, 0.3)',
       }}
     >
-      <form onSubmit={sendMessage} className="flex gap-1 sm:gap-2 font-mono items-center"> 
+      <form onSubmit={sendMessage} className="flex gap-1 sm:gap-2 font-mono items-stretch"> 
         {/* Terminal Input Container */}
         <div 
-          className="flex-1 px-2 sm:px-3 py-2 rounded-lg relative"
+          className="flex-1 px-2 sm:px-3 py-2 rounded-lg relative min-w-0"
           style={{ 
             backgroundColor: currentTheme === 'coolRetro' ? '#000000' : 'rgba(0,0,0,0.5)', 
-            border: `1px solid ${theme.colors.border}` 
+            border: `1px solid ${theme.colors.border}`,
+            maxWidth: 'calc(100% - 80px)' // Reserve space for button
           }}
         >
           <TerminalInput
@@ -212,11 +213,10 @@ export default function MessageInput({
           type="submit"
           title={t('send')}
           disabled={!newMessage?.trim() || !currentChannel}
-          className={`px-3 sm:px-6 py-2 rounded-lg transition-colors duration-200 text-sm sm:text-base flex-shrink-0 self-start ${ 
+          className={`px-3 sm:px-6 py-2 rounded-lg transition-colors duration-200 text-sm sm:text-base flex-shrink-0 min-w-[60px] sm:min-w-[80px] ${ 
             currentTheme === 'default' ? 'font-medium' : 'font-mono'
           } ${currentTheme === 'windows95' ? 'windows95-button' : ''} ${theme.colors.button} cursor-pointer`}
           style={{
-            marginTop: '2px',
             transition: 'none'
           }}
         >
