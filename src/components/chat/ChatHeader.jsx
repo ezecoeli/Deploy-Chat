@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import UserMenu from './UserMenu';
 import NotesModal from '../ui/NotesModal';
-import { BsShieldLock } from "react-icons/bs";
+import BotEventModal from '../ui/BotEventModal';
+import { BsShieldLock, BsCalendarEvent } from "react-icons/bs";
 import { LuNotebookText } from "react-icons/lu";
+import { usePermissions } from '../../hooks/usePermissions';
 
 export default function ChatHeader({ 
   currentChannel, 
@@ -15,8 +17,12 @@ export default function ChatHeader({
   onLogout,
   isPrivateMode 
 }) {
-
   const [showNotes, setShowNotes] = useState(false);
+  const [showBotModal, setShowBotModal] = useState(false);
+  const { isAdmin, isModerator } = usePermissions(user);
+
+  // only show bot event if user is admin or moderator and in #events channel
+  const canProgramBot = (isAdmin || isModerator) && currentChannel?.name === 'events';
 
   return (
     <div 
@@ -27,7 +33,6 @@ export default function ChatHeader({
           : currentTheme === 'windows95'
           ? '#c0c7c8'
           : theme.colors.border,
-
         backgroundColor: currentTheme === 'windows95' 
           ? theme.colors.headerBg || '#000080' 
           : currentTheme === 'matrix' || currentTheme === 'coolRetro' 
@@ -36,27 +41,13 @@ export default function ChatHeader({
       }}
     >
       <div>
-        <h1 
-          className="text-2xl font-bold font-mono"
-          style={{ 
-            color: currentTheme === 'windows95' ? theme.colors.headerText || '#ffffff' : theme.colors.primary,
-            textShadow: currentTheme === 'windows95' ? 'none' : theme.effects.textShadow,
-            fontFamily: theme.font
-          }}
-        >
+        {/* title and description */}
+        <h1 className="text-2xl font-bold font-mono" style={{ color: theme.colors.primary, fontFamily: theme.font }}>
           Deploy-Chat
         </h1>
-        <p 
-          className="text-sm font-mono"
-          style={{ 
-            color: currentTheme === 'windows95' ? theme.colors.headerText || '#ffffff' : theme.colors.textSecondary,
-            fontFamily: theme.font
-          }}
-        >
+        <p className="text-sm font-mono" style={{ color: theme.colors.textSecondary, fontFamily: theme.font }}>
           {currentChannel ? `${theme.prompt} cd #${currentChannel.name}` : 'Connecting...'}
         </p>
-
-        {/* private mode indicator */}
         {isPrivateMode && (
           <div className="flex items-center gap-1 text-xs">
             <span style={{ color: theme.colors.textSecondary }}>
@@ -69,8 +60,17 @@ export default function ChatHeader({
         )}
       </div>
 
-      {/* User Profile Section + Notas */}
       <div className="flex items-center gap-4">
+        {/* Button to open bot event modal */}
+        {canProgramBot && (
+          <button
+            className="animate-bounce p-2 rounded brightness-150 hover:bg-cyan-600 transition text-cyan-500 hover:text-white"
+            title={t("scheduleEvent")}
+            onClick={() => setShowBotModal(true)}
+          >
+            <BsCalendarEvent className="w-6 h-6" />
+          </button>
+        )}
         {/* create note button */}
         <button
           className="p-2 rounded hover:bg-blue-600 transition text-blue-600 hover:text-white"
@@ -95,6 +95,16 @@ export default function ChatHeader({
       <NotesModal
         open={showNotes}
         onClose={() => setShowNotes(false)}
+        theme={theme}
+        currentTheme={currentTheme}
+      />
+
+      {/* Bot Event Modal */}
+      <BotEventModal
+        isOpen={showBotModal}
+        onClose={() => setShowBotModal(false)}
+        channelId={currentChannel?.id}
+        userId={user?.id}
         theme={theme}
         currentTheme={currentTheme}
       />

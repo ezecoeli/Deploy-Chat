@@ -206,6 +206,13 @@ body[data-theme="coolRetro"] input {
   z-index: 10;
 }
 
+body[data-theme="coolRetro"] textarea {
+  border: 1px solid #ffb000 !important;
+  color: #ffcc00 !important;
+  background: rgba(0, 0, 0, 0.9) !important;
+  text-shadow: 0 0 2px #ffb000 !important;
+}
+
 body[data-theme="coolRetro"] input::placeholder {
   color: #cc8800 !important;
   opacity: 0.7 !important;

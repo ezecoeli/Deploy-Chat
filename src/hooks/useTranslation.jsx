@@ -49,6 +49,8 @@ const translations = {
     notes: "Notas",
     close: "Cerrar",
     writeNotes: "Escribe tus notas aquí...",
+    scheduleEvent: "Programar evento",
+    titleInput: "Título",
 
     // Members count
     oneMember: "1 miembro",
@@ -86,6 +88,11 @@ const translations = {
     language: "Idioma",
     settings: "Configuración",
     confirm: "Confirmar",
+    creating: "Creando...",
+    once: "Una vez",
+    daily: "Diario",
+    weekly: "Semanal",
+    monthly: "Mensual",
     
     // Navigation
     home: "Inicio",
@@ -182,6 +189,8 @@ const translations = {
     notes: "Notes",
     close: "Close",
     writeNotes: "Write your notes here...",
+    scheduleEvent: "Schedule Event",
+    titleInput: "Title",
 
     // Members count  
     oneMember: "1 member",
@@ -213,13 +222,17 @@ const translations = {
     supportDescription: "Technical support, troubleshooting and help",
     randomDescription: "Casual conversations and off-topic discussions",
     
-
     // UI
     darkMode: "Dark mode",
     lightMode: "Light mode",
     language: "Language",
     settings: "Settings",
     confirm: "Confirm",
+    creating: "Creating...",
+    once: "Once",
+    daily: "Daily",
+    weekly: "Weekly",
+    monthly: "Monthly",
 
     // Navigation
     home: "Home",

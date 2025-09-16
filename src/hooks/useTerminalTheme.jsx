@@ -1,3 +1,4 @@
+import { button, p } from 'framer-motion/client';
 import { useState, useEffect } from 'react';
 
 const terminalThemes = {
@@ -20,6 +21,9 @@ const terminalThemes = {
             inputBg: '#fff',
             inputText: '#222',
             inputPlaceholder: '#888',
+            previewBg: '#f3f4f6',
+            previewText: '#222',
+            buttonHover: '#4338ca',
         },
         effects: {
             textShadow: 'none',
@@ -46,6 +50,10 @@ const terminalThemes = {
             inputBg: '#000',
             inputText: '#00ff00',
             inputPlaceholder: '#39ff14',
+            previewBg: '#111',
+            previewText: '#00ff00',
+            buttonText: '#000',
+            buttonHover: '#009900',
         },
         effects: {
             textShadow: '0 0 10px #00ff00',
@@ -76,6 +84,9 @@ const terminalThemes = {
             inputBg: '#300a24',
             inputText: '#fff',
             inputPlaceholder: '#e95420',
+            previewBg: '#f3f4f6',
+            previewText: '#222',
+            buttonHover: '#cc4a1a',
         },
         effects: {
             textShadow: 'none',
@@ -108,6 +119,8 @@ const terminalThemes = {
             inputBg: '#fff',
             putText: '#222',
             inputPlaceholder: '#888',
+            previewBg: '#e5e7eb',
+            previewText: '#222',  
         },
         effects: {
             textShadow: 'none',
@@ -142,6 +155,8 @@ const terminalThemes = {
             inputText: '#fff',
             inputPlaceholder: '#c0c7c8',
             icon: '#000000',
+            previewBg: '#fff',
+            previewText: '#000000',
         },
         effects: {
             textShadow: 'none',
@@ -171,6 +186,10 @@ const terminalThemes = {
             inputBg: '#000',
             inputText: '#ffcc00',
             inputPlaceholder: '#ffaa00',
+            previewBg: '#222',
+            previewText: '#fff',
+            buttonText: '#000',
+            buttonHover: '#ffb000',
         },
         effects: {
             textShadow: '0 0 6px #ffb000, 0 0 12px rgba(255, 176, 0, 0.5)',
