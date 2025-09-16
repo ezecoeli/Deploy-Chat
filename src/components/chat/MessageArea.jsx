@@ -176,7 +176,7 @@ export default function MessageArea({
                         wordBreak: 'break-word'
                       }}
                     >
-                      <MessageRenderer content={message.content} />
+                      <MessageRenderer content={message.content} currentTheme={currentTheme} />
                       <p className="text-xs mt-1 opacity-70">
                         // {new Date(message.created_at).toLocaleTimeString()}
                       </p>

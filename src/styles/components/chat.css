@@ -2,3 +2,50 @@ input::placeholder {
   color: var(--input-placeholder, #888);
   opacity: 1;
 }
+
+/* Markdown content styling */
+.markdown-content {
+  line-height: 1.6;
+}
+
+.markdown-content h1,
+.markdown-content h2, 
+.markdown-content h3 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.markdown-content h1:first-child,
+.markdown-content h2:first-child,
+.markdown-content h3:first-child {
+  margin-top: 0;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+  padding-left: 1rem;
+}
+
+.markdown-content li {
+  margin-bottom: 0.25rem;
+}
+
+.markdown-content pre {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+/* Responsive tables */
+.markdown-content table {
+  font-size: 0.875rem;
+}
+
+@media (max-width: 640px) {
+  .markdown-content table {
+    font-size: 0.75rem;
+  }
+  
+  .markdown-content h1 { font-size: 1.125rem; }
+  .markdown-content h2 { font-size: 1rem; }
+  .markdown-content h3 { font-size: 0.875rem; }
+}

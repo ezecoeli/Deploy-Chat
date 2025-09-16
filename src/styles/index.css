@@ -5,7 +5,6 @@
 /* Components */
 @import './components/login.css';
 @import './components/scrollbars.css';
-@import './components/codeblocks.css';
 
 /* Themes */
 @import './themes/coolretro.css';
