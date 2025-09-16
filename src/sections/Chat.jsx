@@ -3,6 +3,7 @@ import { supabase } from '../utils/supabaseClient';
 import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from '../hooks/useTranslation';
 import { useTerminalTheme } from '../hooks/useTerminalTheme';
+import { useUnreadMessages } from '../hooks/useUnreadMessages';
 import UserProfileModal from '../components/UserProfileModal';
 import ChatHeader from '../components/chat/ChatHeader';
 import ConnectionStatus from '../components/chat/ConnectionStatus';
@@ -17,9 +18,15 @@ export default function Chat() {
   const { t } = useTranslation();
   const { theme, currentTheme } = useTerminalTheme();
   
+  const {
+    unreadChannels,
+    markChannelAsRead,
+    addUnreadChannel,
+    removeUnreadChannel
+  } = useUnreadMessages(user);
+  
   const [messages, setMessages] = useState([]);
   const [currentChannel, setCurrentChannel] = useState(null);
-  const [unreadChannels, setUnreadChannels] = useState(new Set());
   const [error, setError] = useState('');
   const [typingUsers, setTypingUsers] = useState([]);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -51,7 +58,6 @@ export default function Chat() {
         .single();
 
       if (error) throw error;
-      
       setUserProfile(data);
     } catch (error) {
       setUserProfile({
@@ -69,9 +75,7 @@ export default function Chat() {
   };
 
   const loadMessages = useCallback(async (channelId) => {
-    if (!channelId || messagesLoading) {
-      return;
-    }
+    if (!channelId || messagesLoading) return;
 
     try {
       setMessagesLoading(true);
@@ -91,25 +95,19 @@ export default function Chat() {
         .limit(100);
 
       if (error) throw error;
-
       setMessages(data || []);
       setError('');
     } catch (err) {
-      setError('Error cargando mensajes: ' + err.message);
+      setError('Error loading messages: ' + err.message);
       setMessages([]);
     } finally {
       setMessagesLoading(false);
     }
   }, [messagesLoading]);
 
+  // Initialize default channel
   useEffect(() => {
-    if (loading || !user) {
-      return;
-    }
-
-    if (isInitializedRef.current) {
-      return;
-    }
+    if (loading || !user || isInitializedRef.current) return;
 
     isInitializedRef.current = true;
 
@@ -137,9 +135,8 @@ export default function Chat() {
 
         setCurrentChannel(generalChannel);
         await loadMessages(generalChannel.id);
-
       } catch (err) {
-        setError('Error inicializando canal general');
+        setError('Error initializing general channel');
       }
     };
 
@@ -152,6 +149,7 @@ export default function Chat() {
     }
   }, [user?.id]);
 
+  // Global subscription for new messages in other channels
   useEffect(() => {
     if (!user) return;
 
@@ -162,11 +160,12 @@ export default function Chat() {
         schema: 'public',
         table: 'messages'
       }, (payload) => {
+        // Only mark as unread if it's from another user and not the current channel
         if (
           payload.new.user_id !== user.id &&
           payload.new.channel_id !== currentChannel?.id
         ) {
-          setUnreadChannels(prev => new Set([...prev, payload.new.channel_id]));
+          addUnreadChannel(payload.new.channel_id, payload.new.user_id);
         }
       })
       .subscribe();
@@ -174,12 +173,11 @@ export default function Chat() {
     return () => {
       globalSubscription.unsubscribe();
     };
-  }, [user, currentChannel?.id]);
+  }, [user, currentChannel?.id, addUnreadChannel]);
 
+  // Current channel subscription
   useEffect(() => {
-    if (!currentChannel?.id || !user) {
-      return;
-    }
+    if (!currentChannel?.id || !user) return;
     
     let retryCount = 0;
     const maxRetries = 3;
@@ -232,17 +230,12 @@ export default function Chat() {
 
           setMessages(current => {
             const messageExists = current.some(msg => msg.id === payload.new.id);
-            if (messageExists) {
-              return current;
-            }
+            if (messageExists) return current;
             return [...current, messageWithUser];
           });
 
-          setUnreadChannels(prev => {
-            const newSet = new Set(prev);
-            newSet.delete(currentChannel.id);
-            return newSet;
-          });
+          // Remove from unread if viewing this channel
+          removeUnreadChannel(currentChannel.id);
         })
         .on('broadcast', { event: 'typing' }, (payload) => {
           const { user_id, username, is_typing } = payload.payload;
@@ -282,13 +275,12 @@ export default function Chat() {
     };
 
     const subscription = createSubscription();
-
     return () => {
       if (subscription) {
         subscription.unsubscribe();
       }
     };
-  }, [currentChannel?.id, user?.id, userProfile]);
+  }, [currentChannel?.id, user?.id, userProfile, removeUnreadChannel]);
 
   const handleOpenProfile = () => {
     setShowProfileModal(true);
@@ -298,7 +290,7 @@ export default function Chat() {
     try {
       await logout();
     } catch (err) {
-      setError(t('logoutError') || 'Error cerrando sesión');
+      setError(t('logoutError') || 'Error logging out');
     }
   };
 
@@ -306,38 +298,7 @@ export default function Chat() {
     setError(errorMessage);
   };
 
-  const [publicChannels, setPublicChannels] = useState([]);
-
-  // check for unread messages in public channels
-  useEffect(() => {
-    if (user?.id && publicChannels.length > 0) {
-      const checkUnread = async () => {
-        const newUnread = new Set();
-
-        // get last read times for all public channels
-        const { data: reads } = await supabase
-          .from('user_channel_reads')
-          .select('channel_id, last_read_at')
-          .eq('user_id', user.id);
-
-        for (const channel of publicChannels) {
-          const read = reads?.find(r => r.channel_id === channel.id);
-          const { data: messages } = await supabase
-            .from('messages')
-            .select('id, created_at')
-            .eq('channel_id', channel.id)
-            .gt('created_at', read?.last_read_at || '1970-01-01');
-          if (messages && messages.length > 0) {
-            newUnread.add(channel.id);
-          }
-        }
-        setUnreadChannels(newUnread);
-      };
-      checkUnread();
-    }
-  }, [user?.id, publicChannels]);
-
-  // when a channel is selected, mark it as read
+  // Handle conversation selection
   const handleSelectConversation = useCallback(async (conversation) => {
     setMessages([]);
     setTypingUsers([]);
@@ -345,20 +306,8 @@ export default function Chat() {
     setCurrentChannel(conversation);
     setSelectedConversation(conversation);
 
-    // update date in supabase
-    await supabase
-      .from('user_channel_reads')
-      .upsert({
-        user_id: user.id,
-        channel_id: conversation.id,
-        last_read_at: new Date().toISOString()
-      }, { onConflict: ['user_id', 'channel_id'] });
-
-    setUnreadChannels(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(conversation.id);
-      return newSet;
-    });
+    // Mark as read when entering a channel
+    await markChannelAsRead(conversation.id);
 
     const isPrivate = conversation.type === 'direct';
     setIsPrivateMode(isPrivate);
@@ -366,75 +315,40 @@ export default function Chat() {
     if (!isPrivate) {
       await loadMessages(conversation.id);
     }
-  }, [loadMessages, user?.id]);
+  }, [loadMessages, markChannelAsRead]);
 
   const getSidebarBorderColor = () => {
     switch (currentTheme) {
-      case 'matrix':
-        return 'rgba(0, 255, 0, 0.3)';
-      case 'coolRetro':
-        return 'rgba(0, 255, 255, 0.3)';
-      case 'windows95':
-        return '#808080';
-      case 'ubuntu':
-        return 'rgba(255, 102, 0, 0.3)';
-      case 'macOS':
-        return '#d1d5db';
-      default:
-        return 'rgba(255, 255, 255, 0.2)';
+      case 'matrix': return 'rgba(0, 255, 0, 0.3)';
+      case 'coolRetro': return 'rgba(0, 255, 255, 0.3)';
+      case 'windows95': return '#808080';
+      case 'ubuntu': return 'rgba(255, 102, 0, 0.3)';
+      case 'macOS': return '#d1d5db';
+      default: return 'rgba(255, 255, 255, 0.2)';
     }
   };
 
   const getSidebarBackgroundColor = () => {
     switch (currentTheme) {
-      case 'matrix':
-        return 'rgba(0, 0, 0, 0.95)';
-      case 'coolRetro':
-        return 'rgba(0, 0, 0, 0.95)';
-      case 'windows95':
-        return '#c0c0c0';
-      case 'ubuntu':
-        return 'rgba(45, 45, 45, 0.95)';
-      case 'macOS':
-        return 'rgba(248, 250, 252, 0.95)';
-      default:
-        return 'rgba(30, 30, 30, 0.95)';
+      case 'matrix': return 'rgba(0, 0, 0, 0.95)';
+      case 'coolRetro': return 'rgba(0, 0, 0, 0.95)';
+      case 'windows95': return '#c0c0c0';
+      case 'ubuntu': return 'rgba(45, 45, 45, 0.95)';
+      case 'macOS': return 'rgba(248, 250, 252, 0.95)';
+      default: return 'rgba(30, 30, 30, 0.95)';
     }
   };
 
   const getSidebarTextColor = () => {
     switch (currentTheme) {
-      case 'matrix':
-        return '#00ff00';
-      case 'coolRetro':
-        return '#00ffff';
-      case 'windows95':
-        return '#000000';
-      case 'ubuntu':
-        return '#ff6600';
-      case 'macOS':
-        return '#374151';
-      default:
-        return '#ffffff';
+      case 'matrix': return '#00ff00';
+      case 'coolRetro': return '#00ffff';
+      case 'windows95': return '#000000';
+      case 'ubuntu': return '#ff6600';
+      case 'macOS': return '#374151';
+      default: return '#ffffff';
     }
   };
-
-  // load stored unread channels from localStorage on mount
-  useEffect(() => {
-    if (user?.id) {
-      const stored = localStorage.getItem(`unreadChannels_${user.id}`);
-      if (stored) {
-        setUnreadChannels(new Set(JSON.parse(stored)));
-      }
-    }
-  }, [user?.id]);
-
-  // Save state to localStorage whenever it changes
-  useEffect(() => {
-    if (user?.id) {
-      localStorage.setItem(`unreadChannels_${user.id}`, JSON.stringify([...unreadChannels]));
-    }
-  }, [unreadChannels, user?.id]);
 
   return (
     <div 
@@ -453,7 +367,6 @@ export default function Chat() {
       )}
       
       <div className="w-full max-w-6xl h-screen p-4 flex relative mx-auto z-20">
-        
         <div 
           className="w-64 flex-shrink-0 border-r overflow-y-auto border"
           style={{ 
@@ -473,7 +386,6 @@ export default function Chat() {
         </div>
 
         <div className="flex-1 flex flex-col min-w-0">
-          
           <ChatHeader
             currentChannel={currentChannel}
             theme={theme}
@@ -495,7 +407,7 @@ export default function Chat() {
           {messagesLoading && (
             <div className="flex-1 flex items-center justify-center">
               <div className="animate-pulse text-center">
-                <div className="text-lg opacity-70">Cargando mensajes...</div>
+                <div className="text-lg opacity-70">Loading messages...</div>
               </div>
             </div>
           )}
@@ -527,6 +439,7 @@ export default function Chat() {
                 currentTheme={currentTheme}
                 t={t}
                 onError={handleError}
+                onMessageSent={() => markChannelAsRead(currentChannel?.id)}
               />
             </>
           ) : null}

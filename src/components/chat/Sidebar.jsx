@@ -5,12 +5,13 @@ import { usePermissions } from '../../hooks/usePermissions';
 import ChatAI from './ChatAI';
 import ArchiveConfirmModal from '../ui/ArchiveConfirmModal';
 import { IoEarth } from "react-icons/io5";
-import { FaHashtag, FaCodeBranch } from "react-icons/fa";
+import { FaHashtag } from "react-icons/fa";
+import { MdMarkChatUnread } from "react-icons/md";
 import { BsPlus, BsChatSquareText, BsArchive, BsPeopleFill} from "react-icons/bs";
 
 function UnreadDot({ hasUnread }) {
   return hasUnread ? (
-    <FaCodeBranch className="ml-2 text-red-500 w-4 h-4 animate-pulse" />
+    <MdMarkChatUnread className="text-blue-500 w-5 h-5 animate-pulse flex-shrink-0" />
   ) : null;
 }
 
@@ -23,7 +24,7 @@ export default function Sidebar({
   unreadChannels
 }) {
   const [conversations, setConversations] = useState([]);
-  const [publicChannels, setPublicChannels] = useState([]);
+  const [publicChannels, setPublicChannels] = useState([]); 
   const [users, setUsers] = useState([]);
   const [channelsLoading, setChannelsLoading] = useState(true);
   const [conversationsLoading, setConversationsLoading] = useState(true);
@@ -163,15 +164,6 @@ export default function Sidebar({
   }, [userId]);
 
   const handleArchiveChannel = useCallback(async (channelId, channelName) => {
-    if (['general', 'announcements'].includes(channelName)) {
-      setConfirmModal({
-        isOpen: true,
-        title: t('cannotArchiveGeneral'),
-        message: `El canal ${getChannelDisplayName(channelName)} no puede ser archivado.`,
-        onConfirm: () => {}
-      });
-      return;
-    }
     setConfirmModal({
       isOpen: true,
       title: t('archiveChannel'),
@@ -195,23 +187,29 @@ export default function Sidebar({
             if (updateError) throw updateError;
           }
           setPublicChannels(prev => prev.filter(channel => channel.id !== channelId));
+          
+          // If archiving the current channel, switch to another one or none
           if (currentChannel?.id === channelId) {
-            const generalChannel = publicChannels.find(ch => ch.name === 'general');
-            if (generalChannel) {
-              onSelectConversation(generalChannel);
+            const remainingChannels = publicChannels.filter(ch => ch.id !== channelId);
+            if (remainingChannels.length > 0) {
+              onSelectConversation(remainingChannels[0]);
+            } else {
+              // No channels left, could redirect to a default state
+              onSelectConversation(null);
             }
           }
+          
           setConfirmModal({
             isOpen: true,
             title: t('channelArchived'),
-            message: `El canal #${getChannelDisplayName(channelName)} ha sido archivado exitosamente.`,
+            message: `Channel #${getChannelDisplayName(channelName)} has been successfully archived.`,
             onConfirm: () => {}
           });
         } catch (error) {
           setConfirmModal({
             isOpen: true,
             title: t('unexpectedError'),
-            message: `Error al archivar el canal: ${error.message}`,
+            message: `Error archiving channel: ${error.message}`,
             onConfirm: () => {}
           });
           await loadPublicChannels();
@@ -454,16 +452,19 @@ export default function Sidebar({
               <div key={channel.id} className="flex items-center justify-between group">
                 <div
                   onClick={() => onSelectConversation(channel)}
-                  className={`flex-1 flex border items-center gap-2 px-2 py-2 rounded cursor-pointer transition-colors text-sm ${
+                  className={`flex-1 flex border items-center justify-between px-2 py-2 rounded cursor-pointer transition-colors text-sm ${
                     currentChannel?.id === channel.id ? themeStyles.activeItem : themeStyles.item
                   } ${unreadChannels?.has(channel.id) ? 'glitch-effect' : ''}`}
                   title={getChannelDescription(channel.name, channel.description)}
                 >
-                  <FaHashtag className="w-4 h-4 opacity-70" />
-                  <span className="truncate">{getChannelDisplayName(channel.name)}</span>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <FaHashtag className="w-4 h-4 opacity-70 flex-shrink-0" />
+                    <span className="truncate">{getChannelDisplayName(channel.name)}</span>
+                  </div>
                   <UnreadDot hasUnread={unreadChannels?.has(channel.id)} />
                 </div>
-                {isAdmin && channel.name !== 'general' && channel.name !== 'announcements' && (
+                {/* Show archive button for ALL channels if user is admin */}
+                {isAdmin && (
                   <button
                     onClick={() => handleArchiveChannel(channel.id, channel.name)}
                     className="opacity-0 group-hover:opacity-70 hover:opacity-100 p-1 rounded ml-1"
@@ -525,14 +526,18 @@ export default function Sidebar({
               <div
                 key={conversation.id}
                 onClick={() => onSelectConversation(conversation)}
-                className={`flex border items-center gap-2 px-2 py-2 rounded cursor-pointer transition-colors text-sm ${
+                className={`flex border items-center justify-between px-2 py-2 rounded cursor-pointer transition-colors text-sm ${
                   currentChannel?.id === conversation.id ? themeStyles.activeItem : themeStyles.item
                 } ${unreadChannels?.has(conversation.id) ? 'glitch-effect' : ''}`}
               >
-                <span className="text-xs opacity-70"><BsChatSquareText className='w-5 h-5' /></span>
-                <span className="truncate">
-                  {getOtherParticipant(conversation)}
-                </span>
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-xs opacity-70 flex-shrink-0">
+                    <BsChatSquareText className='w-5 h-5' />
+                  </span>
+                  <span className="truncate">
+                    {getOtherParticipant(conversation)}
+                  </span>
+                </div>
                 <UnreadDot hasUnread={unreadChannels?.has(conversation.id)} />
               </div>
             ))

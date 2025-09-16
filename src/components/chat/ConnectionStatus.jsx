@@ -15,7 +15,8 @@ export default function ConnectionStatus({
     try {
       const { count, error } = await supabase
         .from('users')
-        .select('*', { count: 'exact', head: true });
+        .select('*', { count: 'exact', head: true })
+        .neq('id', '00000000-0000-0000-0000-000000000001');
 
       if (error) throw error;
       
