@@ -360,9 +360,9 @@ export default function Chat() {
     >
       {currentTheme === 'matrix' && (
         <MatrixRain 
-          fps={30} 
+          fps={15} 
           density={0.8} 
-          opacity={0.8} 
+          opacity={0.15} 
         />
       )}
       
