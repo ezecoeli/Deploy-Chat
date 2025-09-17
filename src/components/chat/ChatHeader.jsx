@@ -24,8 +24,20 @@ export default function ChatHeader({
   const { isAdmin, isModerator } = usePermissions(user);
   const [showSearch, setShowSearch] = useState(false);
 
-  // only show bot event if user is admin or moderator and in #events channel
   const canProgramBot = (isAdmin || isModerator) && currentChannel?.name === 'events';
+
+  const getChannelDisplayName = () => {
+    if (!currentChannel) return 'Connecting...';
+    
+    if (isPrivateMode) {
+      if (currentChannel.otherUser) {
+        return `@${currentChannel.otherUser.username || currentChannel.otherUser.email?.split('@')[0] || 'Usuario'}`;
+      }
+      return '@Chat Privado';
+    }
+    
+    return `#${currentChannel.name}`;
+  };
 
   return (
     <div 
@@ -44,12 +56,11 @@ export default function ChatHeader({
       }}
     >
       <div>
-        {/* title and description */}
         <h1 className="text-2xl font-bold font-mono" style={{ color: theme.colors.primary, fontFamily: theme.font }}>
           Deploy-Chat
         </h1>
         <p className="text-sm font-mono" style={{ color: theme.colors.textSecondary, fontFamily: theme.font }}>
-          {currentChannel ? `${theme.prompt} cd #${currentChannel.name}` : 'Connecting...'}
+          {theme.prompt} cd {getChannelDisplayName()}
         </p>
         {isPrivateMode && (
           <div className="flex items-center gap-1 text-xs">
@@ -64,7 +75,6 @@ export default function ChatHeader({
       </div>
 
       <div className="flex items-center gap-4">
-        {/* Search button */}
         <button
           className="p-2 rounded hover:bg-green-600 transition text-green-600 hover:text-white"
           title={t("searchMessages")}
@@ -73,7 +83,6 @@ export default function ChatHeader({
           <BsSearch className="w-5 h-5" />
         </button>
 
-        {/* Button to open bot event modal */}
         {canProgramBot && (
           <button
             className="animate-bounce p-2 rounded brightness-150 hover:bg-cyan-600 transition text-cyan-500 hover:text-white"
@@ -83,7 +92,7 @@ export default function ChatHeader({
             <BsCalendarEvent className="w-6 h-6" />
           </button>
         )}
-        {/* create note button */}
+
         <button
           className="p-2 rounded hover:bg-blue-600 transition text-blue-600 hover:text-white"
           title={t("notes")}
@@ -91,7 +100,7 @@ export default function ChatHeader({
         >
           <LuNotebookText className="w-6 h-6" />
         </button>
-        {/* User menu component */}
+
         <UserMenu
           user={user}
           userProfile={userProfile}
@@ -103,7 +112,6 @@ export default function ChatHeader({
         />
       </div>
 
-      {/* notes modal */}
       <NotesModal
         open={showNotes}
         onClose={() => setShowNotes(false)}
@@ -111,7 +119,6 @@ export default function ChatHeader({
         currentTheme={currentTheme}
       />
 
-      {/* Bot Event Modal */}
       <BotEventModal
         isOpen={showBotModal}
         onClose={() => setShowBotModal(false)}
@@ -121,7 +128,6 @@ export default function ChatHeader({
         currentTheme={currentTheme}
       />
 
-      {/* Search Modal */}
       <SearchModal
         isOpen={showSearch}
         onClose={() => setShowSearch(false)}

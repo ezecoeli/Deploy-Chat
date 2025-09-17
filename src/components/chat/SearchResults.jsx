@@ -12,6 +12,7 @@ export default function SearchResults({
   searchQuery 
 }) {
   const { t } = useTranslation();
+  
   const renderAvatar = (avatarUrl, username, size = 'w-6 h-6') => {
     const preloadedAvatar = getAvatarById(avatarUrl);
     if (preloadedAvatar) {
@@ -39,6 +40,17 @@ export default function SearchResults({
         </mark>
       ) : part
     );
+  };
+
+  const getChannelDisplayName = (channel) => {
+    if (!channel) return 'Canal desconocido';
+    
+    // Check if it's a DM channel (usually has DM- prefix or very long UUID)
+    if (channel.name?.startsWith('DM-') || channel.name?.length > 30) {
+      return 'Mensaje Directo';
+    }
+    
+    return `#${channel.name}`;
   };
 
   const getResultStyles = () => {
@@ -73,7 +85,6 @@ export default function SearchResults({
   const styles = getResultStyles();
 
   const handleMessageClick = (message, event) => {
-    // visual feedback
     const messageElement = event.currentTarget;
     messageElement.style.transform = 'scale(0.98)';
     messageElement.style.opacity = '0.7';
@@ -116,7 +127,7 @@ export default function SearchResults({
                   {message.users?.username || message.users?.email}
                 </span>
                 <span className={`text-xs ${styles.meta}`}>
-                  {t("in")} #{message.channels?.name}
+                  {t("in")} {getChannelDisplayName(message.channels)}
                 </span>
                 <span className={`text-xs ${styles.meta}`}>
                   {new Date(message.created_at).toLocaleDateString()} {new Date(message.created_at).toLocaleTimeString()}
