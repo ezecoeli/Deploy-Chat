@@ -34,20 +34,25 @@ export default function Chat() {
   const [isPrivateMode, setIsPrivateMode] = useState(false);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [messagesLoading, setMessagesLoading] = useState(false);
+  const [channels, setChannels] = useState([]);
   const isInitializedRef = useRef(false);
 
-  useEffect(() => {
-    if (user) {
-      loadUserProfile();
+  const loadChannels = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('channels')
+        .select('id, name, type, description')
+        .eq('is_active', true)
+        .eq('is_archived', false)
+        .order('name');
+    
+      if (!error) {
+        setChannels(data || []);
+      }
+    } catch (error) {
+      console.error('Error loading channels:', error);
     }
-  }, [user]);
-
-  useEffect(() => {
-    document.body.style.fontFamily = theme.font;
-    return () => {
-      document.body.style.fontFamily = '';
-    };
-  }, [theme.font]);
+  }, []);
 
   const loadUserProfile = async () => {
     try {
@@ -64,13 +69,6 @@ export default function Chat() {
         username: user.email.split('@')[0],
         avatar_url: 'avatar-01'
       });
-    }
-  };
-
-  const handleProfileUpdated = (updatedProfile) => {
-    setUserProfile(updatedProfile);
-    if (currentChannel?.id) {
-      loadMessages(currentChannel.id);
     }
   };
 
@@ -105,7 +103,118 @@ export default function Chat() {
     }
   }, [messagesLoading]);
 
-  // Initialize default channel
+  const loadOlderMessages = async (targetDate, targetMessageId = null) => {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select(`
+          id,
+          content,
+          created_at,
+          user_id,
+          channel_id,
+          is_encrypted,
+          encrypted_content,
+          encryption_iv,
+          users:user_id (
+            id,
+            email,
+            username,
+            avatar_url
+          )
+        `)
+        .eq('channel_id', currentChannel?.id)
+        .lte('created_at', targetDate)
+        .order('created_at', { ascending: false })
+        .limit(100);
+
+      if (!error && data) {
+        setMessages(prev => {
+          const reversedData = data.reverse();
+          const existingIds = new Set(prev.map(msg => msg.id));
+          const newMessages = reversedData.filter(msg => !existingIds.has(msg.id));
+          return [...newMessages, ...prev];
+        });
+
+        if (targetMessageId) {
+          setTimeout(() => {
+            const messageElement = document.querySelector(`[data-message-id="${targetMessageId}"]`);
+            if (messageElement) {
+              messageElement.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+              });
+              messageElement.classList.add('highlight-message');
+              setTimeout(() => {
+                messageElement.classList.remove('highlight-message');
+              }, 3000);
+            }
+          }, 500);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading older messages:', error);
+    }
+  };
+
+  const handleNavigateToMessage = useCallback(async (message) => {
+    try {
+      if (message.channel_id !== currentChannel?.id) {
+        const targetChannel = channels.find(ch => ch.id === message.channel_id);
+        if (targetChannel) {
+          setCurrentChannel(targetChannel);
+          setIsPrivateMode(targetChannel.type === 'direct');
+          await loadMessages(targetChannel.id);
+          await new Promise(resolve => setTimeout(resolve, 500));
+        } else {
+          return;
+        }
+      }
+
+      setTimeout(() => {
+        const messageElement = document.querySelector(`[data-message-id="${message.id}"]`);
+        
+        if (messageElement) {
+          messageElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+          
+          messageElement.classList.add('highlight-message');
+          setTimeout(() => {
+            messageElement.classList.remove('highlight-message');
+          }, 3000);
+        } else {
+          loadOlderMessages(message.created_at, message.id);
+        }
+      }, 300);
+
+    } catch (error) {
+      console.error('Error navigating to message:', error);
+    }
+  }, [currentChannel, channels, loadMessages]);
+
+  useEffect(() => {
+    if (user) {
+      loadChannels();
+      loadUserProfile();
+    }
+  }, [user, loadChannels]);
+
+  useEffect(() => {
+    document.body.style.fontFamily = theme.font;
+    return () => {
+      document.body.style.fontFamily = '';
+    };
+  }, [theme.font]);
+
+  const handleProfileUpdated = (updatedProfile) => {
+    setUserProfile(updatedProfile);
+    if (currentChannel?.id) {
+      loadMessages(currentChannel.id);
+    }
+  };
+
   useEffect(() => {
     if (loading || !user || isInitializedRef.current) return;
 
@@ -149,7 +258,6 @@ export default function Chat() {
     }
   }, [user?.id]);
 
-  // Global subscription for new messages in other channels
   useEffect(() => {
     if (!user) return;
 
@@ -160,7 +268,6 @@ export default function Chat() {
         schema: 'public',
         table: 'messages'
       }, (payload) => {
-        // Only mark as unread if it's from another user and not the current channel
         if (
           payload.new.user_id !== user.id &&
           payload.new.channel_id !== currentChannel?.id
@@ -175,7 +282,6 @@ export default function Chat() {
     };
   }, [user, currentChannel?.id, addUnreadChannel]);
 
-  // Current channel subscription
   useEffect(() => {
     if (!currentChannel?.id || !user) return;
     
@@ -234,7 +340,6 @@ export default function Chat() {
             return [...current, messageWithUser];
           });
 
-          // Remove from unread if viewing this channel
           removeUnreadChannel(currentChannel.id);
         })
         .on('broadcast', { event: 'typing' }, (payload) => {
@@ -298,7 +403,6 @@ export default function Chat() {
     setError(errorMessage);
   };
 
-  // Handle conversation selection
   const handleSelectConversation = useCallback(async (conversation) => {
     setMessages([]);
     setTypingUsers([]);
@@ -306,7 +410,6 @@ export default function Chat() {
     setCurrentChannel(conversation);
     setSelectedConversation(conversation);
 
-    // Mark as read when entering a channel
     await markChannelAsRead(conversation.id);
 
     const isPrivate = conversation.type === 'direct';
@@ -396,6 +499,7 @@ export default function Chat() {
             onOpenProfile={handleOpenProfile}
             onLogout={handleLogout}
             isPrivateMode={isPrivateMode}
+            onNavigateToMessage={handleNavigateToMessage} 
           />
 
           <ConnectionStatus

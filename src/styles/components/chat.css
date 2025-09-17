@@ -3,7 +3,7 @@ input::placeholder {
   opacity: 1;
 }
 
-/* Markdown content styling */
+/****** Markdown styles ******/
 .markdown-content {
   line-height: 1.6;
 }
@@ -48,4 +48,114 @@ input::placeholder {
   .markdown-content h1 { font-size: 1.125rem; }
   .markdown-content h2 { font-size: 1rem; }
   .markdown-content h3 { font-size: 0.875rem; }
+}
+
+/****** Search styles ******/
+/* Search highlighting */
+.search-highlight {
+  background-color: #fbbf24;
+  color: #000;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+/* Search modal animations */
+.search-modal-enter {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.search-modal-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 200ms, transform 200ms;
+}
+
+.search-modal-exit {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.search-modal-exit-active {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 200ms, transform 200ms;
+}
+
+/* Search input focus states */
+.search-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+/* Matrix theme search styles */
+.matrix-search {
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid rgba(0, 255, 0, 0.5);
+  color: #00ff00;
+}
+
+.matrix-search:focus {
+  box-shadow: 0 0 0 2px rgba(0, 255, 0, 0.3);
+}
+
+/* CoolRetro theme search styles */
+.coolretro-search {
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid rgba(0, 255, 255, 0.5);
+  color: #00ffff;
+  text-shadow: 0 0 5px currentColor;
+}
+
+.coolretro-search:focus {
+  box-shadow: 0 0 0 2px rgba(0, 255, 255, 0.3);
+}
+
+/* highlight message when navigating */
+.highlight-message {
+  background: rgba(59, 130, 246, 0.3) !important;
+  border: 2px solid rgba(59, 130, 246, 0.6);
+  border-radius: 8px;
+  animation: highlightPulse 3s ease-in-out;
+}
+
+@keyframes highlightPulse {
+  0% { 
+    background: rgba(59, 130, 246, 0.5);
+    transform: scale(1);
+  }
+  50% { 
+    background: rgba(59, 130, 246, 0.3);
+    transform: scale(1.02);
+  }
+  100% { 
+    background: rgba(59, 130, 246, 0.1);
+    transform: scale(1);
+  }
+}
+
+/* Matrix theme highlight */
+.matrix .highlight-message {
+  background: rgba(0, 255, 0, 0.3) !important;
+  border-color: rgba(0, 255, 0, 0.6);
+  animation: matrixHighlightPulse 3s ease-in-out; 
+}
+
+@keyframes matrixHighlightPulse {
+  0% { background: rgba(0, 255, 0, 0.5); }
+  50% { background: rgba(0, 255, 0, 0.3); }
+  100% { background: rgba(0, 255, 0, 0.1); }
+}
+
+/* CoolRetro theme highlight */
+.coolRetro .highlight-message {
+  background: rgba(0, 255, 255, 0.3) !important;
+  border-color: rgba(0, 255, 255, 0.6);
+  animation: coolRetroHighlightPulse 3s ease-in-out;
+}
+
+@keyframes coolRetroHighlightPulse {
+  0% { background: rgba(0, 255, 255, 0.5); }
+  50% { background: rgba(0, 255, 255, 0.3); }
+  100% { background: rgba(0, 255, 255, 0.1); }
 }

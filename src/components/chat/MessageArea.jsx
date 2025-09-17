@@ -122,6 +122,7 @@ export default function MessageArea({
             return (
               <div
                 key={message.id}
+                data-message-id={message.id}
                 className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
               >
                 <div className={`flex gap-2 sm:gap-3 max-w-[85%] sm:max-w-xs lg:max-w-md xl:max-w-lg ${

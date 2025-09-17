@@ -52,6 +52,24 @@ const translations = {
     scheduleEvent: "Programar evento",
     titleInput: "Título",
 
+    // Search functionality
+    searchMessages: "Buscar mensajes",
+    searchPlaceholder: "Buscar mensajes...",
+    searching: "Buscando...",
+    searchFilters: "Filtros de búsqueda",
+    noSearchResults: "No se encontraron mensajes",
+    searchResultsCount: "{count} resultado(s) encontrado(s)",
+    tryDifferentTerms: "Intenta con otros términos de búsqueda",
+    clearFilters: "Limpiar filtros",
+    channel: "Canal",
+    allChannels: "Todos los canales",
+    user: "Usuario",
+    allUsers: "Todos los usuarios",
+    from: "Desde",
+    to: "Hasta",
+    in: "en",
+    clearSearch: "Limpiar búsqueda",
+
     // Members count
     oneMember: "1 miembro",
     membersCount: "{count} miembros",
@@ -191,6 +209,24 @@ const translations = {
     writeNotes: "Write your notes here...",
     scheduleEvent: "Schedule Event",
     titleInput: "Title",
+
+    // Search functionality
+    searchMessages: "Search Messages",
+    searchPlaceholder: "Search messages...",
+    searching: "Searching...",
+    searchFilters: "Search Filters",
+    noSearchResults: "No messages found",
+    searchResultsCount: "{count} result(s) found",
+    tryDifferentTerms: "Try different search terms",
+    clearFilters: "Clear filters",
+    channel: "Channel",
+    allChannels: "All channels",
+    user: "User",
+    allUsers: "All users",
+    from: "From",
+    to: "To",
+    in: "in",
+    clearSearch: "Clear search",
 
     // Members count  
     oneMember: "1 member",

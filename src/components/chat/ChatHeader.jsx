@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import UserMenu from './UserMenu';
 import NotesModal from '../ui/NotesModal';
 import BotEventModal from '../ui/BotEventModal';
-import { BsShieldLock, BsCalendarEvent } from "react-icons/bs";
+import SearchModal from '../ui/SearchModal';
+import { BsShieldLock, BsCalendarEvent, BsSearch  } from "react-icons/bs";
 import { LuNotebookText } from "react-icons/lu";
 import { usePermissions } from '../../hooks/usePermissions';
 
@@ -15,11 +16,13 @@ export default function ChatHeader({
   t,
   onOpenProfile,
   onLogout,
-  isPrivateMode 
+  isPrivateMode,
+  onNavigateToMessage
 }) {
   const [showNotes, setShowNotes] = useState(false);
   const [showBotModal, setShowBotModal] = useState(false);
   const { isAdmin, isModerator } = usePermissions(user);
+  const [showSearch, setShowSearch] = useState(false);
 
   // only show bot event if user is admin or moderator and in #events channel
   const canProgramBot = (isAdmin || isModerator) && currentChannel?.name === 'events';
@@ -61,6 +64,15 @@ export default function ChatHeader({
       </div>
 
       <div className="flex items-center gap-4">
+        {/* Search button */}
+        <button
+          className="p-2 rounded hover:bg-green-600 transition text-green-600 hover:text-white"
+          title={t("searchMessages")}
+          onClick={() => setShowSearch(true)}
+        >
+          <BsSearch className="w-5 h-5" />
+        </button>
+
         {/* Button to open bot event modal */}
         {canProgramBot && (
           <button
@@ -107,6 +119,16 @@ export default function ChatHeader({
         userId={user?.id}
         theme={theme}
         currentTheme={currentTheme}
+      />
+
+      {/* Search Modal */}
+      <SearchModal
+        isOpen={showSearch}
+        onClose={() => setShowSearch(false)}
+        user={user}
+        theme={theme}
+        currentTheme={currentTheme}
+        onNavigateToMessage={onNavigateToMessage}
       />
     </div>
   );
