@@ -3,17 +3,16 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { FiExternalLink } from 'react-icons/fi';
+import { FaRegCopy } from "react-icons/fa";
 
 export default function MessageRenderer({ content, currentTheme = 'default' }) {
-  // Detect if content contains markdown
   const hasMarkdown = /[*_`#>\[\]|]/.test(content) || content.includes('```');
   
-  // If no markdown detected, render as plain text
   if (!hasMarkdown) {
     return <span className="whitespace-pre-wrap">{content}</span>;
   }
 
-  // Choose syntax highlighting theme based on current theme
   const getSyntaxTheme = () => {
     switch (currentTheme) {
       case 'matrix':
@@ -34,7 +33,6 @@ export default function MessageRenderer({ content, currentTheme = 'default' }) {
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-          // Code blocks
           code({ node, inline, className, children, ...props }) {
             const match = /language-(\w+)/.exec(className || '');
             const language = match ? match[1] : 'text';
@@ -44,14 +42,14 @@ export default function MessageRenderer({ content, currentTheme = 'default' }) {
                 <div className="my-2">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs opacity-70 font-mono">
-                      📄 {language.toUpperCase()}
+                      {language.toUpperCase()}
                     </span>
                     <button
                       onClick={() => navigator.clipboard.writeText(String(children))}
-                      className="text-xs opacity-70 hover:opacity-100 transition-opacity px-2 py-1 rounded"
+                      className="ml-1 text-xs opacity-70 hover:opacity-100 transition-opacity px-2 py-1 rounded flex items-center gap-1"
                       title="Copy code"
                     >
-                      📋
+                      <FaRegCopy className="w-4 h-4" />
                     </button>
                   </div>
                   <SyntaxHighlighter
@@ -72,7 +70,6 @@ export default function MessageRenderer({ content, currentTheme = 'default' }) {
                 </div>
               );
             } else {
-              // Inline code
               return (
                 <code
                   className="bg-gray-800 text-green-400 px-1 py-0.5 rounded text-sm font-mono"
@@ -88,7 +85,6 @@ export default function MessageRenderer({ content, currentTheme = 'default' }) {
             }
           },
           
-          // Headings
           h1: ({ children }) => (
             <h1 className="text-xl font-bold mb-2 text-blue-400"># {children}</h1>
           ),
@@ -99,7 +95,6 @@ export default function MessageRenderer({ content, currentTheme = 'default' }) {
             <h3 className="text-base font-bold mb-1 text-blue-400">### {children}</h3>
           ),
           
-          // Lists
           ul: ({ children }) => (
             <ul className="list-disc list-inside my-2 space-y-1">{children}</ul>
           ),
@@ -107,19 +102,18 @@ export default function MessageRenderer({ content, currentTheme = 'default' }) {
             <ol className="list-decimal list-inside my-2 space-y-1">{children}</ol>
           ),
           
-          // Links
           a: ({ href, children }) => (
             <a
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-400 hover:text-blue-300 underline"
+              className="text-blue-400 hover:text-blue-300 underline inline-flex items-center gap-1"
             >
-              {children} 🔗
+              {children}
+              <FiExternalLink className="w-3 h-3" />
             </a>
           ),
           
-          // Bold and italic
           strong: ({ children }) => (
             <strong className="font-bold text-yellow-400">{children}</strong>
           ),
@@ -127,14 +121,12 @@ export default function MessageRenderer({ content, currentTheme = 'default' }) {
             <em className="italic text-cyan-400">{children}</em>
           ),
           
-          // Blockquotes
           blockquote: ({ children }) => (
             <blockquote className="border-l-4 border-blue-500 pl-4 my-2 italic opacity-80">
               {children}
             </blockquote>
           ),
           
-          // Tables
           table: ({ children }) => (
             <div className="overflow-x-auto my-2">
               <table className="min-w-full border border-gray-600 rounded">
@@ -153,7 +145,6 @@ export default function MessageRenderer({ content, currentTheme = 'default' }) {
             </td>
           ),
           
-          // Paragraphs
           p: ({ children }) => (
             <p className="whitespace-pre-wrap mb-2 last:mb-0">{children}</p>
           ),

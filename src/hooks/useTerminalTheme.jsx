@@ -1,4 +1,3 @@
-import { button, p } from 'framer-motion/client';
 import { useState, useEffect } from 'react';
 
 const terminalThemes = {
@@ -97,7 +96,7 @@ const terminalThemes = {
 
     macOS: {
         name: 'Macintosh',
-        prompt: '⌘',
+        prompt: '%',
         font: '"Chicago", "Geneva", "Monaco", "Charcoal", monospace',
         colors: {
             bg: 'from-[#c0c0c0] to-[#e0e0e0]',

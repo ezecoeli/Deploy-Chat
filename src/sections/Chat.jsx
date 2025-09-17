@@ -387,22 +387,6 @@ export default function Chat() {
     };
   }, [currentChannel?.id, user?.id, userProfile, removeUnreadChannel]);
 
-  const handleOpenProfile = () => {
-    setShowProfileModal(true);
-  };
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (err) {
-      setError(t('logoutError') || 'Error logging out');
-    }
-  };
-
-  const handleError = (errorMessage) => {
-    setError(errorMessage);
-  };
-
   const handleSelectConversation = useCallback(async (conversation) => {
     setMessages([]);
     setTypingUsers([]);
@@ -496,8 +480,14 @@ export default function Chat() {
             user={user}
             userProfile={userProfile}
             t={t}
-            onOpenProfile={handleOpenProfile}
-            onLogout={handleLogout}
+            onOpenProfile={() => setShowProfileModal(true)}
+            onLogout={async () => {
+              try {
+                await logout();
+              } catch (err) {
+                setError(t('logoutError') || 'Error logging out');
+              }
+            }}
             isPrivateMode={isPrivateMode}
             onNavigateToMessage={handleNavigateToMessage} 
           />
@@ -522,7 +512,7 @@ export default function Chat() {
               conversation={selectedConversation}
               theme={theme}
               currentTheme={currentTheme}
-              onError={handleError}
+              onError={setError}
             />
           ) : !messagesLoading ? (
             <>
@@ -532,7 +522,7 @@ export default function Chat() {
                 theme={theme}
                 currentTheme={currentTheme}
                 typingUsers={typingUsers}
-                t={t}
+                currentChannel={currentChannel}
               />
 
               <MessageInput
@@ -542,7 +532,7 @@ export default function Chat() {
                 theme={theme}
                 currentTheme={currentTheme}
                 t={t}
-                onError={handleError}
+                onError={setError}
                 onMessageSent={() => markChannelAsRead(currentChannel?.id)}
               />
             </>
@@ -556,14 +546,12 @@ export default function Chat() {
         </div>
       </div>
 
-      <div className="relative z-30">
-        <UserProfileModal
-          isOpen={showProfileModal}
-          onClose={() => setShowProfileModal(false)}
-          user={user}
-          onProfileUpdated={handleProfileUpdated}
-        />
-      </div>
+      <UserProfileModal
+        isOpen={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+        user={user}
+        onProfileUpdated={handleProfileUpdated}
+      />
     </div>
   );
 }

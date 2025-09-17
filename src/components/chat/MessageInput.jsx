@@ -47,7 +47,7 @@ export default function MessageInput({
         case 'windows95':
           return 'C:\> ';
         case 'macOS':
-          return '$ ';
+          return '% ';
         default:
           return '$ ';
       }
@@ -64,7 +64,7 @@ export default function MessageInput({
       case 'windows95':
         return `${username}: C:\> `;
       case 'macOS':
-        return `${username}: ⌘ `;
+        return `${username}: % `;
       default:
         return `${username}@deploy-chat:~$ `;
     }

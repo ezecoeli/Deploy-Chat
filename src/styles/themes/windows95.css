@@ -403,3 +403,22 @@ body[data-theme="windows95"] .flex-1.overflow-y-auto .text-green-400,
 body[data-theme="windows95"] .flex-1.overflow-y-auto .text-orange-400 {
   color: #000080 !important;
 }
+
+/* Pin Button Windows 95 specific styling */
+body[data-theme="windows95"] .opacity-0.group-hover\:opacity-100 {
+  background: linear-gradient(to bottom, #f0f0f0 0%, #c0c7c8 50%, #a0a0a0 100%) !important;
+  border: 1px outset #c0c7c8 !important;
+  color: #000000 !important;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3) !important;
+}
+
+body[data-theme="windows95"] .opacity-0.group-hover\:opacity-100:hover {
+  background: linear-gradient(to bottom, #ffffff 0%, #d0d7d8 50%, #b0b0b0 100%) !important;
+  border: 1px outset #d0d7d8 !important;
+}
+
+body[data-theme="windows95"] .opacity-0.group-hover\:opacity-100:active {
+  background: linear-gradient(to bottom, #a0a0a0 0%, #c0c7c8 50%, #e0e0e0 100%) !important;
+  border: 1px inset #c0c7c8 !important;
+  box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.3) !important;
+}

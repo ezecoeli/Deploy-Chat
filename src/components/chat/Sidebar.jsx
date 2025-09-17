@@ -304,8 +304,8 @@ export default function Sidebar({
         };
       case 'windows95':
         return {
-          item: 'hover:bg-blue-600 hover:text-white text-black border-gray-300',
-          activeItem: 'bg-blue-600 text-white border-blue-700',
+          item: 'hover:bg-gray-100 text-black border-gray-300',
+          activeItem: 'bg-gray-200 text-white border-black',
           button: 'text-black hover:bg-gray-300 bg-white border border-gray-400 shadow-sm'
         };
       case 'ubuntu':

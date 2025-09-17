@@ -70,6 +70,13 @@ const translations = {
     in: "en",
     clearSearch: "Limpiar búsqueda",
 
+    // Pinned messages
+    pinnedMessages: "Mensajes fijados",
+    pinMessage: "Fijar mensaje",
+    unpinMessage: "Desfijar mensaje",
+    pinned: "Fijado",
+    maxPinnedReached: "Máximo 2 mensajes fijados por canal",
+
     // Members count
     oneMember: "1 miembro",
     membersCount: "{count} miembros",
@@ -227,6 +234,13 @@ const translations = {
     to: "To",
     in: "in",
     clearSearch: "Clear search",
+
+    // Pinned messages
+    pinnedMessages: "Pinned messages",
+    pinMessage: "Pin message",
+    unpinMessage: "Unpin message", 
+    pinned: "Pinned",
+    maxPinnedReached: "Maximum 2 pinned messages per channel",
 
     // Members count  
     oneMember: "1 member",
