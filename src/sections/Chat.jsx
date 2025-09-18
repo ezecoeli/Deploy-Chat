@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from '../hooks/useTranslation';
 import { useTerminalTheme } from '../hooks/useTerminalTheme';
 import { useUnreadMessages } from '../hooks/useUnreadMessages';
+import { DevStatesProvider } from '../hooks/useDevStatesContext';
 import UserProfileModal from '../components/UserProfileModal';
 import ChatHeader from '../components/chat/ChatHeader';
 import ConnectionStatus from '../components/chat/ConnectionStatus';
@@ -438,120 +439,122 @@ export default function Chat() {
   };
 
   return (
-    <div 
-      className={`relative min-h-screen w-full overflow-hidden bg-gradient-to-br ${theme.colors.bg}`}
-      style={{
-        background: currentTheme === 'coolRetro' ? '#000000' : 
-                   currentTheme === 'matrix' ? '#000000' : undefined
-      }}
-    >
-      {currentTheme === 'matrix' && (
-        <MatrixRain 
-          fps={15} 
-          density={0.8} 
-          opacity={0.15} 
-        />
-      )}
-      
-      <div className="w-full max-w-6xl h-screen p-4 flex relative mx-auto z-20">
-        <div 
-          className="w-64 flex-shrink-0 border-r overflow-y-auto border"
-          style={{ 
-            borderColor: getSidebarBorderColor(),
-            backgroundColor: getSidebarBackgroundColor(),
-            color: getSidebarTextColor()
-          }}
-        >
-          <Sidebar
-            user={user}
-            onSelectConversation={handleSelectConversation}
-            currentChannel={currentChannel}
-            theme={theme}
-            currentTheme={currentTheme}
-            unreadChannels={unreadChannels}
+    <DevStatesProvider>
+      <div 
+        className={`relative min-h-screen w-full overflow-hidden bg-gradient-to-br ${theme.colors.bg}`}
+        style={{
+          background: currentTheme === 'coolRetro' ? '#000000' : 
+                     currentTheme === 'matrix' ? '#000000' : undefined
+        }}
+      >
+        {currentTheme === 'matrix' && (
+          <MatrixRain 
+            fps={15} 
+            density={0.8} 
+            opacity={0.15} 
           />
-        </div>
-
-        <div className="flex-1 flex flex-col min-w-0">
-          <ChatHeader
-            currentChannel={currentChannel}
-            theme={theme}
-            currentTheme={currentTheme}
-            user={user}
-            userProfile={userProfile}
-            t={t}
-            onOpenProfile={() => setShowProfileModal(true)}
-            onLogout={async () => {
-              try {
-                await logout();
-              } catch (err) {
-                setError(t('logoutError') || 'Error logging out');
-              }
+        )}
+        
+        <div className="w-full max-w-6xl h-screen p-4 flex relative mx-auto z-20">
+          <div 
+            className="w-64 flex-shrink-0 border-r overflow-y-auto border"
+            style={{ 
+              borderColor: getSidebarBorderColor(),
+              backgroundColor: getSidebarBackgroundColor(),
+              color: getSidebarTextColor()
             }}
-            isPrivateMode={isPrivateMode}
-            onNavigateToMessage={handleNavigateToMessage} 
-          />
-
-          <ConnectionStatus
-            user={user}
-            theme={theme}
-            t={t}
-          />
-
-          {messagesLoading && (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="animate-pulse text-center">
-                <div className="text-lg opacity-70">Loading messages...</div>
-              </div>
-            </div>
-          )}
-
-          {isPrivateMode && selectedConversation && !messagesLoading ? (
-            <PrivateChat
+          >
+            <Sidebar
               user={user}
-              conversation={selectedConversation}
+              onSelectConversation={handleSelectConversation}
+              currentChannel={currentChannel}
               theme={theme}
               currentTheme={currentTheme}
-              onError={setError}
+              unreadChannels={unreadChannels}
             />
-          ) : !messagesLoading ? (
-            <>
-              <MessageArea
-                messages={messages}
-                user={user}
-                theme={theme}
-                currentTheme={currentTheme}
-                typingUsers={typingUsers}
-                currentChannel={currentChannel}
-              />
+          </div>
 
-              <MessageInput
-                currentChannel={currentChannel}
+          <div className="flex-1 flex flex-col min-w-0">
+            <ChatHeader
+              currentChannel={currentChannel}
+              theme={theme}
+              currentTheme={currentTheme}
+              user={user}
+              userProfile={userProfile}
+              t={t}
+              onOpenProfile={() => setShowProfileModal(true)}
+              onLogout={async () => {
+                try {
+                  await logout();
+                } catch (err) {
+                  setError(t('logoutError') || 'Error logging out');
+                }
+              }}
+              isPrivateMode={isPrivateMode}
+              onNavigateToMessage={handleNavigateToMessage} 
+            />
+
+            <ConnectionStatus
+              user={user}
+              theme={theme}
+              t={t}
+            />
+
+            {messagesLoading && (
+              <div className="flex-1 flex items-center justify-center">
+                <div className="animate-pulse text-center">
+                  <div className="text-lg opacity-70">Loading messages...</div>
+                </div>
+              </div>
+            )}
+
+            {isPrivateMode && selectedConversation && !messagesLoading ? (
+              <PrivateChat
                 user={user}
-                userProfile={userProfile}
+                conversation={selectedConversation}
                 theme={theme}
                 currentTheme={currentTheme}
-                t={t}
                 onError={setError}
-                onMessageSent={() => markChannelAsRead(currentChannel?.id)}
               />
-            </>
-          ) : null}
+            ) : !messagesLoading ? (
+              <>
+                <MessageArea
+                  messages={messages}
+                  user={user}
+                  theme={theme}
+                  currentTheme={currentTheme}
+                  typingUsers={typingUsers}
+                  currentChannel={currentChannel}
+                />
 
-          {error && (
-            <div className="mt-2 p-3 bg-red-900 border border-red-600 text-red-100 rounded-lg text-sm font-mono">
-              Error: {error}
-            </div>
-          )}
+                <MessageInput
+                  currentChannel={currentChannel}
+                  user={user}
+                  userProfile={userProfile}
+                  theme={theme}
+                  currentTheme={currentTheme}
+                  t={t}
+                  onError={setError}
+                  onMessageSent={() => markChannelAsRead(currentChannel?.id)}
+                />
+              </>
+            ) : null}
+
+            {error && (
+              <div className="mt-2 p-3 bg-red-900 border border-red-600 text-red-100 rounded-lg text-sm font-mono">
+                Error: {error}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
 
-      <UserProfileModal
-        isOpen={showProfileModal}
-        onClose={() => setShowProfileModal(false)}
-        user={user}
-        onProfileUpdated={handleProfileUpdated}
-      />
-    </div>
+        <UserProfileModal
+          isOpen={showProfileModal}
+          onClose={() => setShowProfileModal(false)}
+          user={user}
+          onProfileUpdated={handleProfileUpdated}
+        />
+      </div>
+    </DevStatesProvider>
   );
 }

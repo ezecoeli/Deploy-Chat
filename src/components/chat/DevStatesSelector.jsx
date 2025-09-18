@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useDevStates } from '../../hooks/useDevStates';
+import { useDevStatesContext } from '../../hooks/useDevStatesContext';
 import { stateCategories } from '../../data/devStates';
 import { useTranslation } from '../../hooks/useTranslation';
 
@@ -8,19 +8,32 @@ export default function DevStateSelector({
   currentTheme, 
   className = ''
 }) {
-  const { currentStates, updateState, loading } = useDevStates(user?.id);
+  const { allUserStates, updateUserState, loading } = useDevStatesContext();
   const [activeTab, setActiveTab] = useState('availability');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { t } = useTranslation();
 
+  const currentStates = allUserStates[user?.id] || {
+    work: null,
+    mood: null,
+    availability: null
+  };
+
   const handleStateSelect = async (category, state) => {
     if (isSubmitting || loading) return;
     
+    console.log('[DevStatesSelector] Selecting state:', { category: category.id, state });
+    
     setIsSubmitting(true);
     try {
-      await updateState(category.id, state);
+      const success = await updateUserState(user?.id, category.id, state);
+      if (success) {
+        console.log('[DevStatesSelector] State updated successfully');
+      } else {
+        console.error('[DevStatesSelector] Failed to update state');
+      }
     } catch (error) {
-      console.error('Error setting state:', error);
+      console.error('[DevStatesSelector] Error setting state:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -84,7 +97,6 @@ export default function DevStateSelector({
 
   return (
     <div className={`border rounded-lg p-2 w-full ${themeClasses.container} ${className}`}>
-      {/* Compact Tabs */}
       <div className="grid grid-cols-3 gap-1 text-xs mb-2">
         {stateCategories.map(category => {
           const IconComponent = category.icon;
@@ -108,7 +120,6 @@ export default function DevStateSelector({
         })}
       </div>
 
-      {/* Current State Display */}
       {currentStates[activeTab] && (
         <div className={`mb-2 p-2 rounded text-xs ${themeClasses.current} border-opacity-50`}>
           <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -128,7 +139,6 @@ export default function DevStateSelector({
         </div>
       )}
 
-      {/* State Options */}
       <div className="space-y-1 max-h-40 overflow-y-auto">
         {activeCategory?.states.map(state => {
           const IconComponent = state.icon;
@@ -170,7 +180,6 @@ export default function DevStateSelector({
         })}
       </div>
 
-      {/* Loading state */}
       {(loading || isSubmitting) && (
         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>

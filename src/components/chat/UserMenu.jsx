@@ -3,7 +3,7 @@ import { FiUser, FiLogOut, FiChevronDown, FiGlobe, FiMonitor, FiSettings, FiActi
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTerminalTheme } from '../../hooks/useTerminalTheme';
 import { useTranslation } from '../../hooks/useTranslation';
-import { useDevStates } from '../../hooks/useDevStates';
+import { useDevStatesContext } from '../../hooks/useDevStatesContext';
 import { getStateById } from '../../data/devStates';
 import DevStatesSelector from './DevStatesSelector';
 
@@ -23,12 +23,10 @@ export default function UserMenu({
   const [hoveredTheme, setHoveredTheme] = useState(null);
   const userMenuRef = useRef(null);
   
-  // Import theme and language hooks
   const { changeTheme, getThemesList, allThemes } = useTerminalTheme();
   const { language, changeLanguage } = useTranslation();
-  const { currentStates } = useDevStates(user?.id);
+  const { allUserStates } = useDevStatesContext();
 
-  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
@@ -51,7 +49,6 @@ export default function UserMenu({
     };
   }, [showUserMenu]);
 
-  // Close dropdowns with Escape key
   useEffect(() => {
     const handleEscapeKey = (event) => {
       if (event.key === 'Escape') {
@@ -96,14 +93,16 @@ export default function UserMenu({
   };
 
   const getActiveStateDisplay = () => {
-    // find in any category the current active state
+    const userStates = allUserStates[user?.id];
+    if (!userStates) return null;
+    
     for (const category of ['availability', 'work', 'mood']) {
-      if (currentStates[category]) {
-        const stateData = getStateById(category, currentStates[category].id, t);
+      if (userStates[category]) {
+        const stateData = getStateById(category, userStates[category].id, t);
         if (stateData) {
           return {
             ...stateData,
-            color: currentStates[category].color,
+            color: userStates[category].color,
             category: category
           };
         }
@@ -115,7 +114,6 @@ export default function UserMenu({
   const activeState = getActiveStateDisplay();
   const themes = getThemesList();
 
-  // Get menu styles based on current theme
   const getMenuStyles = () => {
     switch (currentTheme) {
       case 'coolRetro':
@@ -211,7 +209,6 @@ export default function UserMenu({
 
   return (
     <div className="relative" ref={userMenuRef}>
-      {/* User Button with State Indicator */}
       <button
         onClick={() => setShowUserMenu(!showUserMenu)}
         className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${theme.colors.input} hover:opacity-80 relative`}
@@ -225,7 +222,6 @@ export default function UserMenu({
           <p className="text-sm font-medium">
             <FiSettings className='w-6 h-6 flex-shrink-0' />
           </p>
-          {/* Status indicator */}
           {activeState && (
             <div 
               className="absolute -top-1 -right-1 w-3 h-3 rounded-full border-2"
@@ -245,7 +241,6 @@ export default function UserMenu({
         </motion.div>
       </button>
 
-      {/* Dropdown Menu */}
       <AnimatePresence>
         {showUserMenu && (
           <motion.div
@@ -264,7 +259,6 @@ export default function UserMenu({
             }}
           >
             <div className="p-3">
-              {/* Active Status Display */}
               {activeState && (
                 <div className="mb-3 pb-3 border-b" style={{ borderColor: hoverStyles.borderColor }}>
                   <div className="flex items-center gap-2 text-xs">
@@ -279,7 +273,6 @@ export default function UserMenu({
                 </div>
               )}
 
-              {/* Developer Status Option */}
               <button
                 onClick={() => setShowDevStates(!showDevStates)}
                 className="w-full text-left px-3 py-2 rounded text-xs transition-colors flex items-center gap-2"
@@ -302,7 +295,6 @@ export default function UserMenu({
                 </motion.div>
               </button>
 
-              {/* Developer States Selector */}
               <AnimatePresence>
                 {showDevStates && (
                   <motion.div
@@ -321,7 +313,6 @@ export default function UserMenu({
                 )}
               </AnimatePresence>
 
-              {/* Profile Option */}
               <button
                 onClick={handleProfileClick}
                 className="w-full text-left px-3 py-2 rounded text-xs transition-colors flex items-center gap-2"
@@ -338,7 +329,6 @@ export default function UserMenu({
                 {userProfile?.username || user?.email?.split('@')[0]}
               </button>
 
-              {/* Language Selector */}
               <button
                 onClick={handleLanguageChange}
                 className="w-full text-xs text-left px-3 py-2 rounded transition-colors flex items-center gap-2"
@@ -366,7 +356,6 @@ export default function UserMenu({
                 </div>
               </button>
 
-              {/* Theme Selector */}
               <button
                 onClick={() => setShowThemeSelector(!showThemeSelector)}
                 className="w-full text-left px-3 py-2 rounded text-xs transition-colors flex items-center gap-2"
@@ -398,7 +387,6 @@ export default function UserMenu({
                 </div>
               </button>
 
-              {/* Theme List */}
               <AnimatePresence>
                 {showThemeSelector && (
                   <motion.div
@@ -447,7 +435,6 @@ export default function UserMenu({
                 )}
               </AnimatePresence>
 
-              {/* Divider */}
               <hr 
                 className="my-2"
                 style={{ 
@@ -458,7 +445,6 @@ export default function UserMenu({
                 }}
               />
               
-              {/* Logout */}
               <button
                 onClick={handleLogoutClick}
                 className="w-full text-left px-3 py-2 rounded text-xs transition-colors flex items-center gap-2"
@@ -474,7 +460,6 @@ export default function UserMenu({
                 <span className="flex-1">{t('logout')}</span>
               </button>
 
-              {/* Footer */}
               <div 
                 className="mt-3 pt-2 border-t" 
                 style={{ 

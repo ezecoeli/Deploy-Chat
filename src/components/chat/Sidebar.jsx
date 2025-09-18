@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { supabase } from '../../utils/supabaseClient';
 import { useTranslation } from '../../hooks/useTranslation';
 import { usePermissions } from '../../hooks/usePermissions';
-import { useAllUsersStates } from '../../hooks/useDevStates';
+import { useDevStatesContext } from '../../hooks/useDevStatesContext';
 import { getStateById } from '../../data/devStates';
 import ChatAI from './ChatAI';
 import ArchiveConfirmModal from '../ui/ArchiveConfirmModal';
@@ -12,7 +12,6 @@ import { FaHashtag } from "react-icons/fa";
 import { MdMarkChatUnread } from "react-icons/md";
 import { BsPlus, BsChatSquareText, BsArchive, BsPeopleFill} from "react-icons/bs";
 import { getAvatarById, getDefaultAvatar } from '../../config/avatars';
-
 
 function UnreadDot({ hasUnread }) {
   return hasUnread ? (
@@ -42,7 +41,7 @@ export default function Sidebar({
   const isInitializedRef = useRef(false);
   const { t } = useTranslation();
   const { isAdmin, loading: permissionsLoading } = usePermissions(user);
-  const { allStates } = useAllUsersStates();
+  const { allUserStates } = useDevStatesContext();
 
   const [confirmModal, setConfirmModal] = useState({
     isOpen: false,
@@ -84,6 +83,25 @@ export default function Sidebar({
     }
     return 'Unknown User';
   }, []);
+
+  const getUserActiveState = useCallback((userId) => {
+    const userStates = allUserStates[userId];
+    if (!userStates) return null;
+    
+    for (const category of ['availability', 'work', 'mood']) {
+      if (userStates[category]) {
+        const stateInfo = getStateById(category, userStates[category].id, t);
+        if (stateInfo) {
+          return {
+            ...stateInfo,
+            category: category,
+            color: userStates[category].color
+          };
+        }
+      }
+    }
+    return null;
+  }, [allUserStates, t]);
 
   const loadPublicChannels = useCallback(async () => {
     if (loadingRef.current || !userId) return;
@@ -194,13 +212,11 @@ export default function Sidebar({
           }
           setPublicChannels(prev => prev.filter(channel => channel.id !== channelId));
           
-          // If archiving the current channel, switch to another one or none
           if (currentChannel?.id === channelId) {
             const remainingChannels = publicChannels.filter(ch => ch.id !== channelId);
             if (remainingChannels.length > 0) {
               onSelectConversation(remainingChannels[0]);
             } else {
-              // No channels left, could redirect to a default state
               onSelectConversation(null);
             }
           }
@@ -469,7 +485,6 @@ export default function Sidebar({
                   </div>
                   <UnreadDot hasUnread={unreadChannels?.has(channel.id)} />
                 </div>
-                {/* Show archive button for ALL channels if user is admin */}
                 {isAdmin && (
                   <button
                     onClick={() => handleArchiveChannel(channel.id, channel.name)}
@@ -529,7 +544,6 @@ export default function Sidebar({
             </p>
           ) : (
             conversations.map(conversation => {
-              // Fix avatar URL for conversation
               const otherUser = conversation.otherUser;
               let avatarUrl = otherUser?.avatar_url;
               
@@ -539,6 +553,8 @@ export default function Sidebar({
                 const avatar = getAvatarById(avatarUrl);
                 avatarUrl = avatar ? avatar.src : getDefaultAvatar().src;
               }
+
+              const activeState = getUserActiveState(conversation.otherUser?.id);
 
               return (
                 <div
@@ -556,32 +572,18 @@ export default function Sidebar({
                         username: otherUser?.username,
                         email: otherUser?.email
                       }}
-                      size="md"
+                      size="sm"
                       showStates={true}
                     />
                     <div className="min-w-0 flex-1">
                       <div className="truncate font-mono">
                         {getOtherParticipant(conversation)}
                       </div>
-                      {/* Show active state if any */}
-                      {(() => {
-                        const userStates = allStates[conversation.otherUser?.id];
-                        if (!userStates) return null;
-                        
-                        const activeState = userStates.availability || userStates.work || userStates.mood;
-                        if (!activeState) return null;
-                        
-                        const category = userStates.availability ? 'availability' : 
-                                        userStates.work ? 'work' : 'mood';
-                        
-                        const stateInfo = getStateById(category, activeState.id);
-                        
-                        return (
-                          <div className="text-xs opacity-75 truncate">
-                            {stateInfo?.label}
-                          </div>
-                        );
-                      })()}
+                      {activeState && (
+                        <div className="text-xs opacity-75 truncate">
+                          {activeState.label}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <UnreadDot hasUnread={unreadChannels?.has(conversation.id)} />
@@ -592,7 +594,6 @@ export default function Sidebar({
         </div>
       </div>
 
-      {/* AI Assistant */}
       <ChatAI
         user={user}
         conversationId={currentChannel?.id}
@@ -600,7 +601,6 @@ export default function Sidebar({
         currentTheme={currentTheme}
       />
       
-      {/* Archive Confirmation Modal */}
       <ArchiveConfirmModal
         isOpen={confirmModal.isOpen}
         onClose={closeConfirmModal}
