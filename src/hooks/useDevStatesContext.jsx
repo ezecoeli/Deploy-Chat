@@ -7,6 +7,8 @@ export function DevStatesProvider({ children }) {
   const [allUserStates, setAllUserStates] = useState({});
   const [loading, setLoading] = useState(false);
   const isUnmountedRef = useRef(false);
+  const subscriptionRef = useRef(null);
+  const broadcastChannelRef = useRef(null);
 
   const fetchAllStates = useCallback(async () => {
     if (isUnmountedRef.current) return;
@@ -39,18 +41,12 @@ export function DevStatesProvider({ children }) {
         usersMap[user.id] = user;
       });
 
+      // Properly group states by user and type
       const statesByUser = {};
       
-      const latestStatesByUser = {};
       statesData.forEach(state => {
-        if (!latestStatesByUser[state.user_id] || 
-            new Date(state.created_at) > new Date(latestStatesByUser[state.user_id].created_at)) {
-          latestStatesByUser[state.user_id] = state;
-        }
-      });
-
-      Object.values(latestStatesByUser).forEach(state => {
         const userId = state.user_id;
+        
         if (!statesByUser[userId]) {
           statesByUser[userId] = {
             work: null,
@@ -60,12 +56,17 @@ export function DevStatesProvider({ children }) {
           };
         }
         
+        // Keep the latest state for each type
         if (state.state_type && ['work', 'mood', 'availability'].includes(state.state_type)) {
-          statesByUser[userId][state.state_type] = {
-            id: state.state_id,
-            emoji: state.emoji,
-            color: state.color
-          };
+          if (!statesByUser[userId][state.state_type] || 
+              new Date(state.created_at) > new Date((statesByUser[userId][state.state_type].created_at || '1970-01-01'))) {
+            statesByUser[userId][state.state_type] = {
+              id: state.state_id,
+              emoji: state.emoji,
+              color: state.color,
+              created_at: state.created_at
+            };
+          }
         }
       });
 
@@ -88,10 +89,12 @@ export function DevStatesProvider({ children }) {
     try {
       console.log(`[DevStatesContext] Updating state for user ${userId}:`, { type, stateData });
       
+      // Only delete the specific state type
       const { error: deleteError } = await supabase
         .from('user_states')
         .delete()
-        .eq('user_id', userId);
+        .eq('user_id', userId)
+        .eq('state_type', type);
 
       if (deleteError) throw deleteError;
 
@@ -109,9 +112,9 @@ export function DevStatesProvider({ children }) {
 
       if (insertError) throw insertError;
 
-      console.log('[DevStatesContext] State updated successfully');
+      console.log('[DevStatesContext] State updated successfully, broadcasting...');
       
-      // Update local state immediately
+      // Update local state immediately for instant feedback
       setAllUserStates(prev => ({
         ...prev,
         [userId]: {
@@ -122,10 +125,31 @@ export function DevStatesProvider({ children }) {
           [type]: {
             id: stateData.id,
             emoji: stateData.emoji || null,
-            color: stateData.color
+            color: stateData.color,
+            created_at: new Date().toISOString()
           }
         }
       }));
+
+      // Use the same channel for broadcasting
+      if (broadcastChannelRef.current) {
+        console.log('[DevStatesContext] Broadcasting to channel...');
+        await broadcastChannelRef.current.send({
+          type: 'broadcast',
+          event: 'state_updated',
+          payload: {
+            userId,
+            type,
+            stateData: {
+              id: stateData.id,
+              emoji: stateData.emoji || null,
+              color: stateData.color,
+              created_at: new Date().toISOString()
+            }
+          }
+        });
+        console.log('[DevStatesContext] Broadcast sent successfully');
+      }
 
       return true;
     } catch (error) {
@@ -134,39 +158,95 @@ export function DevStatesProvider({ children }) {
     }
   }, []);
 
+  const handleDatabaseChange = useCallback((payload) => {
+    console.log('[DevStatesContext] Database change received:', payload);
+    
+    // Refetch all states when database changes
+    setTimeout(() => {
+      if (!isUnmountedRef.current) {
+        fetchAllStates();
+      }
+    }, 50);
+  }, [fetchAllStates]);
+
+  const handleBroadcastUpdate = useCallback((payload) => {
+    console.log('[DevStatesContext] Broadcast update received:', payload);
+    
+    if (payload.event === 'state_updated') {
+      const { userId, type, stateData } = payload.payload;
+      console.log(`[DevStatesContext] Applying broadcast update for user ${userId}, type ${type}`);
+      
+      setAllUserStates(prev => ({
+        ...prev,
+        [userId]: {
+          work: null,
+          mood: null,
+          availability: null,
+          ...prev[userId],
+          [type]: stateData
+        }
+      }));
+    }
+  }, []);
+
   useEffect(() => {
     isUnmountedRef.current = false;
     fetchAllStates();
 
-    console.log('[DevStatesContext] Setting up global subscription...');
+    console.log('[DevStatesContext] Setting up enhanced subscriptions...');
 
-    const subscription = supabase
-      .channel('global-dev-states')
+    // Cleanup existing subscriptions
+    if (subscriptionRef.current) {
+      subscriptionRef.current.unsubscribe();
+    }
+    if (broadcastChannelRef.current) {
+      broadcastChannelRef.current.unsubscribe();
+    }
+
+    // Create database subscription
+    const dbSubscription = supabase
+      .channel('dev-states-db')
       .on('postgres_changes', 
         { 
           event: '*', 
           schema: 'public', 
           table: 'user_states'
         }, 
-        (payload) => {
-          console.log('[DevStatesContext] Received realtime update:', payload);
-          setTimeout(() => {
-            if (!isUnmountedRef.current) {
-              fetchAllStates();
-            }
-          }, 300);
-        }
+        handleDatabaseChange
       )
       .subscribe((status) => {
-        console.log('[DevStatesContext] Subscription status:', status);
+        console.log('[DevStatesContext] Database subscription status:', status);
       });
 
+    // Create separate broadcast subscription
+    const broadcastSubscription = supabase
+      .channel('dev-states-broadcast')
+      .on('broadcast', 
+        { event: 'state_updated' }, 
+        handleBroadcastUpdate
+      )
+      .subscribe((status) => {
+        console.log('[DevStatesContext] Broadcast subscription status:', status);
+      });
+
+    subscriptionRef.current = dbSubscription;
+    broadcastChannelRef.current = broadcastSubscription;
+
     return () => {
-      console.log('[DevStatesContext] Cleaning up...');
+      console.log('[DevStatesContext] Cleaning up subscriptions...');
       isUnmountedRef.current = true;
-      subscription.unsubscribe();
+      
+      if (subscriptionRef.current) {
+        subscriptionRef.current.unsubscribe();
+        subscriptionRef.current = null;
+      }
+      
+      if (broadcastChannelRef.current) {
+        broadcastChannelRef.current.unsubscribe();
+        broadcastChannelRef.current = null;
+      }
     };
-  }, [fetchAllStates]);
+  }, [fetchAllStates, handleDatabaseChange, handleBroadcastUpdate]);
 
   return (
     <DevStatesContext.Provider value={{

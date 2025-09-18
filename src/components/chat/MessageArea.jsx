@@ -5,7 +5,7 @@ import ReactionBar from '../ReactionBar';
 import { useTranslation } from '../../hooks/useTranslation';
 import { usePinnedMessages } from '../../hooks/usePinnedMessages';
 import { usePermissions } from '../../hooks/usePermissions';
-import { useAllUsersStates } from '../../hooks/useDevStates';
+import { useDevStatesContext } from '../../hooks/useDevStatesContext';
 import PinnedMessagesBar from './PinnedMessagesBar';
 import PinButton from './PinButton';
 import UserAvatar from './UserAvatar';
@@ -22,7 +22,7 @@ export default function MessageArea({
   const messagesEndRef = useRef(null);
   const { t } = useTranslation();
   const { isAdmin, isModerator } = usePermissions(user);
-  const { allStates } = useAllUsersStates();
+  const { allUserStates } = useDevStatesContext();
   const canPin = isAdmin || isModerator;
 
   const {
@@ -84,7 +84,7 @@ export default function MessageArea({
           username: messageUser.username,
           email: messageUser.email
         }}
-        size="sm"
+        size="md"
         showStates={true}
       />
     );
@@ -213,7 +213,6 @@ export default function MessageArea({
                       )}
                       
                       <div className="relative">
-                        {/* Pin Button  */}
                         {canPin && (
                           <div className={`absolute z-10 ${isOwnMessage ? '-left-10' : '-right-10'} top-0`}>
                             <PinButton
@@ -228,7 +227,6 @@ export default function MessageArea({
                           </div>
                         )}
 
-                        {/* Message Container  */}
                         <div 
                           className={`px-2 py-1 sm:px-3 sm:py-2 rounded text-sm sm:text-base ${
                             canPin ? (isOwnMessage ? 'mr-8' : 'ml-8') : ''

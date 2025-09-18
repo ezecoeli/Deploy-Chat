@@ -572,7 +572,7 @@ export default function Sidebar({
                         username: otherUser?.username,
                         email: otherUser?.email
                       }}
-                      size="sm"
+                      size="md"
                       showStates={true}
                     />
                     <div className="min-w-0 flex-1">

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useDevStates } from '../../hooks/useDevStates';
+import { useDevStatesContext } from '../../hooks/useDevStatesContext';
 import { getStateById } from '../../data/devStates';
 import { getAvatarById, getDefaultAvatar } from '../../config/avatars';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -11,8 +11,14 @@ export default function UserAvatar({
   className = '',
   onClick
 }) {
-  const { currentStates } = useDevStates(user?.id);
+  const { allUserStates } = useDevStatesContext();
   const { t } = useTranslation();
+
+  const currentStates = allUserStates[user?.id] || {
+    work: null,
+    mood: null,
+    availability: null
+  };
 
   const sizeClasses = {
     xs: 'w-4 h-4',
@@ -30,7 +36,6 @@ export default function UserAvatar({
     xl: 'w-3.5 h-3.5'
   };
 
-  // Get avatar URL
   const getAvatarUrl = () => {
     if (!user?.avatar_url) {
       return getDefaultAvatar().src;
@@ -44,7 +49,6 @@ export default function UserAvatar({
     return user.avatar_url;
   };
 
-  // get unique state (active) if any
   const getActiveState = () => {
     for (const category of ['availability', 'work', 'mood']) {
       if (currentStates?.[category]) {
@@ -64,11 +68,10 @@ export default function UserAvatar({
   const activeState = getActiveState();
   const avatarUrl = getAvatarUrl();
 
-  // Tooltip
   const getTooltipText = () => {
     const username = user?.username || user?.email || 'Usuario';
     if (showStates && activeState) {
-      return `${username} - ${activeState.label} `;
+      return `${username} - ${activeState.label}`;
     }
     return username;
   };
@@ -79,7 +82,6 @@ export default function UserAvatar({
       title={getTooltipText()}
       onClick={onClick}
     >
-      {/* Avatar Image */}
       <img
         src={avatarUrl}
         alt={user?.username || user?.email || 'User Avatar'}
@@ -96,7 +98,7 @@ export default function UserAvatar({
         <div 
           className={`absolute -bottom-0.5 -right-0.5 ${indicatorSizes[size]} rounded-full border-2 border-gray-800`}
           style={{ backgroundColor: activeState.color }}
-          title={`${activeState.label} `}
+          title={`${activeState.label}`}
         />
       )}
     </div>
