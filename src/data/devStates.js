@@ -12,58 +12,50 @@ export const workStates = [
   { 
     id: 'coding', 
     icon: FaCode, 
-    label: 'Coding', 
-    color: '#10b981',
-    description: 'Writing code'
+    labelKey: 'coding',
+    color: '#10b981'
   },
   { 
     id: 'debugging', 
     icon: FaWrench, 
-    label: 'Debugging', 
-    color: '#f59e0b',
-    description: 'Fixing bugs'
+    labelKey: 'debugging',
+    color: '#f59e0b'
   },
   { 
     id: 'reviewing', 
     icon: FaEye, 
-    label: 'Code Review', 
-    color: '#3b82f6',
-    description: 'Reviewing code'
+    labelKey: 'reviewing',
+    color: '#3b82f6'
   },
   { 
     id: 'testing', 
     icon: FaFlask, 
-    label: 'Testing', 
-    color: '#8b5cf6',
-    description: 'Running tests'
+    labelKey: 'testing',
+    color: '#8b5cf6'
   },
   { 
     id: 'deploying', 
     icon: FaRocket, 
-    label: 'Deploying', 
-    color: '#ef4444',
-    description: 'Deploying to production'
+    labelKey: 'deploying',
+    color: '#ef4444'
   },
   { 
     id: 'learning', 
     icon: FaBook, 
-    label: 'Learning', 
-    color: '#06b6d4',
-    description: 'Reading documentation'
+    labelKey: 'learning',
+    color: '#06b6d4'
   },
   { 
     id: 'documenting', 
     icon: FaFileAlt, 
-    label: 'Documenting', 
-    color: '#84cc16',
-    description: 'Writing documentation'
+    labelKey: 'documenting',
+    color: '#84cc16'
   },
   { 
     id: 'meeting', 
     icon: FaBullseye, 
-    label: 'In Meeting', 
-    color: '#f97316',
-    description: 'Attending meeting'
+    labelKey: 'meeting',
+    color: '#f97316'
   }
 ];
 
@@ -71,44 +63,38 @@ export const moodStates = [
   { 
     id: 'fire', 
     icon: FaFire, 
-    label: 'On Fire', 
-    color: '#dc2626',
-    description: 'Highly productive'
+    labelKey: 'fire',
+    color: '#dc2626'
   },
   { 
     id: 'focused', 
     icon: FaCrosshairs, 
-    label: 'Deep Focus', 
-    color: '#7c3aed',
-    description: 'In the zone'
+    labelKey: 'focused',
+    color: '#7c3aed'
   },
   { 
     id: 'coffee', 
     icon: FaCoffee, 
-    label: 'Coffee Break', 
-    color: '#92400e',
-    description: 'Taking a coffee break'
+    labelKey: 'coffee',
+    color: '#92400e'
   },
   { 
     id: 'tired', 
     icon: FaBed, 
-    label: 'Need Rest', 
-    color: '#6b7280',
-    description: 'Feeling tired'
+    labelKey: 'tired',
+    color: '#6b7280'
   },
   { 
     id: 'thinking', 
     icon: FaBrain, 
-    label: 'Thinking', 
-    color: '#059669',
-    description: 'Working through a problem'
+    labelKey: 'thinking',
+    color: '#059669'
   },
   { 
     id: 'celebrate', 
     icon: LuPartyPopper, 
-    label: 'Victory', 
-    color: '#db2777',
-    description: 'Just accomplished something'
+    labelKey: 'celebrate',
+    color: '#db2777'
   }
 ];
 
@@ -116,47 +102,33 @@ export const availabilityStates = [
   { 
     id: 'available', 
     icon: FaCircle, 
-    label: 'Available', 
-    color: '#22c55e',
-    description: 'Available for chat'
+    labelKey: 'available',
+    color: '#22c55e'
   },
   { 
     id: 'busy', 
     icon: MdDoNotDisturb, 
-    label: 'Do Not Disturb', 
-    color: '#ef4444',
-    description: 'Please do not interrupt'
+    labelKey: 'busy',
+    color: '#ef4444'
   },
   { 
     id: 'away', 
     icon: MdDirectionsWalk, 
-    label: 'Away', 
-    color: '#eab308',
-    description: 'Away from keyboard'
+    labelKey: 'away',
+    color: '#eab308'
   },
   { 
     id: 'lunch', 
     icon: FaPizzaSlice, 
-    label: 'Lunch Break', 
-    color: '#f97316',
-    description: 'Having lunch'
+    labelKey: 'lunch',
+    color: '#f97316'
   },
   { 
     id: 'overtime', 
     icon: FaClock, 
-    label: 'Working Late', 
-    color: '#6366f1',
-    description: 'Working overtime'
+    labelKey: 'overtime',
+    color: '#6366f1'
   }
-];
-
-export const durationOptions = [
-  { value: 15, label: '15m' },
-  { value: 30, label: '30m' },
-  { value: 60, label: '1h' },
-  { value: 120, label: '2h' },
-  { value: 240, label: '4h' },
-  { value: 480, label: '8h' }
 ];
 
 export const stateCategories = [
@@ -164,28 +136,36 @@ export const stateCategories = [
     id: 'work', 
     label: 'Work', 
     icon: MdWork, 
-    states: workStates,
-    description: 'Current work activity'
+    states: workStates
   },
   { 
     id: 'mood', 
     label: 'Mood', 
     icon: MdMood, 
-    states: moodStates,
-    description: 'Current mood or energy level'
+    states: moodStates
   },
   { 
     id: 'availability', 
     label: 'Status', 
     icon: MdNotifications, 
-    states: availabilityStates,
-    description: 'Availability for communication'
+    states: availabilityStates
   }
 ];
 
-export const getStateById = (category, stateId) => {
+export const getStateById = (category, stateId, t = null) => {
   const categoryData = stateCategories.find(cat => cat.id === category);
-  return categoryData?.states.find(state => state.id === stateId);
+  const state = categoryData?.states.find(state => state.id === stateId);
+  
+  if (!state) return null;
+  
+  if (t) {
+    return {
+      ...state,
+      label: t(state.labelKey)
+    };
+  }
+  
+  return state;
 };
 
 export const getAllStates = () => {

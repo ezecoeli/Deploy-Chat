@@ -99,7 +99,7 @@ export default function UserMenu({
     // find in any category the current active state
     for (const category of ['availability', 'work', 'mood']) {
       if (currentStates[category]) {
-        const stateData = getStateById(category, currentStates[category].id);
+        const stateData = getStateById(category, currentStates[category].id, t);
         if (stateData) {
           return {
             ...stateData,

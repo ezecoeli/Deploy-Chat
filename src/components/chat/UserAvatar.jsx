@@ -2,6 +2,7 @@ import React from 'react';
 import { useDevStates } from '../../hooks/useDevStates';
 import { getStateById } from '../../data/devStates';
 import { getAvatarById, getDefaultAvatar } from '../../config/avatars';
+import { useTranslation } from '../../hooks/useTranslation';
 
 export default function UserAvatar({ 
   user, 
@@ -11,6 +12,7 @@ export default function UserAvatar({
   onClick
 }) {
   const { currentStates } = useDevStates(user?.id);
+  const { t } = useTranslation();
 
   const sizeClasses = {
     xs: 'w-4 h-4',
@@ -28,82 +30,53 @@ export default function UserAvatar({
     xl: 'w-3.5 h-3.5'
   };
 
-  // Get correct avatar URL
+  // Get avatar URL
   const getAvatarUrl = () => {
     if (!user?.avatar_url) {
       return getDefaultAvatar().src;
     }
     
-    // If it's just an ID like 'avatar-01', get the full path
     if (user.avatar_url.startsWith('avatar-')) {
       const avatar = getAvatarById(user.avatar_url);
       return avatar ? avatar.src : getDefaultAvatar().src;
     }
     
-    // If it's already a full URL/path, use it
     return user.avatar_url;
   };
 
-  const getAvailabilityState = () => {
-    if (currentStates?.availability) {
-      const stateData = getStateById('availability', currentStates.availability.id);
-      return {
-        ...stateData,
-        color: currentStates.availability.color,
-        customMessage: currentStates.availability.customMessage
-      };
+  // get unique state (active) if any
+  const getActiveState = () => {
+    for (const category of ['availability', 'work', 'mood']) {
+      if (currentStates?.[category]) {
+        const stateData = getStateById(category, currentStates[category].id, t);
+        if (stateData) {
+          return {
+            ...stateData,
+            color: currentStates[category].color,
+            category: category
+          };
+        }
+      }
     }
     return null;
   };
 
-  const getWorkMoodState = () => {
-    // Priority: work state over mood state
-    if (currentStates?.work) {
-      const stateData = getStateById('work', currentStates.work.id);
-      return {
-        ...stateData,
-        color: currentStates.work.color,
-        customMessage: currentStates.work.customMessage,
-        type: 'work'
-      };
-    }
-    
-    if (currentStates?.mood) {
-      const stateData = getStateById('mood', currentStates.mood.id);
-      return {
-        ...stateData,
-        color: currentStates.mood.color,
-        customMessage: currentStates.mood.customMessage,
-        type: 'mood'
-      };
-    }
-    
-    return null;
-  };
-
-  const availabilityState = getAvailabilityState();
-  const workMoodState = getWorkMoodState();
-
-  const getTooltipText = () => {
-    const states = [];
-    
-    if (availabilityState) {
-      states.push(availabilityState.customMessage || availabilityState.label);
-    }
-    
-    if (workMoodState) {
-      states.push(workMoodState.customMessage || workMoodState.label);
-    }
-    
-    return states.join(' • ');
-  };
-
+  const activeState = getActiveState();
   const avatarUrl = getAvatarUrl();
+
+  // Tooltip
+  const getTooltipText = () => {
+    const username = user?.username || user?.email || 'Usuario';
+    if (showStates && activeState) {
+      return `${username} - ${activeState.label} `;
+    }
+    return username;
+  };
 
   return (
     <div 
       className={`relative inline-block ${className}`}
-      title={showStates && getTooltipText() ? getTooltipText() : user?.username || user?.email}
+      title={getTooltipText()}
       onClick={onClick}
     >
       {/* Avatar Image */}
@@ -112,7 +85,6 @@ export default function UserAvatar({
         alt={user?.username || user?.email || 'User Avatar'}
         className={`${sizeClasses[size]} rounded-full object-cover cursor-pointer hover:opacity-80 transition-opacity`}
         onError={(e) => {
-          // Try default avatar as fallback
           const defaultAvatar = getDefaultAvatar();
           if (e.target.src !== defaultAvatar.src) {
             e.target.src = defaultAvatar.src;
@@ -120,26 +92,12 @@ export default function UserAvatar({
         }}
       />
 
-      {showStates && (
-        <>
-          {/* Availability Status Indicator (bottom-right) */}
-          {availabilityState && (
-            <div 
-              className={`absolute -bottom-0.5 -right-0.5 ${indicatorSizes[size]} rounded-full border-2 border-gray-800`}
-              style={{ backgroundColor: availabilityState.color }}
-              title={availabilityState.customMessage || availabilityState.label}
-            />
-          )}
-
-          {/* Work/Mood State Indicator (top-right) */}
-          {workMoodState && (
-            <div 
-              className={`absolute -top-0.5 -right-0.5 ${indicatorSizes[size]} rounded-full border-2 border-gray-800`}
-              style={{ backgroundColor: workMoodState.color }}
-              title={workMoodState.customMessage || workMoodState.label}
-            />
-          )}
-        </>
+      {showStates && activeState && (
+        <div 
+          className={`absolute -bottom-0.5 -right-0.5 ${indicatorSizes[size]} rounded-full border-2 border-gray-800`}
+          style={{ backgroundColor: activeState.color }}
+          title={`${activeState.label} `}
+        />
       )}
     </div>
   );

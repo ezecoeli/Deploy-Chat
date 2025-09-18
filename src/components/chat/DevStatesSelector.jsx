@@ -8,7 +8,7 @@ export default function DevStateSelector({
   currentTheme, 
   className = ''
 }) {
-  const { currentStates, updateState, clearState, loading } = useDevStates(user?.id);
+  const { currentStates, updateState, loading } = useDevStates(user?.id);
   const [activeTab, setActiveTab] = useState('availability');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { t } = useTranslation();
@@ -26,19 +26,6 @@ export default function DevStateSelector({
     }
   };
 
-  const handleClearState = async (categoryId) => {
-    if (isSubmitting || loading) return;
-    
-    setIsSubmitting(true);
-    try {
-      await clearState(categoryId);
-    } catch (error) {
-      console.error('Error clearing state:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   const getThemeClasses = () => {
     switch (currentTheme) {
       case 'matrix':
@@ -46,7 +33,6 @@ export default function DevStateSelector({
           container: 'bg-black border-green-500 text-green-400',
           tab: 'border-green-500 text-green-400 hover:bg-green-900',
           activeTab: 'bg-green-500 text-black',
-          button: 'hover:bg-green-800 text-green-400',
           listItem: 'hover:bg-green-900 border-green-700',
           current: 'bg-green-900 border-green-500'
         };
@@ -55,7 +41,6 @@ export default function DevStateSelector({
           container: 'bg-black border-amber-500 text-amber-400',
           tab: 'border-amber-500 text-amber-400 hover:bg-amber-900',
           activeTab: 'bg-amber-500 text-black',
-          button: 'hover:bg-amber-800 text-amber-400',
           listItem: 'hover:bg-amber-900 border-amber-700',
           current: 'bg-amber-900 border-amber-500'
         };
@@ -64,7 +49,6 @@ export default function DevStateSelector({
           container: 'bg-gray-900 border-orange-500 text-orange-100',
           tab: 'border-orange-500 text-orange-400 hover:bg-orange-900',
           activeTab: 'bg-orange-500 text-white',
-          button: 'hover:bg-orange-800 text-orange-100',
           listItem: 'hover:bg-orange-900 border-orange-700',
           current: 'bg-gray-800 border-orange-500'
         };
@@ -73,7 +57,6 @@ export default function DevStateSelector({
           container: 'bg-gray-200 border-gray-400 text-black',
           tab: 'border-gray-400 text-black hover:bg-gray-300',
           activeTab: 'bg-blue-500 text-white',
-          button: 'hover:bg-gray-400 text-black border border-gray-500',
           listItem: 'hover:bg-gray-300 border-gray-400',
           current: 'bg-white border-gray-400'
         };
@@ -82,7 +65,6 @@ export default function DevStateSelector({
           container: 'bg-gray-100 border-gray-300 text-gray-800',
           tab: 'border-gray-300 text-gray-600 hover:bg-gray-200',
           activeTab: 'bg-blue-500 text-white',
-          button: 'hover:bg-gray-50 text-gray-800 border border-gray-300',
           listItem: 'hover:bg-gray-200 border-gray-300',
           current: 'bg-white border-gray-300'
         };
@@ -91,7 +73,6 @@ export default function DevStateSelector({
           container: 'bg-gray-800 border-gray-600 text-white',
           tab: 'border-gray-600 text-gray-300 hover:bg-gray-700',
           activeTab: 'bg-blue-500 text-white',
-          button: 'hover:bg-gray-600 text-white',
           listItem: 'hover:bg-gray-700 border-gray-600',
           current: 'bg-gray-700 border-gray-600'
         };
@@ -103,7 +84,7 @@ export default function DevStateSelector({
 
   return (
     <div className={`border rounded-lg p-2 w-full ${themeClasses.container} ${className}`}>
-      {/* Compact Tabs - Vertical para que quepan */}
+      {/* Compact Tabs */}
       <div className="grid grid-cols-3 gap-1 text-xs mb-2">
         {stateCategories.map(category => {
           const IconComponent = category.icon;
@@ -137,7 +118,10 @@ export default function DevStateSelector({
             />
             <div className="min-w-0 flex-1">
               <div className="font-mono text-xs font-medium truncate">
-                {t('current')}: {activeCategory?.states.find(s => s.id === currentStates[activeTab].id)?.label}
+                {t('current')}: {activeCategory?.states.find(s => s.id === currentStates[activeTab].id)?.labelKey ? 
+                  t(activeCategory.states.find(s => s.id === currentStates[activeTab].id).labelKey) :
+                  activeCategory?.states.find(s => s.id === currentStates[activeTab].id)?.label
+                }
               </div>
             </div>
           </div>
@@ -170,8 +154,9 @@ export default function DevStateSelector({
                   style={{ color: isActive ? 'currentColor' : state.color }}
                 />
                 <div className="min-w-0 flex-1">
-                  <div className="font-mono text-xs font-medium">{state.label}</div>
-                  <div className="text-xs opacity-75 truncate">{state.description}</div>
+                  <div className="font-mono text-xs font-medium">
+                    {state.labelKey ? t(state.labelKey) : state.label}
+                  </div>
                 </div>
                 {isActive && (
                   <div 
