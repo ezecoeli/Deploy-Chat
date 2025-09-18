@@ -52,6 +52,59 @@ const translations = {
     scheduleEvent: "Programar evento",
     titleInput: "Título",
 
+    // States
+    status: "Estado",
+    work: "Trabajo",
+    mood: "Ánimo", 
+    availability: "General",
+    current: "Actual",
+    
+    // Work states
+    coding: "Programando",
+    debugging: "Depurando", 
+    codeReview: "Revisión",
+    testing: "Probando",
+    deploying: "Desplegando",
+    learning: "Aprendiendo",
+    documenting: "Documentando",
+    inMeeting: "En reunión",
+    
+    // Mood states
+    onFire: "En racha",
+    deepFocus: "Concentrado",
+    coffeeBreak: "Descanso",
+    needRest: "Cansado",
+    thinking: "Pensando",
+    victory: "Victoria",
+    
+    // Availability states
+    available: "Disponible",
+    doNotDisturb: "No molestar",
+    away: "Ausente",
+    lunchBreak: "Almorzando",
+    workingLate: "Trabajando",
+    
+    // State descriptions
+    writingCode: "Escribiendo código",
+    fixingBugs: "Corrigiendo errores",
+    reviewingCode: "Revisando código",
+    runningTests: "Ejecutando pruebas",
+    deployingProduction: "Desplegando a producción",
+    readingDocs: "Leyendo documentación",
+    writingDocs: "Escribiendo documentación",
+    attendingMeeting: "Asistiendo a reunión",
+    highlyProductive: "Muy productivo",
+    inTheZone: "En la zona",
+    takingCoffeeBreak: "Tomando un descanso",
+    feelingTired: "Sintiéndome cansado",
+    workingProblem: "Resolviendo un problema",
+    justAccomplished: "Acabo de lograr algo",
+    availableChat: "Disponible para chat",
+    pleaseNotInterrupt: "Por favor no interrumpir",
+    awayKeyboard: "Lejos del teclado",
+    havingLunch: "Almorzando",
+    workingOvertime: "Trabajando horas extra",
+
     // Search functionality
     searchMessages: "Buscar mensajes",
     searchPlaceholder: "Buscar mensajes...",
@@ -213,6 +266,59 @@ const translations = {
     writeNotes: "Write your notes here...",
     scheduleEvent: "Schedule Event",
     titleInput: "Title",
+
+    // States
+    status: "Status",
+    work: "Work",
+    mood: "Mood",
+    availability: "General", 
+    current: "Current",
+    
+    // Work states
+    coding: "Coding",
+    debugging: "Debugging",
+    codeReview: "Review",
+    testing: "Testing",
+    deploying: "Deploying",
+    learning: "Learning",
+    documenting: "Docs",
+    inMeeting: "Meeting",
+    
+    // Mood states
+    onFire: "On Fire",
+    deepFocus: "Focused",
+    coffeeBreak: "Break",
+    needRest: "Tired", 
+    thinking: "Thinking",
+    victory: "Victory",
+    
+    // Availability states
+    available: "Available",
+    doNotDisturb: "DND",
+    away: "Away",
+    lunchBreak: "Lunch",
+    workingLate: "Late",
+    
+    // State descriptions
+    writingCode: "Writing code",
+    fixingBugs: "Fixing bugs",
+    reviewingCode: "Reviewing code",
+    runningTests: "Running tests",
+    deployingProduction: "Deploying to production",
+    readingDocs: "Reading documentation",
+    writingDocs: "Writing documentation",
+    attendingMeeting: "Attending meeting",
+    highlyProductive: "Highly productive",
+    inTheZone: "In the zone",
+    takingCoffeeBreak: "Taking a coffee break",
+    feelingTired: "Feeling tired",
+    workingProblem: "Working through a problem",
+    justAccomplished: "Just accomplished something",
+    availableChat: "Available for chat",
+    pleaseNotInterrupt: "Please do not interrupt",
+    awayKeyboard: "Away from keyboard", 
+    havingLunch: "Having lunch",
+    workingOvertime: "Working overtime",
 
     // Search functionality
     searchMessages: "Search Messages",

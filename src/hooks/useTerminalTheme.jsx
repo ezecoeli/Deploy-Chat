@@ -116,7 +116,7 @@ const terminalThemes = {
             menuBar: '#c0c0c0',
             scrollBar: '#c0c0c0',
             inputBg: '#fff',
-            putText: '#222',
+            inputText: '#222',
             inputPlaceholder: '#888',
             previewBg: '#e5e7eb',
             previewText: '#222',  

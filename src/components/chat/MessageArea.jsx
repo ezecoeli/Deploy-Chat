@@ -1,13 +1,15 @@
 import React, { useRef, useEffect } from 'react';
-import { getAvatarById } from '../../config/avatars';
 import { FiUser } from 'react-icons/fi';
 import MessageRenderer from './MessageRenderer';
 import ReactionBar from '../ReactionBar';
 import { useTranslation } from '../../hooks/useTranslation';
 import { usePinnedMessages } from '../../hooks/usePinnedMessages';
 import { usePermissions } from '../../hooks/usePermissions';
+import { useAllUsersStates } from '../../hooks/useDevStates';
 import PinnedMessagesBar from './PinnedMessagesBar';
 import PinButton from './PinButton';
+import UserAvatar from './UserAvatar';
+import { getAvatarById, getDefaultAvatar } from '../../config/avatars';
 
 export default function MessageArea({ 
   messages, 
@@ -20,6 +22,7 @@ export default function MessageArea({
   const messagesEndRef = useRef(null);
   const { t } = useTranslation();
   const { isAdmin, isModerator } = usePermissions(user);
+  const { allStates } = useAllUsersStates();
   const canPin = isAdmin || isModerator;
 
   const {
@@ -57,33 +60,34 @@ export default function MessageArea({
     }
   };
 
-  const renderAvatar = (avatarUrl, username, size = 'w-6 h-6 sm:w-8 sm:h-8') => {
-    const preloadedAvatar = getAvatarById(avatarUrl);
-    if (preloadedAvatar) {
-      return (
-        <img 
-          src={preloadedAvatar.src} 
-          alt={preloadedAvatar.name}
-          className={`${size} rounded-full object-cover`}
-        />
-      );
+  const renderMessageAvatar = (message) => {
+    const messageUser = message.users || { 
+      email: 'unknown_user',
+      username: 'unknown_user',
+      avatar_url: null
+    };
+
+    let avatarUrl = messageUser.avatar_url;
+    
+    if (!avatarUrl) {
+      avatarUrl = getDefaultAvatar().src;
+    } else if (avatarUrl.startsWith('avatar-')) {
+      const avatar = getAvatarById(avatarUrl);
+      avatarUrl = avatar ? avatar.src : getDefaultAvatar().src;
     }
 
-    if (avatarUrl && !avatarUrl.startsWith('avatar-')) {
-      return (
-        <img 
-          src={avatarUrl} 
-          alt={`Avatar de ${username}`}
-          className={`${size} rounded-full object-cover`}
-          onError={(e) => {
-            e.target.style.display = 'none';
-            e.target.nextSibling.style.display = 'flex';
-          }}
-        />
-      );
-    }
-    
-    return <FiUser className={`${size.replace('w-', '').replace('h-', '')} text-gray-400`} />;
+    return (
+      <UserAvatar 
+        user={{
+          id: message.user_id,
+          avatar_url: avatarUrl,
+          username: messageUser.username,
+          email: messageUser.email
+        }}
+        size="sm"
+        showStates={true}
+      />
+    );
   };
 
   const handlePinMessage = async (messageId) => {
@@ -180,8 +184,8 @@ export default function MessageArea({
                     isOwnMessage ? 'flex-row-reverse' : 'flex-row'
                   }`}>
                     {!isOwnMessage && (
-                      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full overflow-hidden bg-gray-600 flex items-center justify-center flex-shrink-0">
-                        {renderAvatar(messageUser.avatar_url, messageUser.username)}
+                      <div className="flex-shrink-0">
+                        {renderMessageAvatar(message)}
                       </div>
                     )}
                     

@@ -2,12 +2,17 @@ import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { supabase } from '../../utils/supabaseClient';
 import { useTranslation } from '../../hooks/useTranslation';
 import { usePermissions } from '../../hooks/usePermissions';
+import { useAllUsersStates } from '../../hooks/useDevStates';
+import { getStateById } from '../../data/devStates';
 import ChatAI from './ChatAI';
 import ArchiveConfirmModal from '../ui/ArchiveConfirmModal';
+import UserAvatar from './UserAvatar';
 import { IoEarth } from "react-icons/io5";
 import { FaHashtag } from "react-icons/fa";
 import { MdMarkChatUnread } from "react-icons/md";
 import { BsPlus, BsChatSquareText, BsArchive, BsPeopleFill} from "react-icons/bs";
+import { getAvatarById, getDefaultAvatar } from '../../config/avatars';
+
 
 function UnreadDot({ hasUnread }) {
   return hasUnread ? (
@@ -37,6 +42,7 @@ export default function Sidebar({
   const isInitializedRef = useRef(false);
   const { t } = useTranslation();
   const { isAdmin, loading: permissionsLoading } = usePermissions(user);
+  const { allStates } = useAllUsersStates();
 
   const [confirmModal, setConfirmModal] = useState({
     isOpen: false,
@@ -522,25 +528,54 @@ export default function Sidebar({
               {t('noDirectMessages')}
             </p>
           ) : (
-            conversations.map(conversation => (
-              <div
-                key={conversation.id}
-                onClick={() => onSelectConversation(conversation)}
-                className={`flex border items-center justify-between px-2 py-2 rounded cursor-pointer transition-colors text-sm ${
-                  currentChannel?.id === conversation.id ? themeStyles.activeItem : themeStyles.item
-                } ${unreadChannels?.has(conversation.id) ? 'glitch-effect' : ''}`}
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-xs opacity-70 flex-shrink-0">
-                    <BsChatSquareText className='w-5 h-5' />
-                  </span>
-                  <span className="truncate">
-                    {getOtherParticipant(conversation)}
-                  </span>
+            conversations.map(conversation => {
+              // Fix avatar URL for conversation
+              const otherUser = conversation.otherUser;
+              let avatarUrl = otherUser?.avatar_url;
+              
+              if (!avatarUrl) {
+                avatarUrl = getDefaultAvatar().src;
+              } else if (avatarUrl.startsWith('avatar-')) {
+                const avatar = getAvatarById(avatarUrl);
+                avatarUrl = avatar ? avatar.src : getDefaultAvatar().src;
+              }
+
+              return (
+                <div
+                  key={conversation.id}
+                  onClick={() => onSelectConversation(conversation)}
+                  className={`flex border items-center justify-between px-2 py-2 rounded cursor-pointer transition-colors text-sm ${
+                    currentChannel?.id === conversation.id ? themeStyles.activeItem : themeStyles.item
+                  } ${unreadChannels?.has(conversation.id) ? 'glitch-effect' : ''}`}
+                >
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <UserAvatar 
+                      user={{
+                        id: otherUser?.id,
+                        avatar_url: avatarUrl,
+                        username: otherUser?.username,
+                        email: otherUser?.email
+                      }}
+                      size="md"
+                      showStates={true}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate font-mono">
+                        {getOtherParticipant(conversation)}
+                      </div>
+                      {/* Show active state if any */}
+                      {allStates[conversation.otherUser?.id]?.availability && (
+                        <div className="text-xs opacity-75 truncate">
+                          {allStates[conversation.otherUser.id].availability.customMessage || 
+                          getStateById('availability', allStates[conversation.otherUser.id].availability.id)?.label}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <UnreadDot hasUnread={unreadChannels?.has(conversation.id)} />
                 </div>
-                <UnreadDot hasUnread={unreadChannels?.has(conversation.id)} />
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>
@@ -565,7 +600,6 @@ export default function Sidebar({
         confirmText={t('confirm')}
         cancelText={t('cancel')}
       />
-
     </div>
   );
 }

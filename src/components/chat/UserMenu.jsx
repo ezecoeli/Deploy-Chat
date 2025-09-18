@@ -1,8 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FiUser, FiLogOut, FiChevronDown, FiGlobe, FiMonitor, FiSettings } from 'react-icons/fi';
+import { FiUser, FiLogOut, FiChevronDown, FiGlobe, FiMonitor, FiSettings, FiActivity } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTerminalTheme } from '../../hooks/useTerminalTheme';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useDevStates } from '../../hooks/useDevStates';
+import { getStateById } from '../../data/devStates';
+import DevStatesSelector from './DevStatesSelector';
 
 export default function UserMenu({ 
   user, 
@@ -15,6 +18,7 @@ export default function UserMenu({
 }) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showThemeSelector, setShowThemeSelector] = useState(false);
+  const [showDevStates, setShowDevStates] = useState(false);
   const [hoveredItem, setHoveredItem] = useState(null);
   const [hoveredTheme, setHoveredTheme] = useState(null);
   const userMenuRef = useRef(null);
@@ -22,6 +26,7 @@ export default function UserMenu({
   // Import theme and language hooks
   const { changeTheme, getThemesList, allThemes } = useTerminalTheme();
   const { language, changeLanguage } = useTranslation();
+  const { currentStates } = useDevStates(user?.id);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -29,6 +34,7 @@ export default function UserMenu({
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
         setShowUserMenu(false);
         setShowThemeSelector(false);
+        setShowDevStates(false);
         setHoveredItem(null);
         setHoveredTheme(null);
       }
@@ -51,6 +57,7 @@ export default function UserMenu({
       if (event.key === 'Escape') {
         setShowUserMenu(false);
         setShowThemeSelector(false);
+        setShowDevStates(false);
         setHoveredItem(null);
         setHoveredTheme(null);
       }
@@ -88,6 +95,21 @@ export default function UserMenu({
     setHoveredTheme(null);
   };
 
+  const getActiveStateDisplay = () => {
+    if (currentStates.availability) {
+      const stateData = getStateById('availability', currentStates.availability.id);
+      if (stateData) {
+        return {
+          ...stateData,
+          customMessage: currentStates.availability.customMessage,
+          color: currentStates.availability.color
+        };
+      }
+    }
+    return null;
+  };
+
+  const activeState = getActiveStateDisplay();
   const themes = getThemesList();
 
   // Get menu styles based on current theme
@@ -185,21 +207,32 @@ export default function UserMenu({
   const hoverStyles = getHoverStyles();
 
   return (
-    <div className="relative " ref={userMenuRef}>
-      {/* User Button */}
+    <div className="relative" ref={userMenuRef}>
+      {/* User Button with State Indicator */}
       <button
         onClick={() => setShowUserMenu(!showUserMenu)}
-        className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${theme.colors.input} hover:opacity-80`}
+        className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${theme.colors.input} hover:opacity-80 relative`}
         title={t('menu')}
         style={{ 
           color: theme.colors.text,
           fontFamily: theme.font 
         }}
       >
-        <div className="hidden sm:block text-left">
+        <div className="hidden sm:block text-left relative">
           <p className="text-sm font-medium">
             <FiSettings className='w-6 h-6 flex-shrink-0' />
           </p>
+          {/* Status indicator */}
+          {activeState && (
+            <div 
+              className="absolute -top-1 -right-1 w-3 h-3 rounded-full border-2"
+              style={{ 
+                backgroundColor: activeState.color,
+                borderColor: theme.colors.background
+              }}
+              title={activeState.customMessage || activeState.label}
+            />
+          )}
         </div>
         <motion.div
           animate={{ rotate: showUserMenu ? 180 : 0 }}
@@ -228,6 +261,62 @@ export default function UserMenu({
             }}
           >
             <div className="p-3">
+              {/* Active Status Display */}
+              {activeState && (
+                <div className="mb-3 pb-3 border-b" style={{ borderColor: hoverStyles.borderColor }}>
+                  <div className="flex items-center gap-2 text-xs">
+                    <div 
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: activeState.color }}
+                    />
+                    <span style={{ color: menuStyles.color }}>
+                      {activeState.customMessage || activeState.label}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Developer Status Option */}
+              <button
+                onClick={() => setShowDevStates(!showDevStates)}
+                className="w-full text-left px-3 py-2 rounded text-xs transition-colors flex items-center gap-2"
+                style={{ 
+                  color: menuStyles.color,
+                  textShadow: menuStyles.textShadow,
+                  backgroundColor: showDevStates ? hoverStyles.activeBg : 
+                    (hoveredItem === 'devStates' ? hoverStyles.hoverBg : 'transparent')
+                }}
+                onMouseEnter={() => setHoveredItem('devStates')}
+                onMouseLeave={() => setHoveredItem(null)}
+              >
+                <FiActivity className="w-4 h-4 flex-shrink-0" />
+                <span className="flex-1">{t('status')}</span>
+                <motion.div
+                  animate={{ rotate: showDevStates ? 90 : 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <FiChevronDown className="w-3 h-3" />
+                </motion.div>
+              </button>
+
+              {/* Developer States Selector */}
+              <AnimatePresence>
+                {showDevStates && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="ml-2 mt-2 overflow-hidden"
+                  >
+                    <DevStatesSelector
+                      user={user}
+                      currentTheme={currentTheme}
+                      className="max-w-none border-0 p-0 bg-transparent"
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Profile Option */}
               <button

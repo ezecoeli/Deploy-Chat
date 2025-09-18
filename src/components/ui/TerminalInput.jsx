@@ -104,8 +104,8 @@ export default function TerminalInput({
       case 'matrix': return 'text-green-600';
       case 'coolRetro': return 'text-cyan-600';
       case 'ubuntu': return 'text-orange-600';
-      case 'windows95': return 'text-gray-400';
-      case 'macOS': return 'text-gray-400';
+      case 'windows95': return 'text-gray-200';
+      case 'macOS': return 'text-gray-100';
       default: return 'text-gray-500';
     }
   };
