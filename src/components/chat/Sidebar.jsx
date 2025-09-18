@@ -564,12 +564,24 @@ export default function Sidebar({
                         {getOtherParticipant(conversation)}
                       </div>
                       {/* Show active state if any */}
-                      {allStates[conversation.otherUser?.id]?.availability && (
-                        <div className="text-xs opacity-75 truncate">
-                          {allStates[conversation.otherUser.id].availability.customMessage || 
-                          getStateById('availability', allStates[conversation.otherUser.id].availability.id)?.label}
-                        </div>
-                      )}
+                      {(() => {
+                        const userStates = allStates[conversation.otherUser?.id];
+                        if (!userStates) return null;
+                        
+                        const activeState = userStates.availability || userStates.work || userStates.mood;
+                        if (!activeState) return null;
+                        
+                        const category = userStates.availability ? 'availability' : 
+                                        userStates.work ? 'work' : 'mood';
+                        
+                        const stateInfo = getStateById(category, activeState.id);
+                        
+                        return (
+                          <div className="text-xs opacity-75 truncate">
+                            {stateInfo?.label}
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                   <UnreadDot hasUnread={unreadChannels?.has(conversation.id)} />

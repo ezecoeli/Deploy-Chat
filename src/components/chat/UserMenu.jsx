@@ -96,14 +96,17 @@ export default function UserMenu({
   };
 
   const getActiveStateDisplay = () => {
-    if (currentStates.availability) {
-      const stateData = getStateById('availability', currentStates.availability.id);
-      if (stateData) {
-        return {
-          ...stateData,
-          customMessage: currentStates.availability.customMessage,
-          color: currentStates.availability.color
-        };
+    // find in any category the current active state
+    for (const category of ['availability', 'work', 'mood']) {
+      if (currentStates[category]) {
+        const stateData = getStateById(category, currentStates[category].id);
+        if (stateData) {
+          return {
+            ...stateData,
+            color: currentStates[category].color,
+            category: category
+          };
+        }
       }
     }
     return null;

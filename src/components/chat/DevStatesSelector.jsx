@@ -130,19 +130,16 @@ export default function DevStateSelector({
       {/* Current State Display */}
       {currentStates[activeTab] && (
         <div className={`mb-2 p-2 rounded text-xs ${themeClasses.current} border-opacity-50`}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 min-w-0 flex-1">
-              <div 
-                className="w-2 h-2 rounded-full flex-shrink-0"
-                style={{ backgroundColor: currentStates[activeTab].color }}
-              />
-              <div className="min-w-0 flex-1">
-                <div className="font-mono text-xs font-medium truncate">
-                  {t('current')}: {activeCategory?.states.find(s => s.id === currentStates[activeTab].id)?.label}
-                </div>
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <div 
+              className="w-2 h-2 rounded-full flex-shrink-0"
+              style={{ backgroundColor: currentStates[activeTab].color }}
+            />
+            <div className="min-w-0 flex-1">
+              <div className="font-mono text-xs font-medium truncate">
+                {t('current')}: {activeCategory?.states.find(s => s.id === currentStates[activeTab].id)?.label}
               </div>
             </div>
-            
           </div>
         </div>
       )}

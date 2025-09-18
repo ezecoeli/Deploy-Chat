@@ -23,17 +23,21 @@ export function useDevStates(userId) {
         .select('*')
         .eq('user_id', userId)
         .or('expires_at.is.null,expires_at.gt.now()')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(1);
 
       if (error) throw error;
 
+      // Reset all states
       const states = {
         work: null,
         mood: null,
         availability: null
       };
 
-      data.forEach(state => {
+      // If there is a state, put it in its corresponding category
+      if (data && data.length > 0) {
+        const state = data[0];
         if (state.state_type && ['work', 'mood', 'availability'].includes(state.state_type)) {
           states[state.state_type] = {
             id: state.state_id,
@@ -41,7 +45,7 @@ export function useDevStates(userId) {
             color: state.color,
           };
         }
-      });
+      }
 
       setCurrentStates(states);
     } catch (error) {
@@ -50,28 +54,29 @@ export function useDevStates(userId) {
     }
   }, [userId]);
 
-  const updateState = useCallback(async (type, stateData, duration = null, customMessage = null) => {
+  const updateState = useCallback(async (type, stateData) => {
     if (!userId || !type || !stateData) return;
 
     setLoading(true);
     setError(null);
     
     try {
-      const expiresAt = duration ? 
-        new Date(Date.now() + duration * 60 * 1000).toISOString() : null;
+      // Delete ALL existing states for the user
+      await supabase
+        .from('user_states')
+        .delete()
+        .eq('user_id', userId);
 
+      // insert new state
       const { error } = await supabase
         .from('user_states')
-        .upsert({
+        .insert({
           user_id: userId,
           state_type: type,
           state_id: stateData.id,
           emoji: stateData.emoji || null,
           color: stateData.color,
-          custom_message: customMessage,
-          expires_at: expiresAt
-        }, {
-          onConflict: 'user_id, state_type'
+          expires_at: null
         });
 
       if (error) throw error;
@@ -86,30 +91,6 @@ export function useDevStates(userId) {
   }, [userId, fetchCurrentStates]);
 
   const clearState = useCallback(async (type) => {
-    if (!userId || !type) return;
-
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const { error } = await supabase
-        .from('user_states')
-        .delete()
-        .eq('user_id', userId)
-        .eq('state_type', type);
-
-      if (error) throw error;
-      
-      await fetchCurrentStates();
-    } catch (error) {
-      console.error('Error clearing state:', error);
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [userId, fetchCurrentStates]);
-
-  const clearAllStates = useCallback(async () => {
     if (!userId) return;
 
     setLoading(true);
@@ -125,35 +106,12 @@ export function useDevStates(userId) {
       
       await fetchCurrentStates();
     } catch (error) {
-      console.error('Error clearing all states:', error);
+      console.error('Error clearing state:', error);
       setError(error.message);
     } finally {
       setLoading(false);
     }
   }, [userId, fetchCurrentStates]);
-
-  const isStateExpired = useCallback((state) => {
-    if (!state || !state.expiresAt) return false;
-    return new Date(state.expiresAt) <= new Date();
-  }, []);
-
-  const getTimeUntilExpiry = useCallback((state) => {
-    if (!state || !state.expiresAt) return null;
-    
-    const now = new Date();
-    const expiry = new Date(state.expiresAt);
-    const diff = expiry - now;
-    
-    if (diff <= 0) return null;
-    
-    const minutes = Math.floor(diff / (1000 * 60));
-    const hours = Math.floor(minutes / 60);
-    
-    if (hours > 0) {
-      return `${hours}h ${minutes % 60}m`;
-    }
-    return `${minutes}m`;
-  }, []);
 
   useEffect(() => {
     fetchCurrentStates();
@@ -169,7 +127,7 @@ export function useDevStates(userId) {
           table: 'user_states',
           filter: `user_id=eq.${userId}`
         }, 
-        (payload) => {
+        () => {
           fetchCurrentStates();
         }
       )
@@ -189,12 +147,9 @@ export function useDevStates(userId) {
     currentStates,
     updateState,
     clearState,
-    clearAllStates,
     loading,
     error,
-    refetch: fetchCurrentStates,
-    isStateExpired,
-    getTimeUntilExpiry
+    refetch: fetchCurrentStates
   };
 }
 
@@ -215,10 +170,8 @@ export function useAllUsersStates() {
 
       if (statesError) throw statesError;
 
-      // get unique user IDs
       const userIds = [...new Set(statesData.map(state => state.user_id))];
 
-      // get user details
       const { data: usersData, error: usersError } = await supabase
         .from('users')
         .select('id, username, avatar_url')
@@ -248,8 +201,7 @@ export function useAllUsersStates() {
           statesByUser[userId][state.state_type] = {
             id: state.state_id,
             emoji: state.emoji,
-            color: state.color,
-            customMessage: state.custom_message
+            color: state.color
           };
         }
       });
