@@ -92,6 +92,7 @@ const translations = {
     confirmArchive: "¿Estás seguro de que quieres archivar este canal? El canal no se eliminará, pero ya no estará disponible para los miembros.",
     channelCreated: "Canal creado exitosamente",
     channelArchived: "Canal archivado exitosamente",
+    
     // Channel names
     announcements: "Comunicados",
     general: "General", 
@@ -99,6 +100,7 @@ const translations = {
     events: "Eventos",
     support: "Soporte",
     random: "Random",
+    
     // Channel descriptions
     announcementsDescription: "Anuncios oficiales y comunicados importantes",
     generalDescription: "Conversaciones generales del equipo y coordinación diaria",
@@ -127,9 +129,6 @@ const translations = {
     theme: "Tema",
     
     // Messages
-    pinnedMessages: "Mensajes fijados",
-    pinMessage: "Fijar mensaje",
-    unpinMessage: "Desfijar mensaje",
     deleteMessage: "Eliminar mensaje",
     editMessage: "Editar mensaje",
     
@@ -162,8 +161,6 @@ const translations = {
     backToLogin: "Volver al inicio",
     enterEmailToReset: "Ingresa el email asociado a tu cuenta para recibir el enlace de restablecimiento.",
     publicChannels: "Canales Públicos",
-
-
   },
 
   // INGLES
@@ -257,6 +254,7 @@ const translations = {
     confirmArchive: "Are you sure you want to archive this channel? The channel will not be deleted, but it will no longer be available to members.",
     channelCreated: "Channel created successfully",
     channelArchived: "Channel archived successfully",
+    
     // Channel names
     announcements: "Announcements",
     general: "General",
@@ -264,6 +262,7 @@ const translations = {
     events: "Events",
     support: "Support",
     random: "Random",
+    
     // Channel descriptions 
     announcementsDescription: "Official announcements and important communications",
     generalDescription: "General team conversations and daily coordination",
@@ -292,9 +291,6 @@ const translations = {
     theme: "Theme",
     
     // Messages
-    pinnedMessages: "Pinned messages",
-    pinMessage: "Pin message",
-    unpinMessage: "Unpin message",
     deleteMessage: "Delete message",
     editMessage: "Edit message",
     
@@ -330,7 +326,7 @@ const translations = {
   }
 };
 
-// language context
+// Language context
 const LanguageContext = createContext();
 
 // Language provider

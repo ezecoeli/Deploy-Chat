@@ -43,10 +43,21 @@ export default function PinButton({
     }
   };
 
+  const getButtonShape = () => {
+    if (currentTheme === 'windows95') {
+      return 'rounded-none shadow-sm';
+    }
+    return 'rounded';
+  };
+
   const handleClick = async (e) => {
     e.stopPropagation();
     
     if (loading) return;
+
+    if (!isPinned && !canPinMore) {
+      return;
+    }
     
     setLoading(true);
     
@@ -54,10 +65,6 @@ export default function PinButton({
       if (isPinned) {
         await onUnpin(message.id);
       } else {
-        if (!canPinMore) {
-          alert(t("maxPinnedReached"));
-          return;
-        }
         await onPin(message.id);
       }
     } catch (error) {
@@ -67,23 +74,29 @@ export default function PinButton({
     }
   };
 
-  const isDisabled = loading || (!isPinned && !canPinMore);
+  const isDisabled = loading;
 
   return (
     <button
       onClick={handleClick}
       disabled={isDisabled}
-      className={`p-1 rounded transition-all opacity-0 group-hover:opacity-100 ${getButtonStyles()} ${
+      className={`p-1 transition-all opacity-0 group-hover:opacity-100 ${getButtonStyles()} ${getButtonShape()} ${
         isDisabled ? 'opacity-30 cursor-not-allowed' : ''
-      }`}
-      title={isPinned ? t("unpinMessage") : t("pinMessage")}
+      } ${!isPinned && !canPinMore ? 'opacity-50' : ''}`}
+      title={
+        !isPinned && !canPinMore 
+          ? t("maxPinnedReached")
+          : isPinned 
+            ? t("unpinMessage") 
+            : t("pinMessage")
+      }
     >
       {loading ? (
         <div className="w-4 h-4 animate-spin border border-current border-t-transparent rounded-full" />
       ) : isPinned ? (
-        <BsPinAngleFill className="w-5 h-5" />
+        <BsPinAngleFill className="w-4 h-4" />
       ) : (
-        <BsPinAngle className="w-5 h-5" />
+        <BsPinAngle className="w-4 h-4" />
       )}
     </button>
   );
