@@ -44,30 +44,40 @@ export function DevStatesProvider({ children }) {
       // Properly group states by user and type
       const statesByUser = {};
       
+      // Group all states by user
+      const statesByUserTemp = {};
       statesData.forEach(state => {
         const userId = state.user_id;
-        
-        if (!statesByUser[userId]) {
-          statesByUser[userId] = {
-            work: null,
-            mood: null,
-            availability: null,
-            user: usersMap[userId] || null
-          };
+        if (!statesByUserTemp[userId]) {
+          statesByUserTemp[userId] = [];
         }
+        statesByUserTemp[userId].push(state);
+      });
+
+      // For each user, find the most recent state (regardless of type)
+      Object.keys(statesByUserTemp).forEach(userId => {
+        const userStates = statesByUserTemp[userId];
         
-        // Keep the latest state for each type
-        if (state.state_type && ['work', 'mood', 'availability'].includes(state.state_type)) {
-          if (!statesByUser[userId][state.state_type] || 
-              new Date(state.created_at) > new Date((statesByUser[userId][state.state_type].created_at || '1970-01-01'))) {
-            statesByUser[userId][state.state_type] = {
-              id: state.state_id,
-              emoji: state.emoji,
-              color: state.color,
-              created_at: state.created_at
-            };
+        // Sort by created_at to get the most recent
+        const sortedStates = userStates.sort((a, b) => 
+          new Date(b.created_at) - new Date(a.created_at)
+        );
+        
+        const mostRecentState = sortedStates[0];
+        
+        statesByUser[userId] = {
+          work: null,
+          mood: null,
+          availability: null,
+          user: usersMap[userId] || null,
+          // Set the most recent state
+          [mostRecentState.state_type]: {
+            id: mostRecentState.state_id,
+            emoji: mostRecentState.emoji,
+            color: mostRecentState.color,
+            created_at: mostRecentState.created_at
           }
-        }
+        };
       });
 
       console.log('[DevStatesContext] States updated:', statesByUser);
