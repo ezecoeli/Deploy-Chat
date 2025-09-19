@@ -11,7 +11,6 @@ export default function PrivateChat({
     user,
     theme,
     currentTheme,
-    onBack,
     onError,
 }) {
     const { t } = useTranslation();
@@ -356,20 +355,7 @@ export default function PrivateChat({
         }
     };
 
-    const getOtherParticipant = () => {
-        if (!conversation.participant_1 || !conversation.participant_2) return 'Unknown';
-
-        if (conversation.otherUser) {
-            return conversation.otherUser.username || conversation.otherUser.email?.split('@')[0] || 'Unknown User';
-        }
-
-        return 'Private Chat';
-    };
-
-    const handleTypingChange = (isTyping) => {
-        // implement if needed
-    };
-
+    // Keep these variables as they will be used for future UI enhancements
     const otherUser = conversation.otherUser || {
         username: 'Usuario',
         avatar_url: 'avatar-01'
@@ -398,34 +384,14 @@ export default function PrivateChat({
         );
     }
 
-    if (error) {
+    if (error || !conversationKey) {
         return (
             <div className="flex-1 flex items-center justify-center">
                 <div className="text-center text-red-400">
-                    <p className="mb-4">Error setting up encrypted conversation</p>
-                    <p className="text-sm opacity-70">{error}</p>
-                    <button
-                        onClick={onBack}
-                        className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-                    >
-                        Go Back
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
-    if (!conversationKey) {
-        return (
-            <div className="flex-1 flex items-center justify-center">
-                <div className="text-center">
-                    <p className="mb-4">Unable to establish encrypted conversation</p>
-                    <button
-                        onClick={onBack}
-                        className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-                    >
-                        Go Back
-                    </button>
+                    <p className="mb-4">
+                        {error ? 'Error setting up encrypted conversation' : 'Unable to establish encrypted conversation'}
+                    </p>
+                    {error && <p className="text-sm opacity-70">{error}</p>}
                 </div>
             </div>
         );
@@ -433,29 +399,11 @@ export default function PrivateChat({
 
     return (
         <div className="flex-1 flex flex-col min-h-0">
-            <div className="p-4 border-b border-gray-600 flex items-center gap-3">
-                <img
-                    src={avatarSrc}
-                    alt={otherUser.username}
-                    className="w-8 h-8 rounded-full object-cover bg-gray-700"
-                />
-                <div>
-                    <h2 
-                    className="font-semibold"
-                    style={{ color: theme?.colors?.text || '#ffffff' }} 
-                    >
-                    {otherUser.username}
-                    </h2>
-                    
-                </div>
-            </div>
-
             <MessageArea
                 messages={messages}
                 user={user}
                 theme={theme}
                 currentTheme={currentTheme}
-                typingUsers={[]}
                 t={(key) => key}
                 onDecryptMessage={handleDecryptMessage}
             />
@@ -468,7 +416,6 @@ export default function PrivateChat({
                 currentTheme={currentTheme}
                 t={t}
                 onError={onError}
-                onTypingChange={handleTypingChange}
                 onSendMessage={handleSendMessage}
                 isEncrypted={true}
             />

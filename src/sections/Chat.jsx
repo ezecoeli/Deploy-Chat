@@ -29,7 +29,6 @@ export default function Chat() {
   const [messages, setMessages] = useState([]);
   const [currentChannel, setCurrentChannel] = useState(null);
   const [error, setError] = useState('');
-  const [typingUsers, setTypingUsers] = useState([]);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
   const [isPrivateMode, setIsPrivateMode] = useState(false);
@@ -343,30 +342,7 @@ export default function Chat() {
 
           removeUnreadChannel(currentChannel.id);
         })
-        .on('broadcast', { event: 'typing' }, (payload) => {
-          const { user_id, username, is_typing } = payload.payload;
-
-          if (user_id === user.id) return;
-          
-          setTypingUsers(current => {
-            if (is_typing) {
-              if (!current.find(u => u.user_id === user_id)) {
-                return [...current, { user_id, username }];
-              }
-              return current;
-            } else {
-              return current.filter(u => u.user_id !== user_id);
-            }
-          });
-
-          if (is_typing) {
-            setTimeout(() => {
-              setTypingUsers(current => 
-                current.filter(u => u.user_id !== user_id)
-              );
-            }, 3000);
-          }
-        })
+        
         .subscribe((status) => {
           if (status === 'CHANNEL_ERROR' && retryCount < maxRetries) {
             retryCount++;
@@ -390,7 +366,6 @@ export default function Chat() {
 
   const handleSelectConversation = useCallback(async (conversation) => {
     setMessages([]);
-    setTypingUsers([]);
     setError('');
     setCurrentChannel(conversation);
     setSelectedConversation(conversation);
@@ -523,7 +498,6 @@ export default function Chat() {
                   user={user}
                   theme={theme}
                   currentTheme={currentTheme}
-                  typingUsers={typingUsers}
                   currentChannel={currentChannel}
                 />
 

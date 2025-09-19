@@ -15,8 +15,7 @@ export default function MessageArea({
   messages, 
   user, 
   theme, 
-  currentTheme, 
-  typingUsers = [],
+  currentTheme,
   currentChannel
 }) {
   const messagesEndRef = useRef(null);
@@ -33,7 +32,6 @@ export default function MessageArea({
   } = usePinnedMessages(currentChannel?.id);
 
   const safeMessages = Array.isArray(messages) ? messages : [];
-  const safeTypingUsers = Array.isArray(typingUsers) ? typingUsers : [];
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -284,25 +282,6 @@ export default function MessageArea({
               );
             })}
 
-            {safeTypingUsers.length > 0 && ( 
-              <div className="flex items-center gap-2 px-2 sm:px-3 py-2 opacity-70">
-                <div className="flex space-x-1">
-                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-gray-400 animate-bounce" />
-                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0.1s' }} />
-                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0.2s' }} />
-                </div>
-                <span 
-                  className="text-xs font-mono"
-                  style={{ color: theme.colors.textSecondary }}
-                >
-                  {safeTypingUsers.length === 1 
-                    ? `${safeTypingUsers[0].username} ${window.innerWidth < 640 ? '...' : (t?.('isCoding') || 'is typing...')}`
-                    : `${safeTypingUsers.length} usuarios escribiendo...`
-                  }
-                </span>
-              </div>
-            )}
-            
             <div ref={messagesEndRef} />
           </div>
         )}

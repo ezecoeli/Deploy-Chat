@@ -10,14 +10,12 @@ export default function MessageInput({
   currentTheme, 
   t,
   onError,
-  onTypingChange 
+  onSendMessage,
+  isEncrypted = false,
 }) {
   const [newMessage, setNewMessage] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const typingTimeoutRef = useRef(null);
 
-  // Detect window resize for responsive prompt
   useEffect(() => {
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
@@ -30,13 +28,11 @@ export default function MessageInput({
     };
   }, []);
   
-  // Get terminal prompt based on theme and user
   const getTerminalPrompt = () => {
     const username = userProfile?.username || user?.email?.split('@')[0] || 'user';
     const isSmallScreen = windowWidth < 640;
     
     if (isSmallScreen) {
-      // Shortened prompts for mobile
       switch (currentTheme) {
         case 'matrix':
           return 'neo$ ';
@@ -53,7 +49,6 @@ export default function MessageInput({
       }
     }
 
-    // Full prompts for desktop
     switch (currentTheme) {
       case 'matrix':
         return `neo>: `;
@@ -71,49 +66,8 @@ export default function MessageInput({
   };
 
   const handleInputChange = (value) => {
-    // Ensure value is always a string
     const stringValue = value || '';
     setNewMessage(stringValue);
-
-    if (stringValue.trim() && !isTyping) {
-      setIsTyping(true);
-      
-      if (currentChannel?.id) {
-        supabase.channel(`messages:${currentChannel.id}`)
-          .send({
-            type: 'broadcast',
-            event: 'typing',
-            payload: {
-              user_id: user.id,
-              username: userProfile?.username || user?.email?.split('@')[0],
-              is_typing: true
-            }
-          });
-      }
-      onTypingChange?.(true);
-    }
-
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
-    }
-
-    typingTimeoutRef.current = setTimeout(() => {
-      setIsTyping(false);
-      
-      if (currentChannel?.id) {
-        supabase.channel(`messages:${currentChannel.id}`)
-          .send({
-            type: 'broadcast',
-            event: 'typing',
-            payload: {
-              user_id: user.id,
-              username: userProfile?.username || user?.email?.split('@')[0],
-              is_typing: false
-            }
-          });
-      }
-      onTypingChange?.(false);
-    }, 1000);
   };
 
   const sendMessage = async (e) => {
@@ -121,33 +75,32 @@ export default function MessageInput({
     const messageText = newMessage || '';
     if (!messageText.trim() || !currentChannel || !user) return;
 
-    setIsTyping(false);
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
-    }
-    onTypingChange?.(false);
-
     try {
-      const { error } = await supabase
-        .from('messages')
-        .insert([
-          {
-            content: messageText.trim(),
-            user_id: user.id,
-            channel_id: currentChannel.id,
-          },
-        ]);
+      if (isEncrypted && onSendMessage) {
+        await onSendMessage(messageText.trim());
+      } else {
+        const { error } = await supabase
+          .from('messages')
+          .insert([
+            {
+              content: messageText.trim(),
+              user_id: user.id,
+              channel_id: currentChannel.id,
+            },
+          ]);
 
-      if (error) throw error;
+        if (error) throw error;
+      }
+      
       setNewMessage('');
     } catch (err) {
-      onError?.('Error enviando mensaje: ' + err.message);
+      onError?.('Error sending message: ' + err.message);
     }
   };
 
   const getThemePlaceholder = (currentTheme, t) => {
     const placeholders = {
-      default: t('typeMessage') || "Escribe un mensaje...",
+      default: t('typeMessage') || "Type a message...",
       windows95: "echo Hello World!",   
       matrix: "echo 'Follow the white rabbit...'", 
       ubuntu: "echo 'Ubuntu means humanity'",        
@@ -158,15 +111,6 @@ export default function MessageInput({
     const basePlaceholder = placeholders[currentTheme] || "echo 'Hello World!'";
     return basePlaceholder;
   };
-
-  // Cleanup effect for typing timeout
-  React.useEffect(() => {
-    return () => {
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-      }
-    };
-  }, []);
 
   return (
     <div 
@@ -179,13 +123,12 @@ export default function MessageInput({
       }}
     >
       <form onSubmit={sendMessage} className="flex gap-1 sm:gap-2 font-mono items-stretch"> 
-        {/* Terminal Input Container */}
         <div 
           className="flex-1 px-2 sm:px-3 py-2 rounded-lg relative min-w-0"
           style={{ 
             backgroundColor: currentTheme === 'coolRetro' ? '#000000' : 'rgba(0,0,0,0.5)', 
             border: `1px solid ${theme.colors.border}`,
-            maxWidth: 'calc(100% - 80px)' // Reserve space for button
+            maxWidth: 'calc(100% - 80px)'
           }}
         >
           <TerminalInput
@@ -198,7 +141,6 @@ export default function MessageInput({
             className="w-full"
           />
 
-          {/* Character counter for long messages */}
           {(newMessage?.length || 0) > 500 && (
             <div 
               className="absolute -top-6 right-0 text-xs"
@@ -228,7 +170,6 @@ export default function MessageInput({
           </span>
         </button>
       </form>
-      
     </div>
   );
 }
