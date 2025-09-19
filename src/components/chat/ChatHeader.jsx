@@ -41,7 +41,7 @@ export default function ChatHeader({
 
   return (
     <div 
-      className="border p-4 flex justify-between items-center"
+      className="border p-2 flex justify-between items-center"
       style={{
         borderColor: currentTheme === 'matrix' 
           ? 'rgba(0, 255, 0, 0.3)'
@@ -56,16 +56,14 @@ export default function ChatHeader({
       }}
     >
       <div>
-        <h1 className="text-2xl font-bold font-mono" style={{ color: theme.colors.primary, fontFamily: theme.font }}>
-          Deploy-Chat
-        </h1>
-        <p className="text-sm font-mono" style={{ color: theme.colors.textSecondary, fontFamily: theme.font }}>
+        
+        <p className="text-sm animate-pulse font-mono" style={{ color: theme.colors.textSecondary, fontFamily: theme.font }}>
           {theme.prompt} cd {getChannelDisplayName()}
         </p>
         {isPrivateMode && (
           <div className="flex items-center gap-1 text-xs">
             <span style={{ color: theme.colors.textSecondary }}>
-              <BsShieldLock className='w-5 h-5' />
+              <BsShieldLock className='w-4 h-4' />
             </span>
             <span style={{ color: theme.colors.textSecondary }}>
               {t('encrypted')}

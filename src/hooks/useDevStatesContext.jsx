@@ -15,7 +15,6 @@ export function DevStatesProvider({ children }) {
     
     try {
       setLoading(true);
-      console.log('[DevStatesContext] Fetching all user states...');
       
       const { data: statesData, error: statesError } = await supabase
         .from('user_states')
@@ -84,7 +83,6 @@ export function DevStatesProvider({ children }) {
         }
       });
 
-      console.log('[DevStatesContext] States updated:', statesByUser);
       setAllUserStates(statesByUser);
     } catch (error) {
       if (!isUnmountedRef.current) {
@@ -101,8 +99,6 @@ export function DevStatesProvider({ children }) {
     if (!userId || !type || !stateData) return;
 
     try {
-      console.log(`[DevStatesContext] Updating state for user ${userId}:`, { type, stateData });
-      
       const { error: deleteError } = await supabase
         .from('user_states')
         .delete()
@@ -125,8 +121,6 @@ export function DevStatesProvider({ children }) {
         .select();
 
       if (insertError) throw insertError;
-
-      console.log('[DevStatesContext] State updated successfully, broadcasting...');
       
       setAllUserStates(prev => ({
         ...prev,
@@ -145,7 +139,6 @@ export function DevStatesProvider({ children }) {
       }));
 
       if (broadcastChannelRef.current) {
-        console.log('[DevStatesContext] Broadcasting to channel...');
         await broadcastChannelRef.current.send({
           type: 'broadcast',
           event: 'state_updated',
@@ -160,7 +153,6 @@ export function DevStatesProvider({ children }) {
             }
           }
         });
-        console.log('[DevStatesContext] Broadcast sent successfully');
       }
 
       return true;
@@ -171,8 +163,6 @@ export function DevStatesProvider({ children }) {
   }, []);
 
   const handleDatabaseChange = useCallback((payload) => {
-    console.log('[DevStatesContext] Database change received:', payload);
-    
     setTimeout(() => {
       if (!isUnmountedRef.current) {
         fetchAllStates();
@@ -181,11 +171,8 @@ export function DevStatesProvider({ children }) {
   }, [fetchAllStates]);
 
   const handleBroadcastUpdate = useCallback((payload) => {
-    console.log('[DevStatesContext] Broadcast update received:', payload);
-    
     if (payload.event === 'state_updated') {
       const { userId, type, stateData } = payload.payload;
-      console.log(`[DevStatesContext] Applying broadcast update for user ${userId}, type ${type}`);
       
       setAllUserStates(prev => ({
         ...prev,
@@ -204,8 +191,6 @@ export function DevStatesProvider({ children }) {
     isUnmountedRef.current = false;
     fetchAllStates();
 
-    console.log('[DevStatesContext] Setting up enhanced subscriptions...');
-
     if (subscriptionRef.current) {
       subscriptionRef.current.unsubscribe();
     }
@@ -223,9 +208,7 @@ export function DevStatesProvider({ children }) {
         }, 
         handleDatabaseChange
       )
-      .subscribe((status) => {
-        console.log('[DevStatesContext] Database subscription status:', status);
-      });
+      .subscribe();
 
     const broadcastSubscription = supabase
       .channel('dev-states-broadcast')
@@ -233,15 +216,12 @@ export function DevStatesProvider({ children }) {
         { event: 'state_updated' }, 
         handleBroadcastUpdate
       )
-      .subscribe((status) => {
-        console.log('[DevStatesContext] Broadcast subscription status:', status);
-      });
+      .subscribe();
 
     subscriptionRef.current = dbSubscription;
     broadcastChannelRef.current = broadcastSubscription;
 
     return () => {
-      console.log('[DevStatesContext] Cleaning up subscriptions...');
       isUnmountedRef.current = true;
       
       if (subscriptionRef.current) {
