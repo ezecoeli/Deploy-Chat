@@ -74,7 +74,7 @@ const translations = {
     coffee: "Descanso",
     tired: "Cansado",
     thinking: "Pensando",
-    celebrate: "Victoria",
+    celebrate: "Festejo",
     
     // Availability states
     available: "Disponible",
@@ -267,7 +267,7 @@ const translations = {
     coffee: "Coffee Break",
     tired: "Tired",
     thinking: "Thinking",
-    celebrate: "Victory",
+    celebrate: "Celebration",
     
     // Availability states
     available: "Available",

@@ -41,43 +41,47 @@ export function DevStatesProvider({ children }) {
         usersMap[user.id] = user;
       });
 
-      // Properly group states by user and type
       const statesByUser = {};
       
-      // Group all states by user
-      const statesByUserTemp = {};
+      const latestStatesByUser = {};
       statesData.forEach(state => {
-        const userId = state.user_id;
-        if (!statesByUserTemp[userId]) {
-          statesByUserTemp[userId] = [];
+        if (!latestStatesByUser[state.user_id] || 
+            new Date(state.created_at) > new Date(latestStatesByUser[state.user_id].created_at)) {
+          latestStatesByUser[state.user_id] = state;
         }
-        statesByUserTemp[userId].push(state);
       });
 
-      // For each user, find the most recent state (regardless of type)
-      Object.keys(statesByUserTemp).forEach(userId => {
-        const userStates = statesByUserTemp[userId];
+      Object.values(latestStatesByUser).forEach(state => {
+        const userId = state.user_id;
+        if (!statesByUser[userId]) {
+          statesByUser[userId] = {
+            work: null,
+            mood: null,
+            availability: null,
+            user: usersMap[userId] || null
+          };
+        }
         
-        // Sort by created_at to get the most recent
-        const sortedStates = userStates.sort((a, b) => 
-          new Date(b.created_at) - new Date(a.created_at)
-        );
-        
-        const mostRecentState = sortedStates[0];
-        
-        statesByUser[userId] = {
-          work: null,
-          mood: null,
-          availability: null,
-          user: usersMap[userId] || null,
-          // Set the most recent state
-          [mostRecentState.state_type]: {
-            id: mostRecentState.state_id,
-            emoji: mostRecentState.emoji,
-            color: mostRecentState.color,
-            created_at: mostRecentState.created_at
+        if (state.state_type && ['work', 'mood', 'availability', 'status'].includes(state.state_type)) {
+          if (state.state_type === 'status') {
+            statesByUser[userId] = {
+              work: null,
+              mood: null,
+              availability: {
+                id: state.state_id,
+                emoji: state.emoji,
+                color: state.color
+              },
+              user: usersMap[userId] || null
+            };
+          } else {
+            statesByUser[userId][state.state_type] = {
+              id: state.state_id,
+              emoji: state.emoji,
+              color: state.color
+            };
           }
-        };
+        }
       });
 
       console.log('[DevStatesContext] States updated:', statesByUser);
@@ -99,20 +103,20 @@ export function DevStatesProvider({ children }) {
     try {
       console.log(`[DevStatesContext] Updating state for user ${userId}:`, { type, stateData });
       
-      // Only delete the specific state type
       const { error: deleteError } = await supabase
         .from('user_states')
         .delete()
-        .eq('user_id', userId)
-        .eq('state_type', type);
+        .eq('user_id', userId);
 
       if (deleteError) throw deleteError;
+
+      const actualType = type === 'status' ? 'availability' : type;
 
       const { data: insertData, error: insertError } = await supabase
         .from('user_states')
         .insert({
           user_id: userId,
-          state_type: type,
+          state_type: actualType,
           state_id: stateData.id,
           emoji: stateData.emoji || null,
           color: stateData.color,
@@ -124,7 +128,6 @@ export function DevStatesProvider({ children }) {
 
       console.log('[DevStatesContext] State updated successfully, broadcasting...');
       
-      // Update local state immediately for instant feedback
       setAllUserStates(prev => ({
         ...prev,
         [userId]: {
@@ -132,7 +135,7 @@ export function DevStatesProvider({ children }) {
           mood: null,
           availability: null,
           ...prev[userId],
-          [type]: {
+          [actualType]: {
             id: stateData.id,
             emoji: stateData.emoji || null,
             color: stateData.color,
@@ -141,7 +144,6 @@ export function DevStatesProvider({ children }) {
         }
       }));
 
-      // Use the same channel for broadcasting
       if (broadcastChannelRef.current) {
         console.log('[DevStatesContext] Broadcasting to channel...');
         await broadcastChannelRef.current.send({
@@ -149,7 +151,7 @@ export function DevStatesProvider({ children }) {
           event: 'state_updated',
           payload: {
             userId,
-            type,
+            type: actualType,
             stateData: {
               id: stateData.id,
               emoji: stateData.emoji || null,
@@ -171,7 +173,6 @@ export function DevStatesProvider({ children }) {
   const handleDatabaseChange = useCallback((payload) => {
     console.log('[DevStatesContext] Database change received:', payload);
     
-    // Refetch all states when database changes
     setTimeout(() => {
       if (!isUnmountedRef.current) {
         fetchAllStates();
@@ -205,7 +206,6 @@ export function DevStatesProvider({ children }) {
 
     console.log('[DevStatesContext] Setting up enhanced subscriptions...');
 
-    // Cleanup existing subscriptions
     if (subscriptionRef.current) {
       subscriptionRef.current.unsubscribe();
     }
@@ -213,7 +213,6 @@ export function DevStatesProvider({ children }) {
       broadcastChannelRef.current.unsubscribe();
     }
 
-    // Create database subscription
     const dbSubscription = supabase
       .channel('dev-states-db')
       .on('postgres_changes', 
@@ -228,7 +227,6 @@ export function DevStatesProvider({ children }) {
         console.log('[DevStatesContext] Database subscription status:', status);
       });
 
-    // Create separate broadcast subscription
     const broadcastSubscription = supabase
       .channel('dev-states-broadcast')
       .on('broadcast', 
