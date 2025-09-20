@@ -45,6 +45,14 @@ export default function ScrollToBottomButton({
                     shadow: '0 2px 8px rgba(0,0,0,0.15)',
                     hover: 'rgba(249, 250, 251, 0.95)'
                 };
+            case 'ubuntu':
+                return {
+                    bg: 'rgba(233, 84, 32, 0.9)',
+                    border: '1px solid #e95420',
+                    color: '#ffffff',
+                    shadow: '0 2px 8px rgba(233, 84, 32, 0.3)',
+                    hover: 'rgba(207, 73, 27, 0.9)'
+                };
             default:
                 return {
                     bg: 'rgba(59, 130, 246, 0.9)',
@@ -80,7 +88,7 @@ export default function ScrollToBottomButton({
                     }}
                     whileTap={{ scale: 0.95 }}
                     >
-                    <FiChevronDown className="w-5 h-5" />
+                    <FiChevronDown className="w-6 h-6" />
 
                     {newMessagesCount > 0 && (
                         <motion.div
