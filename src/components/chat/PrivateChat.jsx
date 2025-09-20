@@ -1,10 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../../utils/supabaseClient';
 import { useEncryption } from '../../hooks/useEncryption';
 import MessageArea from './MessageArea';
 import MessageInput from './MessageInput';
 import { useTranslation } from '../../hooks/useTranslation';
 import { getAvatarById } from '../../config/avatars';
+import { usePinnedMessages } from '../../hooks/usePinnedMessages';
+import { usePermissions } from '../../hooks/usePermissions';
+import PinnedMessagesBar from './PinnedMessagesBar';
 
 export default function PrivateChat({
     conversation,
@@ -20,6 +23,15 @@ export default function PrivateChat({
     const [messages, setMessages] = useState([]);
     const [userProfile, setUserProfile] = useState(null);
     const isMountedRef = useRef(true);
+    const { isAdmin, isModerator } = usePermissions(user);
+    const canPin = isAdmin || isModerator;
+
+    const { 
+    pinnedMessages, 
+    pinMessage, 
+    unpinMessage, 
+    canPinMore 
+    } = usePinnedMessages(conversation?.id, user);
 
     const {
         userKeyPair,
@@ -58,6 +70,22 @@ export default function PrivateChat({
             setMessages([]);
         }
     };
+
+    const handlePinMessage = useCallback(async (message) => {
+        try {
+            if (message.is_pinned) {
+                await unpinMessage(message.id);
+            } else {
+                if (!canPinMore) {
+                    alert('Máximo de mensajes fijados alcanzado');
+                    return;
+                }
+                await pinMessage(message.id, message.user_id);
+            }
+        } catch (error) {
+            console.error('Error al fijar mensaje:', error);
+        }
+    }, [pinMessage, unpinMessage, canPinMore]);
 
     useEffect(() => {
         if (conversationKey && conversation?.id) {
@@ -399,11 +427,31 @@ export default function PrivateChat({
 
     return (
         <div className="flex-1 flex flex-col min-h-0">
+            {/* pinned messages */}
+            {pinnedMessages.length > 0 && (
+                <PinnedMessagesBar
+                    pinnedMessages={pinnedMessages}
+                    user={user}
+                    theme={theme}
+                    currentTheme={currentTheme}
+                    onMessageClick={() => {}}
+                    onUnpinMessage={async (messageId) => {
+                    try {
+                        await unpinMessage(messageId);
+                    } catch (error) {
+                        console.error('Error al desfijar mensaje:', error);
+                    }
+                    }}
+                />
+            )}
             <MessageArea
                 messages={messages}
                 user={user}
                 theme={theme}
                 currentTheme={currentTheme}
+                currentChannel={conversation}
+                canPin={canPin}
+                onPinMessage={handlePinMessage}
                 t={(key) => key}
                 onDecryptMessage={handleDecryptMessage}
             />

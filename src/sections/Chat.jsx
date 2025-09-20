@@ -430,7 +430,7 @@ export default function Chat() {
           />
         )}
         
-        <div className="w-full max-w-6xl h-screen p-4 flex relative mx-auto z-20">
+        <div className="w-screen h-screen p-0 flex relative z-20">
           <div 
             className="w-64 flex-shrink-0 border-r overflow-y-auto border"
             style={{ 
