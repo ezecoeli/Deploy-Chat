@@ -151,6 +151,12 @@ const translations = {
     daily: "Diario",
     weekly: "Semanal",
     monthly: "Mensual",
+    usernameRequired: "El nombre de usuario es requerido",
+    usernameMinLength: "El nombre debe tener al menos 2 caracteres", 
+    usernameMaxLength: "El nombre no puede exceder 30 caracteres",
+    usernameInvalidChars: "Solo se permiten letras, números, espacios y guiones bajos",
+    usernameAlreadyExists: "Este nombre de usuario ya está en uso",
+    profileUpdateError: "Error al actualizar el perfil",
     
     // Navigation
     home: "Inicio",
@@ -344,6 +350,12 @@ const translations = {
     daily: "Daily",
     weekly: "Weekly",
     monthly: "Monthly",
+    usernameRequired: "Username is required",
+    usernameMinLength: "Username must be at least 2 characters",
+    usernameMaxLength: "Username cannot exceed 30 characters", 
+    usernameInvalidChars: "Only letters, numbers, spaces and underscores allowed",
+    usernameAlreadyExists: "This username is already taken",
+    profileUpdateError: "Error updating profile",
 
     // Navigation
     home: "Home",

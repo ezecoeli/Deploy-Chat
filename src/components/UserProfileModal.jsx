@@ -67,16 +67,15 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
 
     // Validate username
     if (!formData.username.trim()) {
-      newErrors.username = 'El nombre de usuario es requerido';
+      newErrors.username = t('usernameRequired') || 'Username is required';
     } else if (formData.username.trim().length < 2) {
-      newErrors.username = 'El nombre debe tener al menos 2 caracteres';
+      newErrors.username = t('usernameMinLength') || 'Username must be at least 2 characters';
     } else if (formData.username.trim().length > 30) {
-      newErrors.username = 'El nombre no puede exceder 30 caracteres';
+      newErrors.username = t('usernameMaxLength') || 'Username cannot exceed 30 characters';
     } else if (!/^[a-zA-Z0-9_\s]+$/.test(formData.username.trim())) {
-      newErrors.username = 'Solo se permiten letras, números, espacios y guiones bajos';
+      newErrors.username = t('usernameInvalidChars') || 'Only letters, numbers, spaces and underscores allowed';
     }
 
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -101,7 +100,7 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
       if (checkError && checkError.code !== 'PGRST116') { 
         // Continue without verification if there's permission error
       } else if (existingUsers && existingUsers.length > 0) {
-        setErrors({ username: 'Este nombre de usuario ya está en uso' });
+        setErrors({ username: t('usernameAlreadyExists') || 'This username is already taken' });
         setIsLoading(false);
         return;
       }
@@ -135,7 +134,7 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
       }, 1500);*/
 
     } catch (error) {
-      setMessage('Error al actualizar el perfil');
+      setMessage(t('profileUpdateError') || 'Error updating profile');
     } finally {
       setIsLoading(false);
     }
@@ -307,9 +306,9 @@ export default function UserProfileModal({ isOpen, onClose, user, onProfileUpdat
                     <p className="font-medium" style={{ color: theme.colors.text }}>
                       {formData.username || t('profile')}
                     </p>
-                    <p className="text-sm" style={{ color: theme.colors.textSecondary }}>
+                    {/*<p className="text-sm" style={{ color: theme.colors.textSecondary }}>
                       {user?.email}
-                    </p>
+                    </p>*/}
                   </div>
                 </div>
               </div>
