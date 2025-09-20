@@ -49,7 +49,9 @@ export default function ChatHeader({
           ? '#c0c7c8'
           : theme.colors.border,
         backgroundColor: currentTheme === 'windows95' 
-          ? theme.colors.headerBg || '#000080' 
+          ? theme.colors.headerBg || '#000080'
+          : currentTheme === 'macOS'
+          ? theme.colors.titleBar || '#c0c0c0'
           : currentTheme === 'matrix' || currentTheme === 'coolRetro' 
           ? 'transparent' 
           : 'rgba(0, 0, 0, 0.3)',
