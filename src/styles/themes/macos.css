@@ -85,6 +85,21 @@ body[data-theme="macOS"] button:active {
   transform: none !important;
 }
 
+/* Exception for scroll to bottom button */
+body[data-theme="macOS"] button.scroll-to-bottom-btn {
+  width: 36px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  background: linear-gradient(to bottom, #f0f0f0 0%, #c0c0c0 50%, #a0a0a0 100%) !important;
+  border: 2px outset #c0c0c0 !important;
+}
+
+body[data-theme="macOS"] button.scroll-to-bottom-btn:hover {
+  background: linear-gradient(to bottom, #ffffff 0%, #d0d0d0 50%, #b0b0b0 100%) !important;
+}
+
 /* Message area */
 body[data-theme="macOS"] .flex-1.overflow-y-auto {
   background: #ffffff !important;

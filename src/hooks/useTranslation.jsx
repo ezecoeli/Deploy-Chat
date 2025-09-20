@@ -50,6 +50,8 @@ const translations = {
     writeNotes: "Escribe tus notas aquí...",
     scheduleEvent: "Programar evento",
     titleInput: "Título",
+    scrollToBottom: "Desplazarse al final",
+    newMessage: "Nuevo mensaje",
 
     // Dev States
     status: "Estado",
@@ -249,6 +251,8 @@ const translations = {
     writeNotes: "Write your notes here...",
     scheduleEvent: "Schedule Event",
     titleInput: "Title",
+    scrollToBottom: "Scroll to bottom",
+    newMessage: "New message",
 
     // Dev States
     status: "Status",

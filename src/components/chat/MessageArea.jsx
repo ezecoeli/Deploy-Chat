@@ -1,5 +1,4 @@
-import React, { useRef, useEffect } from 'react';
-import { FiUser } from 'react-icons/fi';
+import React from 'react';
 import MessageRenderer from './MessageRenderer';
 import ReactionBar from '../ReactionBar';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -10,19 +9,34 @@ import PinnedMessagesBar from './PinnedMessagesBar';
 import PinButton from './PinButton';
 import UserAvatar from './UserAvatar';
 import { getAvatarById, getDefaultAvatar } from '../../config/avatars';
+import { useScrollToBottom } from '../../hooks/useScrollToBottom';
+import ScrollToBottomButton from './ScrollToBottomButton';
 
 export default function MessageArea({ 
   messages, 
   user, 
   theme, 
   currentTheme,
-  currentChannel
+  currentChannel,
+  canPin: propCanPin,
+  onPinMessage
 }) {
-  const messagesEndRef = useRef(null);
   const { t } = useTranslation();
   const { isAdmin, isModerator } = usePermissions(user);
   const { allUserStates } = useDevStatesContext();
-  const canPin = isAdmin || isModerator;
+  
+  const safeMessages = Array.isArray(messages) ? messages : [];
+  
+  const {
+    containerRef,
+    messagesEndRef,
+    showButton,
+    newMessagesCount,
+    scrollToBottom
+  } = useScrollToBottom(safeMessages, 100);
+
+  // Use prop canPin if provided, otherwise calculate from permissions
+  const canPin = propCanPin !== undefined ? propCanPin : (isAdmin || isModerator);
 
   const {
     pinnedMessages,
@@ -30,12 +44,6 @@ export default function MessageArea({
     unpinMessage,
     canPinMore
   } = usePinnedMessages(currentChannel?.id);
-
-  const safeMessages = Array.isArray(messages) ? messages : [];
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [safeMessages]);
 
   const getScrollbarClass = () => {
     switch (currentTheme) {
@@ -89,7 +97,14 @@ export default function MessageArea({
   };
 
   const handlePinMessage = async (messageId) => {
-    return await pinMessage(messageId, user.id);
+    if (onPinMessage) {
+      // Use external handler from parent (PrivateChat)
+      const message = safeMessages.find(msg => msg.id === messageId);
+      return await onPinMessage(message);
+    } else {
+      // Use internal handler (regular Chat)
+      return await pinMessage(messageId, user.id);
+    }
   };
 
   const handleUnpinMessage = async (messageId) => {
@@ -126,7 +141,7 @@ export default function MessageArea({
   }
 
   return (
-    <div className="flex-1 flex flex-col min-h-0">
+    <div className="flex-1 flex flex-col min-h-0 relative">
       <PinnedMessagesBar
         pinnedMessages={pinnedMessages}
         onUnpinMessage={handleUnpinMessage}
@@ -136,7 +151,8 @@ export default function MessageArea({
         currentTheme={currentTheme}
       />
 
-      <div 
+      <div
+        ref={containerRef} 
         className={`flex-1 overflow-y-auto px-2 py-3 sm:p-4 space-y-2 sm:space-y-3 ${getScrollbarClass()}`}
         style={{
           backgroundColor: currentTheme === 'matrix' || currentTheme === 'coolRetro' 
@@ -156,7 +172,7 @@ export default function MessageArea({
               style={{ color: theme.colors.textSecondary }}
             >
               {currentTheme === 'default' 
-                ? "No hay mensajes aún. ¡Sé el primero en escribir!"
+                ? "No messages yet. Be the first to write!"
                 : `${theme.prompt} echo ${t('noMessagesYet')}`
               }
             </p>
@@ -286,6 +302,14 @@ export default function MessageArea({
           </div>
         )}
       </div>
+
+      <ScrollToBottomButton
+        show={showButton}
+        newMessagesCount={newMessagesCount}
+        onClick={scrollToBottom}
+        theme={theme}
+        currentTheme={currentTheme}
+      />
     </div>
   );
 }

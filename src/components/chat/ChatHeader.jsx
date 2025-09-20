@@ -59,7 +59,7 @@ export default function ChatHeader({
     >
       <div>
         
-        <p className="text-sm animate-pulse font-mono" style={{ color: theme.colors.textSecondary, fontFamily: theme.font }}>
+        <p className="text-lg animate-pulse font-mono" style={{ color: theme.colors.textSecondary, fontFamily: theme.font }}>
           {theme.prompt} cd {getChannelDisplayName()}
         </p>
         {isPrivateMode && (
