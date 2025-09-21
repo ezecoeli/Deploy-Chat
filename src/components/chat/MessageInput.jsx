@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../../utils/supabaseClient';
 import TerminalInput from '../ui/TerminalInput';
 
@@ -11,7 +11,7 @@ export default function MessageInput({
   t,
   onError,
   onSendMessage,
-  isEncrypted = false,
+  onMessageSent
 }) {
   const [newMessage, setNewMessage] = useState('');
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -76,9 +76,11 @@ export default function MessageInput({
     if (!messageText.trim() || !currentChannel || !user) return;
 
     try {
-      if (isEncrypted && onSendMessage) {
+      if (onSendMessage) {
+        // Para chats privados con función personalizada
         await onSendMessage(messageText.trim());
       } else {
+        // Para chats públicos normales
         const { error } = await supabase
           .from('messages')
           .insert([
@@ -90,6 +92,10 @@ export default function MessageInput({
           ]);
 
         if (error) throw error;
+        
+        if (onMessageSent) {
+          onMessageSent();
+        }
       }
       
       setNewMessage('');

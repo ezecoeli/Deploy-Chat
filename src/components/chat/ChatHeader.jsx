@@ -3,7 +3,7 @@ import UserMenu from './UserMenu';
 import NotesModal from '../ui/NotesModal';
 import BotEventModal from '../ui/BotEventModal';
 import SearchModal from '../ui/SearchModal';
-import { BsShieldLock, BsCalendarEvent, BsSearch  } from "react-icons/bs";
+import { BsCalendarEvent, BsSearch  } from "react-icons/bs";
 import { LuNotebookText } from "react-icons/lu";
 import { usePermissions } from '../../hooks/usePermissions';
 
@@ -58,20 +58,10 @@ export default function ChatHeader({
       }}
     >
       <div>
-        
         <p className="text-lg animate-pulse font-mono" style={{ color: theme.colors.textSecondary, fontFamily: theme.font }}>
           {theme.prompt} cd {getChannelDisplayName()}
         </p>
-        {isPrivateMode && (
-          <div className="flex items-center gap-1 text-xs">
-            <span style={{ color: theme.colors.textSecondary }}>
-              <BsShieldLock className='w-4 h-4' />
-            </span>
-            <span style={{ color: theme.colors.textSecondary }}>
-              {t('encrypted')}
-            </span>
-          </div>
-        )}
+        
       </div>
 
       <div className="flex items-center gap-4">

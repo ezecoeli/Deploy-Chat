@@ -43,9 +43,7 @@ export const useMessageSearch = (user) => {
             type
           )
         `)
-        
         .ilike('content', `%${query}%`)
-        .eq('is_encrypted', false) 
         .order('created_at', { ascending: false })
         .limit(50);
 

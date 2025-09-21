@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import MessageRenderer from './MessageRenderer';
 import ReactionBar from '../ReactionBar';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -19,7 +19,8 @@ export default function MessageArea({
   currentTheme,
   currentChannel,
   canPin: propCanPin,
-  onPinMessage
+  onPinMessage,
+  hidePinnedBar = false
 }) {
   const { t } = useTranslation();
   const { isAdmin, isModerator } = usePermissions(user);
@@ -35,7 +36,6 @@ export default function MessageArea({
     scrollToBottom
   } = useScrollToBottom(safeMessages, 100);
 
-  // Use prop canPin if provided, otherwise calculate from permissions
   const canPin = propCanPin !== undefined ? propCanPin : (isAdmin || isModerator);
 
   const {
@@ -66,7 +66,7 @@ export default function MessageArea({
     }
   };
 
-  const renderMessageAvatar = (message) => {
+  const renderMessageAvatar = useCallback((message) => {
     const messageUser = message.users || { 
       email: 'unknown_user',
       username: 'unknown_user',
@@ -94,24 +94,22 @@ export default function MessageArea({
         showStates={true}
       />
     );
-  };
+  }, []);
 
-  const handlePinMessage = async (messageId) => {
+  const handlePinMessage = useCallback(async (messageId) => {
     if (onPinMessage) {
-      // Use external handler from parent (PrivateChat)
       const message = safeMessages.find(msg => msg.id === messageId);
       return await onPinMessage(message);
     } else {
-      // Use internal handler (regular Chat)
       return await pinMessage(messageId, user.id);
     }
-  };
+  }, [onPinMessage, safeMessages, pinMessage, user.id]);
 
-  const handleUnpinMessage = async (messageId) => {
+  const handleUnpinMessage = useCallback(async (messageId) => {
     return await unpinMessage(messageId);
-  };
+  }, [unpinMessage]);
 
-  const handlePinnedMessageClick = (message) => {
+  const handlePinnedMessageClick = useCallback((message) => {
     const messageElement = document.querySelector(`[data-message-id="${message.id}"]`);
     if (messageElement) {
       messageElement.scrollIntoView({ 
@@ -124,11 +122,32 @@ export default function MessageArea({
         messageElement.classList.remove('highlight-message');
       }, 3000);
     }
-  };
+  }, []);
 
-  const isMessagePinned = (messageId) => {
+  const isMessagePinned = useCallback((messageId) => {
     return pinnedMessages.some(pinnedMsg => pinnedMsg.id === messageId);
-  };
+  }, [pinnedMessages]);
+
+  // Memoized messages processing
+  const processedMessages = useMemo(() => {
+    return safeMessages.map(message => {
+      const isOwnMessage = message.user_id === user?.id;
+      const messageUser = message.users || { 
+        email: 'unknown_user',
+        username: 'unknown_user',
+        avatar_url: 'avatar-01'
+      };
+      const isPinned = isMessagePinned(message.id);
+      
+      return {
+        id: message.id,
+        message,
+        isOwnMessage,
+        messageUser,
+        isPinned
+      };
+    });
+  }, [safeMessages, user?.id, isMessagePinned]);
 
   if (!theme || !user) {
     return (
@@ -142,14 +161,16 @@ export default function MessageArea({
 
   return (
     <div className="flex-1 flex flex-col min-h-0 relative">
-      <PinnedMessagesBar
-        pinnedMessages={pinnedMessages}
-        onUnpinMessage={handleUnpinMessage}
-        onMessageClick={handlePinnedMessageClick}
-        user={user}
-        theme={theme}
-        currentTheme={currentTheme}
-      />
+      {!hidePinnedBar && (
+        <PinnedMessagesBar
+          pinnedMessages={pinnedMessages}
+          onUnpinMessage={handleUnpinMessage}
+          onMessageClick={handlePinnedMessageClick}
+          user={user}
+          theme={theme}
+          currentTheme={currentTheme}
+        />
+      )}
 
       <div
         ref={containerRef} 
@@ -179,14 +200,8 @@ export default function MessageArea({
           </div>
         ) : (
           <div className="space-y-2 sm:space-y-3">
-            {safeMessages.map((message) => {
-              const isOwnMessage = message.user_id === user?.id;
-              const messageUser = message.users || { 
-                email: 'unknown_user',
-                username: 'unknown_user',
-                avatar_url: 'avatar-01'
-              };
-              const isPinned = isMessagePinned(message.id);
+            {processedMessages.map((item) => {
+              const { message, isOwnMessage, messageUser, isPinned } = item;
               
               return (
                 <div
@@ -297,7 +312,6 @@ export default function MessageArea({
                 </div>
               );
             })}
-
             <div ref={messagesEndRef} />
           </div>
         )}

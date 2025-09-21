@@ -11,7 +11,7 @@ export default function PinnedMessagesBar({
   user, 
   theme, 
   currentTheme,
-  onMessageClick 
+  onMessageClick
 }) {
   const { t } = useTranslation();
   const { isAdmin, isModerator } = usePermissions(user);
@@ -72,16 +72,16 @@ export default function PinnedMessagesBar({
     }
   };
 
+  const truncateMessage = (content, maxLength = 80) => {
+    if (!content || content.length <= maxLength) return content;
+    return content.substring(0, maxLength) + '...';
+  };
+
   const styles = getBarStyles();
 
   if (!pinnedMessages || pinnedMessages.length === 0) {
     return null;
   }
-
-  const truncateMessage = (content, maxLength = 80) => {
-    if (content.length <= maxLength) return content;
-    return content.substring(0, maxLength) + '...';
-  };
 
   return (
     <div className={`border-b p-3 ${styles.container}`} style={{ borderColor: theme.colors.border }}>

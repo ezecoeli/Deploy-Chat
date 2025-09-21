@@ -108,14 +108,7 @@ export default function Chat() {
       const { data, error } = await supabase
         .from('messages')
         .select(`
-          id,
-          content,
-          created_at,
-          user_id,
-          channel_id,
-          is_encrypted,
-          encrypted_content,
-          encryption_iv,
+          *,
           users:user_id (
             id,
             email,
@@ -413,6 +406,11 @@ export default function Chat() {
     }
   };
 
+  const checkForNewMentions = useCallback(async (channelId, message) => {
+    // Función para verificar menciones (sin relación con encriptación)
+    return;
+  }, []);
+
   return (
     <DevStatesProvider>
       <div 
@@ -490,6 +488,7 @@ export default function Chat() {
                 theme={theme}
                 currentTheme={currentTheme}
                 onError={setError}
+                checkForNewMentions={checkForNewMentions}
               />
             ) : !messagesLoading ? (
               <>
