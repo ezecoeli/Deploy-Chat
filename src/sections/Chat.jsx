@@ -35,7 +35,6 @@ export default function Chat() {
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [channels, setChannels] = useState([]);
-  const isInitializedRef = useRef(false);
 
   const loadChannels = useCallback(async () => {
     try {
@@ -209,49 +208,6 @@ export default function Chat() {
   };
 
   useEffect(() => {
-    if (loading || !user || isInitializedRef.current) return;
-
-    isInitializedRef.current = true;
-
-    const initializeDefaultChannel = async () => {
-      try {
-        const { data: generalChannel, error } = await supabase
-          .from('channels')
-          .select('id, name, description, type')
-          .eq('name', 'general')
-          .eq('type', 'public')
-          .eq('is_active', true)
-          .eq('is_archived', false)
-          .single();
-
-        if (error) {
-          const fallbackChannel = {
-            id: '06cbcdea-0dff-438d-aad9-f94a097298d3',
-            name: 'general',
-            type: 'public'
-          };
-          setCurrentChannel(fallbackChannel);
-          await loadMessages(fallbackChannel.id);
-          return;
-        }
-
-        setCurrentChannel(generalChannel);
-        await loadMessages(generalChannel.id);
-      } catch (err) {
-        setError('Error initializing general channel');
-      }
-    };
-
-    initializeDefaultChannel();
-  }, [user, loading, loadMessages]);
-
-  useEffect(() => {
-    if (user) {
-      isInitializedRef.current = false;
-    }
-  }, [user?.id]);
-
-  useEffect(() => {
     if (!user) return;
 
     const globalSubscription = supabase
@@ -407,7 +363,6 @@ export default function Chat() {
   };
 
   const checkForNewMentions = useCallback(async (channelId, message) => {
-    // Función para verificar menciones (sin relación con encriptación)
     return;
   }, []);
 
@@ -467,13 +422,15 @@ export default function Chat() {
               onNavigateToMessage={handleNavigateToMessage} 
             />
 
-            <ConnectionStatus
-              user={user}
-              theme={theme}
-              t={t}
-            />
+            {currentChannel && (
+              <ConnectionStatus
+                user={user}
+                theme={theme}
+                t={t}
+              />
+            )}
 
-            {messagesLoading && (
+            {messagesLoading && currentChannel && (
               <div className="flex-1 flex items-center justify-center">
                 <div className="animate-pulse text-center">
                   <div className="text-lg opacity-70">Loading messages...</div>
@@ -481,7 +438,7 @@ export default function Chat() {
               </div>
             )}
 
-            {isPrivateMode && selectedConversation && !messagesLoading ? (
+            {isPrivateMode && selectedConversation && !messagesLoading && currentChannel ? (
               <PrivateChat
                 user={user}
                 conversation={selectedConversation}
@@ -490,7 +447,7 @@ export default function Chat() {
                 onError={setError}
                 checkForNewMentions={checkForNewMentions}
               />
-            ) : !messagesLoading ? (
+            ) : (!messagesLoading && currentChannel && !isPrivateMode) ? (
               <>
                 <MessageArea
                   messages={messages}

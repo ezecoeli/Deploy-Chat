@@ -27,7 +27,7 @@ export default function ChatHeader({
   const canProgramBot = (isAdmin || isModerator) && currentChannel?.name === 'events';
 
   const getChannelDisplayName = () => {
-    if (!currentChannel) return 'Connecting...';
+    if (!currentChannel) return 'Deploy Chat';
     
     if (isPrivateMode) {
       if (currentChannel.otherUser) {
@@ -61,17 +61,25 @@ export default function ChatHeader({
         <p className="text-lg animate-pulse font-mono" style={{ color: theme.colors.textSecondary, fontFamily: theme.font }}>
           {theme.prompt} cd {getChannelDisplayName()}
         </p>
-        
+        {isPrivateMode && currentChannel && (
+          <div className="flex items-center gap-1 text-xs">
+            <span style={{ color: theme.colors.textSecondary }}>
+              {t('privateChat')}
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="flex items-center gap-4">
-        <button
-          className="p-2 rounded hover:bg-green-600 transition text-green-600 hover:text-white"
-          title={t("searchMessages")}
-          onClick={() => setShowSearch(true)}
-        >
-          <BsSearch className="w-5 h-5" />
-        </button>
+        {currentChannel && (
+          <button
+            className="p-2 rounded hover:bg-green-600 transition text-green-600 hover:text-white"
+            title={t("searchMessages")}
+            onClick={() => setShowSearch(true)}
+          >
+            <BsSearch className="w-5 h-5" />
+          </button>
+        )}
 
         {canProgramBot && (
           <button
