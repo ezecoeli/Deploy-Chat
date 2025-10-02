@@ -1,19 +1,31 @@
 # Deploy-Chat
 
-Una plataforma de chat diseñada específicamente para equipos de desarrollo, con temas de terminal, syntax highlighting avanzado, IA integrada y encriptación E2E, donde la nostalgia tecnológica se encuentra con funcionalidad moderna.
+Deploy-Chat es un proyecto con vibes retro y esencia dev: una plataforma de chat enfocada en equipos de trabajo, con temas estilo terminal, syntax highlighting, IA integrada y encriptación E2E. 
+
+
+---
+
 
 ## Características Principales
 
 - **Chat en tiempo real** con WebSocket para múltiples canales públicos
-- **Mensajes directos encriptados** con encriptación E2E usando Web Crypto API
+- **Mensajes directos privados** seguros entre usuarios
 - **Soporte completo de Markdown** con syntax highlighting para código
 - **Múltiples temas de terminal** (Matrix, CoolRetro, Ubuntu, macOS, Windows95)
 - **Sistema de autenticación** con GitHub y Google OAuth
 - **IA Assistant integrada** con Groq API para ayuda en desarrollo
-- **Sistema de bots programables** con eventos automáticos
+- **Sistema de eventos programables** con bots automáticos
 - **Indicadores de mensajes no leídos** persistentes
+- **Buscador de mensajes** avanzado con filtros
+- **Mensajes fijados** para información importante
+- **Sistema de reacciones** a mensajes
+- **Notas personales** integradas
 - **Internacionalización** ES/EN con sistema propio
 - **Efectos visuales temáticos** como Matrix Rain y cursores de terminal
+
+
+---
+
 
 ## Tecnologías Utilizadas
 
@@ -38,24 +50,19 @@ Una plataforma de chat diseñada específicamente para equipos de desarrollo, co
 
 ### UI y Efectos Visuales
 - **Framer Motion** - Animaciones y transiciones fluidas
-- **React Icons** - Iconografía completa (Feather, Bootstrap, Font Awesome, Material Design, Phosphor, Lucide, Ionicons, Tabler)
+- **React Icons** - Iconografía completa
 - **Canvas API** - Efectos visuales como Matrix Rain
 - **CSS Animations** - Terminal cursor y efectos de interfaz
-
-### Seguridad y Encriptación
-- **Web Crypto API** - Encriptación E2E para chats privados
-- **AES-GCM** - Algoritmo de encriptación simétrica
-- **PBKDF2** - Derivación segura de claves
 
 ### Integraciones de IA
 - **Groq API** - Servicio de IA para chat assistant
 - **Supabase Edge Functions** - Lógica de IA serverless
 
 ### Utilidades y APIs Nativas
-- **Custom React Hooks** - useAuth, useTerminalTheme, useBotEvents, useUnreadMessages, etc.
+- **Custom React Hooks** - useAuth, useTerminalTheme, useBotEvents, useUnreadMessages, useMessageSearch, usePinnedMessages, useReactions, etc.
 - **LocalStorage API** - Persistencia de configuraciones y estado
-- **Web Crypto API** - Encriptación nativa del navegador
 - **Custom i18n System** - Sistema de traducción propio ES/EN
+- **Intersection Observer API** - Detección de scroll y mensajes nuevos
 
 ### Herramientas de Desarrollo
 - **ESLint** - Linting de código con plugins para React Hooks y React Refresh
@@ -67,5 +74,16 @@ Una plataforma de chat diseñada específicamente para equipos de desarrollo, co
 
 ### Servicios Cloud
 - **Supabase** - Backend completo
-- **Vercel/Netlify** - Hosting (posible deploy)
 - **GitHub** - Repositorio y CI/CD
+- **Vercel/Netlify** - Hosting para deploy
+
+---
+
+## Próximas Funcionalidades
+
+### 🚧 **En Desarrollo**
+- **Notificaciones Push** - Browser Notification API + Service Worker
+- **Compartir archivos/imágenes** - Upload seguro con validación
+- **Menciones inteligentes** - Auto-completado @username
+- **Voice Messages** - Web Audio API
+- **Comandos slash** - Sistema extensible (/help, /status, /clear)
