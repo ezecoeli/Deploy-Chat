@@ -87,3 +87,11 @@ Deploy-Chat es un proyecto con vibes retro y esencia dev: una plataforma de chat
 - **Menciones inteligentes** - Auto-completado @username
 - **Voice Messages** - Web Audio API
 - **Comandos slash** - Sistema extensible (/help, /status, /clear)
+
+## Licencia
+
+**Deploy-Chat** es software propietario. 
+
+© 2025 Ezequiel Coeli. All rights reserved.  
+This software is licensed under the Deploy-Chat Software License Agreement.  
+See [LICENSE.md](./LICENSE.md) for details.  
