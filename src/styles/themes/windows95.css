@@ -374,7 +374,7 @@ body[data-theme="windows95"] .px-3.py-2.rounded-lg {
   border-radius: 0px;
   font-family: 'MS Sans Serif', sans-serif;
   font-size: 11px;
-  padding: 2px 6px;         /* ← CAMBIA EL PADDING ORIGINAL */
+  padding: 2px 6px;
   transform: none !important;
   transition: none !important;
 }
