@@ -14,8 +14,9 @@ export default function SearchModal({
   currentTheme ,
   onNavigateToMessage
 }) {
-  const [showFilters, setShowFilters] = useState(false);
   const { t } = useTranslation();
+  const [showFilters, setShowFilters] = useState(false);
+  
   const {
     searchResults,
     isSearching,
@@ -23,7 +24,6 @@ export default function SearchModal({
     filters,
     updateQuery,
     updateFilters,
-    clearSearch
   } = useMessageSearch(user);
 
   const handleSelectMessage = (message) => {

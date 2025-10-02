@@ -61,13 +61,13 @@ export default function ChatHeader({
         <p className="text-lg animate-pulse font-mono" style={{ color: theme.colors.textSecondary, fontFamily: theme.font }}>
           {theme.prompt} cd {getChannelDisplayName()}
         </p>
-        {isPrivateMode && currentChannel && (
+        {/*{isPrivateMode && currentChannel && (
           <div className="flex items-center gap-1 text-xs">
             <span style={{ color: theme.colors.textSecondary }}>
               {t('privateChat')}
             </span>
           </div>
-        )}
+        )}*/}
       </div>
 
       <div className="flex items-center gap-4">
