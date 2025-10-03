@@ -120,7 +120,7 @@ export default function MessageInput({
 
   return (
     <div 
-      className="border-t px-2 py-3 sm:p-4"
+      className=" px-2 py-3 sm:p-4"
       style={{
         borderColor: theme.colors.border,
         backgroundColor: currentTheme === 'matrix' || currentTheme === 'coolRetro' 

@@ -153,7 +153,7 @@ export default function MessageArea({
     return (
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center text-gray-500">
-          <p>Loading...</p>
+          <p>{t('loading')}...</p>
         </div>
       </div>
     );
